@@ -21,7 +21,7 @@
     <script src="https://apis.google.com/js/platform.js" async defer></script>
     <meta name="google-signin-client_id" content="YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com">
        
-    <title>JomBro - Real Authentication Challenge Platform</title>
+    <title>JomBro - Creator Edition Challenge Platform</title>
 
     <style>
         /* ===== ENHANCED LAYERED GLASS SYSTEM ===== */
@@ -47,6 +47,7 @@
             --gold: #ffd700;
             --silver: #c0c0c0;
             --bronze: #cd7f32;
+            --creator-gold: #ffaa00;
             
             /* Glass Layer System */
             --glass-distance: 3mm;
@@ -539,6 +540,12 @@
             box-shadow: 0 8px 32px rgba(255, 107, 157, 0.3);
         }
 
+        .auth-btn.email {
+            background: rgba(139, 92, 246, 0.8);
+            color: #fff;
+            box-shadow: 0 8px 32px rgba(139, 92, 246, 0.3);
+        }
+
         .auth-btn:hover {
             transform: translateY(-2px) translateZ(2px);
             box-shadow: 0 12px 40px rgba(0,0,0,0.3);
@@ -547,6 +554,30 @@
         .auth-btn:disabled {
             opacity: 0.6;
             cursor: not-allowed;
+        }
+
+        /* Creator Badge */
+        .creator-badge {
+            background: linear-gradient(45deg, var(--creator-gold), #ffcc00);
+            color: #000;
+            padding: 4px 12px;
+            border-radius: 20px;
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            display: inline-block;
+            margin-left: 8px;
+            box-shadow: 0 0 20px rgba(255, 170, 0, 0.5);
+            animation: goldGlow 2s ease-in-out infinite;
+        }
+
+        @keyframes goldGlow {
+            0%, 100% { 
+                box-shadow: 0 0 20px rgba(255, 170, 0, 0.5);
+            }
+            50% { 
+                box-shadow: 0 0 30px rgba(255, 170, 0, 0.8);
+            }
         }
 
         /* Main App with Glass Effect */
@@ -684,6 +715,12 @@
             box-shadow: 0 0 20px rgba(255, 107, 157, 0.3);
         }
 
+        .header-btn.creator {
+            background: linear-gradient(45deg, rgba(255, 170, 0, 0.3), rgba(255, 204, 0, 0.3));
+            border-color: var(--creator-gold);
+            box-shadow: 0 0 15px rgba(255, 170, 0, 0.4);
+        }
+
         .glass-content {
             flex: 1;
             overflow-y: auto;
@@ -755,6 +792,14 @@
                 inset 0 1px 0 rgba(255, 255, 255, 0.2);
         }
 
+        .challenge-card.creator-challenge {
+            border: 2px solid var(--creator-gold);
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.3),
+                0 0 20px rgba(255, 170, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
         .challenge-category-badge {
             position: absolute;
             top: 15px;
@@ -766,6 +811,13 @@
             text-transform: uppercase;
             backdrop-filter: blur(15px);
             border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .creator-challenge-badge {
+            background: linear-gradient(45deg, var(--creator-gold), #ffcc00);
+            color: #000;
+            font-weight: 700;
+            box-shadow: 0 0 10px rgba(255, 170, 0, 0.5);
         }
 
         /* Buttons */
@@ -800,6 +852,21 @@
         .btn-primary:disabled {
             opacity: 0.6;
             cursor: not-allowed;
+        }
+
+        .btn-creator {
+            background: linear-gradient(145deg, rgba(255, 170, 0, 0.8), rgba(255, 204, 0, 0.8));
+            border: 1px solid rgba(255, 170, 0, 0.5);
+            box-shadow: 
+                0 6px 20px rgba(255, 170, 0, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+            color: #000;
+        }
+
+        .btn-creator:hover {
+            box-shadow: 
+                0 8px 25px rgba(255, 170, 0, 0.6),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
         }
 
         .btn-secondary {
@@ -864,11 +931,20 @@
             backdrop-filter: blur(15px);
         }
 
+        .stat-card.creator {
+            background: rgba(255, 170, 0, 0.1);
+            border: 1px solid rgba(255, 170, 0, 0.3);
+        }
+
         .stat-value {
             font-size: 20px;
             font-weight: 700;
             color: var(--primary-pink);
             margin-bottom: 5px;
+        }
+
+        .stat-value.creator {
+            color: var(--creator-gold);
         }
 
         .stat-label {
@@ -892,6 +968,116 @@
             background: linear-gradient(90deg, var(--primary-pink), var(--primary-purple));
             border-radius: 4px;
             transition: width 0.3s ease;
+        }
+
+        .progress-fill.creator {
+            background: linear-gradient(90deg, var(--creator-gold), #ffcc00);
+        }
+
+        /* Auto-refresh Timer */
+        .refresh-timer {
+            position: absolute;
+            top: 5px;
+            left: 5px;
+            background: rgba(0, 0, 0, 0.7);
+            color: white;
+            padding: 4px 8px;
+            border-radius: 8px;
+            font-size: 10px;
+            font-weight: 600;
+        }
+
+        /* Modal System */
+        .modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.4);
+            backdrop-filter: blur(8px);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 3000;
+            padding: 20px;
+            transform: translateZ(1mm);
+        }
+
+        .modal.show {
+            display: flex;
+        }
+
+        .modal-content {
+            background: rgba(15, 15, 15, 0.15);
+            backdrop-filter: blur(25px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 20px;
+            padding: 25px;
+            max-width: 90%;
+            max-height: 80%;
+            overflow-y: auto;
+            width: 100%;
+            max-width: 400px;
+            box-shadow: 
+                0 6mm 12mm rgba(0, 0, 0, 0.3),
+                0 2mm 6mm rgba(0, 0, 0, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2),
+                inset 0 0 15px rgba(255, 255, 255, 0.05);
+            transform: translateZ(1mm);
+            position: relative;
+        }
+
+        .modal-content::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(
+                135deg,
+                rgba(255, 255, 255, 0.08) 0%,
+                rgba(255, 255, 255, 0.03) 50%,
+                rgba(255, 255, 255, 0.08) 100%
+            );
+            border-radius: 20px;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+            padding-bottom: 15px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: var(--text-primary);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.2);
+        }
+
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 20px;
+            cursor: pointer;
+            padding: 5px;
+            transition: all 0.3s ease;
+        }
+
+        .modal-close:hover {
+            color: var(--text-primary);
+            transform: scale(1.1);
         }
 
         /* Loading Spinner */
@@ -1024,6 +1210,10 @@
                     <button class="auth-btn phone" onclick="showPhoneForm()">
                         📱 Continue with Phone
                     </button>
+
+                    <button class="auth-btn email" onclick="showEmailForm()">
+                        ✉️ Continue with Email
+                    </button>
                 </div>
 
                 <!-- Phone Form -->
@@ -1034,6 +1224,23 @@
                     <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
                         <button class="btn-secondary" onclick="showMainAuth()">Back</button>
                         <button class="btn-primary" id="phoneSubmitBtn" onclick="signInWithPhone()">Send OTP</button>
+                    </div>
+                </div>
+
+                <!-- Email Form -->
+                <div id="emailForm" style="display: none; margin-top: 20px;">
+                    <input type="email" id="emailInput" class="form-input" placeholder="your@email.com" required>
+                    <input type="password" id="passwordInput" class="form-input" placeholder="Password" required>
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
+                        <button class="btn-secondary" onclick="showMainAuth()">Back</button>
+                        <button class="btn-primary" id="emailSubmitBtn" onclick="signInWithEmail()">
+                            <span id="emailBtnText">Sign In</span>
+                        </button>
+                    </div>
+                    <div style="text-align: center; margin-top: 10px;">
+                        <button type="button" onclick="toggleEmailMode()" style="background: none; border: none; color: var(--primary-pink); text-decoration: underline; cursor: pointer; font-size: 12px;" id="emailModeToggle">
+                            Don't have an account? Sign Up
+                        </button>
                     </div>
                 </div>
 
@@ -1061,6 +1268,7 @@
                         <div class="logo-subtitle" id="userDisplayName">Loading...</div>
                     </div>
                     <div class="header-actions">
+                        <div class="header-btn creator" onclick="showCreatorPanel()" title="Creator Panel" id="creatorBtn" style="display: none;">👑</div>
                         <div class="header-btn" onclick="signOut()" title="Sign Out">🚪</div>
                     </div>
                 </div>
@@ -1069,11 +1277,11 @@
                     <!-- User Stats Dashboard -->
                     <div class="glass-section">
                         <div class="user-stats">
-                            <div class="stat-card">
+                            <div class="stat-card" id="levelCard">
                                 <div class="stat-value" id="userLevelDisplay">1</div>
                                 <div class="stat-label">Level</div>
                             </div>
-                            <div class="stat-card">
+                            <div class="stat-card" id="tokensCard">
                                 <div class="stat-value" id="userTokensDisplay">0</div>
                                 <div class="stat-label">Tokens</div>
                             </div>
@@ -1085,7 +1293,7 @@
                         <div class="progress-bar">
                             <div class="progress-fill" id="levelProgress" style="width: 0%;"></div>
                         </div>
-                        <div style="text-align: center; font-size: 12px; color: var(--text-secondary); margin-top: 5px;">
+                        <div style="text-align: center; font-size: 12px; color: var(--text-secondary); margin-top: 5px;" id="progressText">
                             0 / 1,000 XP to Level 2
                         </div>
                     </div>
@@ -1110,11 +1318,12 @@
                     </div>
 
                     <!-- Main Challenge Selection -->
-                    <div style="flex: 1; padding: 20px 25px; min-height: 300px;">
+                    <div style="flex: 1; padding: 20px 25px; min-height: 300px; position: relative;">
+                        <div class="refresh-timer" id="refreshTimer">30s</div>
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
                             <div style="display: flex; align-items: center; gap: 10px;">
                                 <h3 style="font-size: 18px; font-weight: 600; color: var(--text-primary);">🎯 Choose Your Challenge</h3>
-                                <div style="background: rgba(255, 255, 255, 0.1); color: var(--text-secondary); padding: 4px 8px; border-radius: 8px; font-size: 10px; backdrop-filter: blur(10px);">8 Choices Available</div>
+                                <div style="background: rgba(255, 255, 255, 0.1); color: var(--text-secondary); padding: 4px 8px; border-radius: 8px; font-size: 10px; backdrop-filter: blur(10px);" id="challengeCount">8 Choices Available</div>
                             </div>
                             <div style="display: flex; gap: 8px;">
                                 <button onclick="refreshChallenges()" style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: var(--text-primary); padding: 6px 8px; border-radius: 8px; cursor: pointer; font-size: 12px; backdrop-filter: blur(15px);" title="Generate New">✨</button>
@@ -1135,6 +1344,85 @@
                         <button class="btn-primary" id="mainActionBtn" onclick="selectChallenge()">
                             🎯 SELECT CHALLENGE
                         </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Creator Panel Modal -->
+        <div id="creatorModal" class="modal">
+            <div class="modal-content" style="max-width: 500px;">
+                <div class="modal-header">
+                    <div class="modal-title">👑 Creator Panel</div>
+                    <button class="modal-close" onclick="hideModal('creator')">&times;</button>
+                </div>
+
+                <div style="background: linear-gradient(45deg, rgba(255, 170, 0, 0.1), rgba(255, 204, 0, 0.1)); border: 2px solid var(--creator-gold); border-radius: 15px; padding: 20px; margin-bottom: 25px;">
+                    <div style="text-align: center; margin-bottom: 15px;">
+                        <div style="font-size: 32px; margin-bottom: 8px;">👑</div>
+                        <div style="font-size: 18px; font-weight: 600; color: var(--creator-gold); margin-bottom: 5px;">Creator Account</div>
+                        <div style="font-size: 12px; color: var(--text-secondary);">Create challenges and distribute tokens to players</div>
+                    </div>
+                    
+                    <div class="user-stats" style="margin-bottom: 15px;">
+                        <div class="stat-card creator">
+                            <div class="stat-value creator" id="creatorTokensDisplay">1,000,000</div>
+                            <div class="stat-label">Available Tokens</div>
+                        </div>
+                        <div class="stat-card creator">
+                            <div class="stat-value creator" id="createdChallengesDisplay">0</div>
+                            <div class="stat-label">Created</div>
+                        </div>
+                        <div class="stat-card creator">
+                            <div class="stat-value creator" id="distributedTokensDisplay">0</div>
+                            <div class="stat-label">Distributed</div>
+                        </div>
+                    </div>
+                </div>
+
+                <div style="margin-bottom: 25px;">
+                    <div style="font-size: 16px; font-weight: 600; margin-bottom: 15px; color: var(--creator-gold);">🎯 Create New Challenge</div>
+                    
+                    <form id="challengeCreationForm">
+                        <input type="text" id="challengeTitle" class="form-input" placeholder="Challenge Title" required>
+                        <textarea id="challengeDescription" class="form-input" placeholder="Challenge Description..." rows="3" required style="resize: vertical;"></textarea>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                            <select id="challengeCategory" class="form-input" required>
+                                <option value="">Select Category</option>
+                                <option value="SOCIAL">👥 Social</option>
+                                <option value="FITNESS">💪 Fitness</option>
+                                <option value="CREATIVE">🎨 Creative</option>
+                                <option value="ADVENTURE">🗺️ Adventure</option>
+                                <option value="MINDFULNESS">🧠 Mindfulness</option>
+                            </select>
+                            <select id="challengeDifficulty" class="form-input" required>
+                                <option value="">Difficulty</option>
+                                <option value="Easy">Easy</option>
+                                <option value="Medium">Medium</option>
+                                <option value="Hard">Hard</option>
+                            </select>
+                        </div>
+                        
+                        <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px;">
+                            <input type="number" id="challengeTokens" class="form-input" placeholder="Token Reward" min="100" max="10000" required>
+                            <input type="text" id="challengeDuration" class="form-input" placeholder="Duration (e.g., 30m)" required>
+                        </div>
+                        
+                        <input type="text" id="challengeHashtags" class="form-input" placeholder="Hashtags (comma separated)" required>
+                        
+                        <button type="submit" class="btn-creator" style="margin-top: 15px;">
+                            👑 CREATE CHALLENGE
+                        </button>
+                    </form>
+                </div>
+
+                <div>
+                    <div style="font-size: 16px; font-weight: 600; margin-bottom: 15px; color: var(--creator-gold);">📊 Your Created Challenges</div>
+                    <div id="createdChallengesList">
+                        <div style="text-align: center; color: var(--text-secondary); font-size: 12px; padding: 20px;">
+                            No challenges created yet. Create your first challenge above!
+                        </div>
                     </div>
                 </div>
             </div>
@@ -1181,12 +1469,19 @@
                     xp: 0,
                     avatar: '🤗',
                     provider: null,
-                    uid: null
+                    uid: null,
+                    isCreator: false,
+                    creatorTokens: 0,
+                    createdChallenges: 0,
+                    distributedTokens: 0
                 };
                 
                 this.realUsers = new Map(); // Store real connected users
                 this.isOnline = false;
                 this.connectionStatus = 'offline';
+                this.createdChallenges = [];
+                this.autoRefreshTimer = null;
+                this.refreshCountdown = 30;
             }
             
             updateUser(updates) {
@@ -1197,16 +1492,35 @@
             
             updateUserDisplay() {
                 // Update all user display elements
-                document.getElementById('userDisplayName').textContent = this.user.name;
+                document.getElementById('userDisplayName').textContent = this.user.name + (this.user.isCreator ? '' : '');
                 document.getElementById('userLevelDisplay').textContent = this.user.level;
                 document.getElementById('userTokensDisplay').textContent = this.user.tokens.toLocaleString();
                 document.getElementById('userChallengesDisplay').textContent = this.user.completedChallenges;
                 document.getElementById('userStatus').textContent = `Level ${this.user.level}`;
                 
+                // Update creator-specific UI
+                if (this.user.isCreator) {
+                    document.getElementById('userDisplayName').innerHTML = this.user.name + '<span class="creator-badge">CREATOR</span>';
+                    document.getElementById('creatorBtn').style.display = 'flex';
+                    document.getElementById('tokensCard').classList.add('creator');
+                    document.getElementById('levelCard').classList.add('creator');
+                    document.getElementById('userTokensDisplay').classList.add('creator');
+                    document.getElementById('userLevelDisplay').classList.add('creator');
+                    document.getElementById('levelProgress').classList.add('creator');
+                    
+                    // Update creator panel
+                    if (document.getElementById('creatorTokensDisplay')) {
+                        document.getElementById('creatorTokensDisplay').textContent = this.user.creatorTokens.toLocaleString();
+                        document.getElementById('createdChallengesDisplay').textContent = this.user.createdChallenges;
+                        document.getElementById('distributedTokensDisplay').textContent = this.user.distributedTokens.toLocaleString();
+                    }
+                }
+                
                 // Update level progress
                 const nextLevelXP = this.user.level * 1000;
                 const progress = (this.user.xp / nextLevelXP) * 100;
                 document.getElementById('levelProgress').style.width = `${Math.min(progress, 100)}%`;
+                document.getElementById('progressText').textContent = `${this.user.xp} / ${nextLevelXP} XP to Level ${this.user.level + 1}`;
             }
             
             async saveToFirestore() {
@@ -1222,6 +1536,10 @@
                         xp: this.user.xp,
                         avatar: this.user.avatar,
                         provider: this.user.provider,
+                        isCreator: this.user.isCreator,
+                        creatorTokens: this.user.creatorTokens,
+                        createdChallenges: this.user.createdChallenges,
+                        distributedTokens: this.user.distributedTokens,
                         lastActive: firebase.firestore.FieldValue.serverTimestamp(),
                         isOnline: true
                     }, { merge: true });
@@ -1278,15 +1596,44 @@
                 } else {
                     container.innerHTML = Array.from(this.realUsers.values()).map(user => `
                         <div style="position: relative; flex-shrink: 0;">
-                            <div style="width: 44px; height: 44px; border-radius: 22px; background: linear-gradient(45deg, var(--primary-pink), var(--primary-purple)); padding: 2px; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 0 20px rgba(255, 107, 157, 0.3);" title="${user.name} - Level ${user.level}">
+                            <div style="width: 44px; height: 44px; border-radius: 22px; background: linear-gradient(45deg, var(--primary-pink), var(--primary-purple)); padding: 2px; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 0 20px rgba(255, 107, 157, 0.3);" title="${user.name} - Level ${user.level}${user.isCreator ? ' (Creator)' : ''}">
                                 <div style="width: 100%; height: 100%; border-radius: 50%; background: rgba(10, 10, 10, 0.8); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; font-size: 16px; overflow: hidden;">
                                     <span style="font-size: 18px;">${user.avatar}</span>
                                 </div>
                             </div>
                             <div style="position: absolute; bottom: 0; right: 0; width: 10px; height: 10px; background: var(--success-green); border: 2px solid rgba(10, 10, 10, 0.8); border-radius: 50%; animation: pulse 2s infinite; box-shadow: 0 0 8px var(--success-green);"></div>
-                            <div style="position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); background: var(--primary-purple); color: white; font-size: 8px; font-weight: 700; padding: 2px 6px; border-radius: 8px; border: 1px solid rgba(0, 0, 0, 0.3); box-shadow: 0 2px 8px rgba(139, 92, 246, 0.4); min-width: 20px; text-align: center;">L${user.level}</div>
+                            <div style="position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); background: ${user.isCreator ? 'var(--creator-gold)' : 'var(--primary-purple)'}; color: ${user.isCreator ? '#000' : 'white'}; font-size: 8px; font-weight: 700; padding: 2px 6px; border-radius: 8px; border: 1px solid rgba(0, 0, 0, 0.3); box-shadow: 0 2px 8px ${user.isCreator ? 'rgba(255, 170, 0, 0.4)' : 'rgba(139, 92, 246, 0.4)'}; min-width: 20px; text-align: center;">${user.isCreator ? '👑' : 'L' + user.level}</div>
                         </div>
                     `).join('');
+                }
+            }
+            
+            startAutoRefresh() {
+                this.refreshCountdown = 30;
+                this.updateRefreshTimer();
+                
+                this.autoRefreshTimer = setInterval(() => {
+                    this.refreshCountdown--;
+                    this.updateRefreshTimer();
+                    
+                    if (this.refreshCountdown <= 0) {
+                        generateAndDisplayChallenges();
+                        this.refreshCountdown = 30;
+                    }
+                }, 1000);
+            }
+            
+            updateRefreshTimer() {
+                const timerEl = document.getElementById('refreshTimer');
+                if (timerEl) {
+                    timerEl.textContent = `${this.refreshCountdown}s`;
+                }
+            }
+            
+            stopAutoRefresh() {
+                if (this.autoRefreshTimer) {
+                    clearInterval(this.autoRefreshTimer);
+                    this.autoRefreshTimer = null;
                 }
             }
         }
@@ -1294,11 +1641,143 @@
         // Initialize global app state
         let appState = new AppState();
 
+        // ===== CREATOR ACCOUNT SYSTEM =====
+        
+        const CREATOR_EMAILS = [
+            'creator@jombro.com',
+            'admin@jombro.com',
+            'challenge@jombro.com'
+        ];
+
+        function checkCreatorStatus(email) {
+            return CREATOR_EMAILS.includes(email.toLowerCase()) || 
+                   email.toLowerCase().includes('creator') || 
+                   email.toLowerCase().includes('admin');
+        }
+
+        window.showCreatorPanel = function() {
+            if (!appState.user.isCreator) {
+                showToast('❌ Creator access required!', 'error');
+                return;
+            }
+            showModal('creator');
+        };
+
+        window.hideModal = function(modalId) {
+            document.getElementById(modalId + 'Modal').classList.remove('show');
+        };
+
+        function showModal(modalId) {
+            document.getElementById(modalId + 'Modal').classList.add('show');
+        }
+
+        // Challenge Creation Form Handler
+        document.addEventListener('DOMContentLoaded', function() {
+            const form = document.getElementById('challengeCreationForm');
+            if (form) {
+                form.addEventListener('submit', createChallenge);
+            }
+        });
+
+        async function createChallenge(e) {
+            e.preventDefault();
+            
+            if (!appState.user.isCreator) {
+                showToast('❌ Creator access required!', 'error');
+                return;
+            }
+            
+            const title = document.getElementById('challengeTitle').value.trim();
+            const description = document.getElementById('challengeDescription').value.trim();
+            const category = document.getElementById('challengeCategory').value;
+            const difficulty = document.getElementById('challengeDifficulty').value;
+            const tokens = parseInt(document.getElementById('challengeTokens').value);
+            const duration = document.getElementById('challengeDuration').value.trim();
+            const hashtags = document.getElementById('challengeHashtags').value.split(',').map(tag => tag.trim().startsWith('#') ? tag.trim() : '#' + tag.trim());
+            
+            if (tokens > appState.user.creatorTokens) {
+                showToast('❌ Insufficient creator tokens!', 'error');
+                return;
+            }
+            
+            try {
+                const newChallenge = {
+                    id: 'creator_' + Date.now(),
+                    title,
+                    description,
+                    difficulty,
+                    duration,
+                    tokens,
+                    hashtags,
+                    category,
+                    categoryInfo: MASTER_CHALLENGE_DATABASE[category],
+                    createdBy: appState.user.uid,
+                    creatorName: appState.user.name,
+                    createdAt: new Date(),
+                    isCreatorChallenge: true
+                };
+                
+                // Add to Firestore
+                if (db) {
+                    await db.collection('challenges').add(newChallenge);
+                }
+                
+                // Update creator stats
+                appState.updateUser({
+                    creatorTokens: appState.user.creatorTokens - tokens,
+                    createdChallenges: appState.user.createdChallenges + 1,
+                    distributedTokens: appState.user.distributedTokens + tokens
+                });
+                
+                // Add to local challenges
+                appState.createdChallenges.push(newChallenge);
+                
+                // Reset form
+                document.getElementById('challengeCreationForm').reset();
+                
+                // Update created challenges list
+                updateCreatedChallengesList();
+                
+                // Refresh challenge display
+                generateAndDisplayChallenges();
+                
+                showToast(`🎯 Challenge "${title}" created successfully!`, 'success');
+                
+            } catch (error) {
+                console.error('Error creating challenge:', error);
+                showToast('❌ Failed to create challenge!', 'error');
+            }
+        }
+
+        function updateCreatedChallengesList() {
+            const container = document.getElementById('createdChallengesList');
+            
+            if (appState.createdChallenges.length === 0) {
+                container.innerHTML = `
+                    <div style="text-align: center; color: var(--text-secondary); font-size: 12px; padding: 20px;">
+                        No challenges created yet. Create your first challenge above!
+                    </div>
+                `;
+            } else {
+                container.innerHTML = appState.createdChallenges.map(challenge => `
+                    <div style="background: rgba(255, 170, 0, 0.1); border: 1px solid rgba(255, 170, 0, 0.3); border-radius: 10px; padding: 15px; margin: 10px 0;">
+                        <div style="font-weight: 600; margin-bottom: 5px; color: var(--creator-gold);">${challenge.title}</div>
+                        <div style="font-size: 12px; color: var(--text-secondary); margin-bottom: 8px;">${challenge.description}</div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; font-size: 11px;">
+                            <span style="color: var(--creator-gold);">${challenge.tokens} tokens</span>
+                            <span style="color: var(--text-secondary);">${challenge.difficulty} • ${challenge.duration}</span>
+                        </div>
+                    </div>
+                `).join('');
+            }
+        }
+
         // ===== REAL AUTHENTICATION SYSTEM =====
         
         // Phone verification
         let phoneVerificationInProgress = false;
         let confirmationResult = null;
+        let isEmailSignUp = false;
 
         window.signInWithGoogle = async function() {
             const btn = document.getElementById('googleSignInBtn');
@@ -1368,9 +1847,79 @@
             }
         };
 
+        window.showEmailForm = function() {
+            document.getElementById('mainAuth').style.display = 'none';
+            document.getElementById('emailForm').style.display = 'block';
+            isEmailSignUp = false;
+            updateEmailFormMode();
+        };
+
         window.showMainAuth = function() {
             document.getElementById('phoneForm').style.display = 'none';
+            document.getElementById('emailForm').style.display = 'none';
             document.getElementById('mainAuth').style.display = 'block';
+        };
+
+        window.toggleEmailMode = function() {
+            isEmailSignUp = !isEmailSignUp;
+            updateEmailFormMode();
+        };
+
+        function updateEmailFormMode() {
+            const btnText = document.getElementById('emailBtnText');
+            const toggleText = document.getElementById('emailModeToggle');
+            
+            if (isEmailSignUp) {
+                btnText.textContent = 'Sign Up';
+                toggleText.textContent = 'Already have an account? Sign In';
+            } else {
+                btnText.textContent = 'Sign In';
+                toggleText.textContent = "Don't have an account? Sign Up";
+            }
+        }
+
+        window.signInWithEmail = async function() {
+            const emailInput = document.getElementById('emailInput');
+            const passwordInput = document.getElementById('passwordInput');
+            const submitBtn = document.getElementById('emailSubmitBtn');
+            
+            const email = emailInput.value.trim();
+            const password = passwordInput.value;
+            
+            if (!email || !password) {
+                showMessage('❌ Please fill in all fields!', 'error');
+                return;
+            }
+            
+            if (password.length < 6) {
+                showMessage('❌ Password must be at least 6 characters!', 'error');
+                return;
+            }
+            
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = `${isEmailSignUp ? 'Creating Account...' : 'Signing In...'}<div class="loading-spinner"></div>`;
+            
+            try {
+                let result;
+                
+                if (isEmailSignUp) {
+                    result = await auth.createUserWithEmailAndPassword(email, password);
+                } else {
+                    result = await auth.signInWithEmailAndPassword(email, password);
+                }
+                
+                const user = result.user;
+                
+                showMessage(`✅ ${isEmailSignUp ? 'Account created' : 'Email sign-in'} successful!`, 'success');
+                await handleSuccessfulLogin(user, 'email');
+                
+            } catch (error) {
+                console.error('Email auth error:', error);
+                handleAuthError(error);
+            } finally {
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = `<span id="emailBtnText">${isEmailSignUp ? 'Sign Up' : 'Sign In'}</span>`;
+            }
         };
 
         window.signInWithPhone = async function() {
@@ -1444,11 +1993,15 @@
 
         async function handleSuccessfulLogin(user, provider) {
             try {
+                const isCreator = checkCreatorStatus(user.email || user.phoneNumber || '');
+                
                 appState.updateUser({
                     uid: user.uid,
-                    name: user.displayName || user.phoneNumber || 'User',
+                    name: user.displayName || user.phoneNumber || user.email || 'User',
                     email: user.email || user.phoneNumber,
-                    provider: provider
+                    provider: provider,
+                    isCreator: isCreator,
+                    creatorTokens: isCreator ? 1000000 : 0
                 });
                 
                 // Load existing user data from Firestore
@@ -1491,6 +2044,18 @@
                 case 'auth/user-disabled':
                     message = '❌ This account has been disabled.';
                     break;
+                case 'auth/user-not-found':
+                    message = '❌ No account found with this email.';
+                    break;
+                case 'auth/wrong-password':
+                    message = '❌ Incorrect password.';
+                    break;
+                case 'auth/email-already-in-use':
+                    message = '❌ An account with this email already exists.';
+                    break;
+                case 'auth/weak-password':
+                    message = '❌ Password is too weak. Use at least 6 characters.';
+                    break;
                 default:
                     console.error('Auth error details:', error);
             }
@@ -1509,6 +2074,9 @@
         window.signOut = async function() {
             if (confirm('Are you sure you want to sign out?')) {
                 try {
+                    // Stop auto-refresh
+                    appState.stopAutoRefresh();
+                    
                     // Mark user as offline
                     appState.setOnlineStatus(false);
                     
@@ -1522,16 +2090,8 @@
                     document.getElementById('authScreen').style.display = 'flex';
                     document.getElementById('mainApp').style.display = 'none';
                     
-                    // Reset phone form
-                    phoneVerificationInProgress = false;
-                    confirmationResult = null;
-                    document.getElementById('phoneForm').style.display = 'none';
-                    document.getElementById('mainAuth').style.display = 'block';
-                    document.getElementById('phoneInput').style.display = 'block';
-                    document.getElementById('otpInput').style.display = 'none';
-                    document.getElementById('phoneInput').value = '';
-                    document.getElementById('otpInput').value = '';
-                    document.getElementById('phoneSubmitBtn').innerHTML = 'Send OTP';
+                    // Reset forms
+                    resetAuthForms();
                     
                     showToast('👋 Signed out successfully!', 'success');
                     
@@ -1541,6 +2101,27 @@
                 }
             }
         };
+
+        function resetAuthForms() {
+            phoneVerificationInProgress = false;
+            confirmationResult = null;
+            isEmailSignUp = false;
+            
+            // Reset phone form
+            document.getElementById('phoneForm').style.display = 'none';
+            document.getElementById('emailForm').style.display = 'none';
+            document.getElementById('mainAuth').style.display = 'block';
+            document.getElementById('phoneInput').style.display = 'block';
+            document.getElementById('otpInput').style.display = 'none';
+            document.getElementById('phoneInput').value = '';
+            document.getElementById('otpInput').value = '';
+            document.getElementById('phoneSubmitBtn').innerHTML = 'Send OTP';
+            
+            // Reset email form
+            document.getElementById('emailInput').value = '';
+            document.getElementById('passwordInput').value = '';
+            updateEmailFormMode();
+        }
 
         // ===== REAL-TIME USER MANAGEMENT =====
         
@@ -1561,6 +2142,7 @@
                                 name: userData.name,
                                 avatar: userData.avatar,
                                 level: userData.level,
+                                isCreator: userData.isCreator || false,
                                 activity: userData.activity || 'Online'
                             });
                         }
@@ -1569,6 +2151,19 @@
                     appState.updateOnlineUsersDisplay();
                 }, (error) => {
                     console.error('Error listening to online users:', error);
+                });
+            
+            // Listen for created challenges
+            db.collection('challenges')
+                .where('createdBy', '==', appState.user.uid)
+                .onSnapshot((snapshot) => {
+                    appState.createdChallenges = [];
+                    snapshot.forEach((doc) => {
+                        appState.createdChallenges.push({id: doc.id, ...doc.data()});
+                    });
+                    updateCreatedChallengesList();
+                }, (error) => {
+                    console.error('Error listening to challenges:', error);
                 });
         }
 
@@ -1603,7 +2198,7 @@
             }
         });
 
-        // ===== CHALLENGE SYSTEM =====
+        // ===== CHALLENGE SYSTEM WITH AUTO-REFRESH =====
         
         const MASTER_CHALLENGE_DATABASE = {
             SOCIAL: {
@@ -1637,6 +2232,24 @@
                         duration: '45m',
                         tokens: 650,
                         hashtags: ['#Language', '#Cultural', '#Learning']
+                    },
+                    {
+                        id: 'social_004',
+                        title: 'Community Helper Challenge',
+                        description: 'Spend 2 hours volunteering at a local community center, food bank, or charity. Document your experience and the impact you made!',
+                        difficulty: 'Medium',
+                        duration: '2h',
+                        tokens: 800,
+                        hashtags: ['#Volunteer', '#Community', '#Helper']
+                    },
+                    {
+                        id: 'social_005',
+                        title: 'Street Musician Support',
+                        description: 'Find a street musician and not only tip them, but stay and genuinely listen to at least 3 songs. Share their story with your friends!',
+                        difficulty: 'Easy',
+                        duration: '45m',
+                        tokens: 550,
+                        hashtags: ['#Music', '#Support', '#Art']
                     }
                 ]
             },
@@ -1662,6 +2275,24 @@
                         duration: '1 day',
                         tokens: 400,
                         hashtags: ['#Stairs', '#Fitness', '#HealthyChoices']
+                    },
+                    {
+                        id: 'fitness_003',
+                        title: 'Park Workout Circuit',
+                        description: 'Create and complete a full-body workout using only park equipment. Share your creative routine with others!',
+                        difficulty: 'Medium',
+                        duration: '1h',
+                        tokens: 700,
+                        hashtags: ['#ParkWorkout', '#Creative', '#Outdoors']
+                    },
+                    {
+                        id: 'fitness_004',
+                        title: 'Hydration Hero Challenge',
+                        description: 'Drink 3 liters of water throughout the day and track how you feel. Document the difference in energy and mood!',
+                        difficulty: 'Easy',
+                        duration: '1 day',
+                        tokens: 300,
+                        hashtags: ['#Hydration', '#Health', '#Wellness']
                     }
                 ]
             },
@@ -1687,6 +2318,24 @@
                         duration: '20m',
                         tokens: 350,
                         hashtags: ['#FoodArt', '#Creative', '#Breakfast']
+                    },
+                    {
+                        id: 'creative_003',
+                        title: 'Upcycling Innovation',
+                        description: 'Take something destined for trash and transform it into something beautiful or useful. Document your creative process!',
+                        difficulty: 'Hard',
+                        duration: '2h',
+                        tokens: 900,
+                        hashtags: ['#Upcycling', '#Sustainable', '#Innovation']
+                    },
+                    {
+                        id: 'creative_004',
+                        title: 'Public Art Installation',
+                        description: 'Create a temporary art installation in a public space (with permission). Document reactions and share the joy of art!',
+                        difficulty: 'Hard',
+                        duration: '3h',
+                        tokens: 1200,
+                        hashtags: ['#PublicArt', '#Installation', '#Community']
                     }
                 ]
             },
@@ -1703,6 +2352,24 @@
                         duration: '3h',
                         tokens: 900,
                         hashtags: ['#Adventure', '#Exploration', '#Mystery']
+                    },
+                    {
+                        id: 'adventure_002',
+                        title: 'Transportation Variety Day',
+                        description: 'Use 5 different modes of transportation in one day (walk, bike, bus, train, etc.). Document your journey!',
+                        difficulty: 'Medium',
+                        duration: '1 day',
+                        tokens: 750,
+                        hashtags: ['#Transportation', '#Adventure', '#Urban']
+                    },
+                    {
+                        id: 'adventure_003',
+                        title: 'Hidden Gem Hunter',
+                        description: 'Find and visit 3 hidden or lesser-known spots in your city that most locals don\'t know about. Become a local explorer!',
+                        difficulty: 'Medium',
+                        duration: '4h',
+                        tokens: 800,
+                        hashtags: ['#HiddenGems', '#Local', '#Explorer']
                     }
                 ]
             },
@@ -1719,12 +2386,31 @@
                         duration: '1h',
                         tokens: 600,
                         hashtags: ['#DigitalDetox', '#Mindfulness', '#SelfCare']
+                    },
+                    {
+                        id: 'mindful_002',
+                        title: 'Gratitude Photo Journey',
+                        description: 'Take photos of 10 things you\'re grateful for throughout your day. Reflect on why each one matters to you!',
+                        difficulty: 'Easy',
+                        duration: '1 day',
+                        tokens: 400,
+                        hashtags: ['#Gratitude', '#Photography', '#Mindfulness']
+                    },
+                    {
+                        id: 'mindful_003',
+                        title: 'Meditation in Nature',
+                        description: 'Find a natural spot and meditate for 20 minutes. Focus on the sounds, smells, and feelings of nature around you!',
+                        difficulty: 'Medium',
+                        duration: '45m',
+                        tokens: 500,
+                        hashtags: ['#Meditation', '#Nature', '#Peace']
                     }
                 ]
             }
         };
 
         let currentChallengeSet = [];
+        let allAvailableChallenges = [];
 
         function getAllChallenges() {
             const allChallenges = [];
@@ -1741,59 +2427,102 @@
             return allChallenges;
         }
 
+        async function getCreatorChallenges() {
+            if (!db) return [];
+            
+            try {
+                const snapshot = await db.collection('challenges').get();
+                const challenges = [];
+                snapshot.forEach(doc => {
+                    const data = doc.data();
+                    challenges.push({
+                        ...data,
+                        id: doc.id,
+                        isCreatorChallenge: true,
+                        categoryInfo: MASTER_CHALLENGE_DATABASE[data.category] || {
+                            name: data.category,
+                            icon: '👑',
+                            color: '#ffaa00'
+                        }
+                    });
+                });
+                return challenges;
+            } catch (error) {
+                console.error('Error fetching creator challenges:', error);
+                return [];
+            }
+        }
+
         async function generateSmartChallengeSet(count = 8) {
-            const allChallenges = getAllChallenges();
-            const shuffled = allChallenges.sort(() => 0.5 - Math.random());
+            const baseChallenges = getAllChallenges();
+            const creatorChallenges = await getCreatorChallenges();
+            
+            // Combine base and creator challenges
+            allAvailableChallenges = [...baseChallenges, ...creatorChallenges];
+            
+            // Shuffle and select
+            const shuffled = allAvailableChallenges.sort(() => 0.5 - Math.random());
             return shuffled.slice(0, count);
         }
 
         function initializeChallenges() {
             generateAndDisplayChallenges();
+            appState.startAutoRefresh();
         }
 
         async function generateAndDisplayChallenges() {
             currentChallengeSet = await generateSmartChallengeSet(8);
             displayChallengeSelection();
+            appState.refreshCountdown = 30; // Reset countdown
+            showToast('✨ Fresh challenges loaded!', 'success');
         }
 
         function displayChallengeSelection() {
             const container = document.getElementById('challengeSelection');
+            const challengeCountEl = document.getElementById('challengeCount');
+            
             container.innerHTML = '';
+            challengeCountEl.textContent = `${currentChallengeSet.length} Choices Available`;
 
             currentChallengeSet.forEach((challenge, index) => {
                 const challengeCard = document.createElement('div');
                 challengeCard.className = 'challenge-card';
+                if (challenge.isCreatorChallenge) {
+                    challengeCard.classList.add('creator-challenge');
+                }
                 
                 challengeCard.innerHTML = `
-                    <div class="challenge-category-badge" style="background: ${challenge.categoryInfo.color}">
+                    <div class="challenge-category-badge ${challenge.isCreatorChallenge ? 'creator-challenge-badge' : ''}" style="background: ${challenge.categoryInfo.color}">
                         ${challenge.categoryInfo.icon} ${challenge.categoryInfo.name}
+                        ${challenge.isCreatorChallenge ? ' 👑' : ''}
                     </div>
                     <div style="margin-top: 30px;">
-                        <div style="font-size: 18px; font-weight: 600; margin-bottom: 10px; color: var(--primary-pink);">
+                        <div style="font-size: 18px; font-weight: 600; margin-bottom: 10px; color: ${challenge.isCreatorChallenge ? 'var(--creator-gold)' : 'var(--primary-pink)'};">
                             ${challenge.title}
+                            ${challenge.isCreatorChallenge ? '<span style="font-size: 12px; color: var(--creator-gold);"> by ' + (challenge.creatorName || 'Creator') + '</span>' : ''}
                         </div>
                         <div style="font-size: 13px; line-height: 1.4; margin-bottom: 15px; opacity: 0.9; color: var(--text-secondary);">
                             ${challenge.description}
                         </div>
                         <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 15px;">
                             <div style="text-align: center; background: rgba(255, 255, 255, 0.1); padding: 8px; border-radius: 8px; backdrop-filter: blur(15px);">
-                                <div style="font-size: 14px; font-weight: 700; color: var(--primary-pink);">${challenge.tokens}</div>
+                                <div style="font-size: 14px; font-weight: 700; color: ${challenge.isCreatorChallenge ? 'var(--creator-gold)' : 'var(--primary-pink)'};">${challenge.tokens}</div>
                                 <div style="font-size: 9px; color: var(--text-secondary);">TOKENS</div>
                             </div>
                             <div style="text-align: center; background: rgba(255, 255, 255, 0.1); padding: 8px; border-radius: 8px; backdrop-filter: blur(15px);">
-                                <div style="font-size: 14px; font-weight: 700; color: var(--primary-pink);">${challenge.difficulty}</div>
+                                <div style="font-size: 14px; font-weight: 700; color: ${challenge.isCreatorChallenge ? 'var(--creator-gold)' : 'var(--primary-pink)'};">${challenge.difficulty}</div>
                                 <div style="font-size: 9px; color: var(--text-secondary);">LEVEL</div>
                             </div>
                             <div style="text-align: center; background: rgba(255, 255, 255, 0.1); padding: 8px; border-radius: 8px; backdrop-filter: blur(15px);">
-                                <div style="font-size: 14px; font-weight: 700; color: var(--primary-pink);">${challenge.duration}</div>
+                                <div style="font-size: 14px; font-weight: 700; color: ${challenge.isCreatorChallenge ? 'var(--creator-gold)' : 'var(--primary-pink)'};">${challenge.duration}</div>
                                 <div style="font-size: 9px; color: var(--text-secondary);">TIME</div>
                             </div>
                         </div>
                         <div style="display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 15px;">
-                            ${challenge.hashtags.map(tag => `<span style="font-size: 9px; padding: 2px 6px; background: rgba(255, 107, 157, 0.1); color: var(--primary-pink); border-radius: 6px;">${tag}</span>`).join('')}
+                            ${challenge.hashtags.map(tag => `<span style="font-size: 9px; padding: 2px 6px; background: ${challenge.isCreatorChallenge ? 'rgba(255, 170, 0, 0.1)' : 'rgba(255, 107, 157, 0.1)'}; color: ${challenge.isCreatorChallenge ? 'var(--creator-gold)' : 'var(--primary-pink)'}; border-radius: 6px;">${tag}</span>`).join('')}
                         </div>
-                        <button class="btn-primary" onclick="takeChallenge(${index})" style="width: 100%; padding: 12px; font-size: 13px;">
-                            🚀 TAKE CHALLENGE
+                        <button class="${challenge.isCreatorChallenge ? 'btn-creator' : 'btn-primary'}" onclick="takeChallenge(${index})" style="width: 100%; padding: 12px; font-size: 13px;">
+                            ${challenge.isCreatorChallenge ? '👑 TAKE CREATOR CHALLENGE' : '🚀 TAKE CHALLENGE'}
                         </button>
                     </div>
                 `;
@@ -1809,7 +2538,10 @@
                 return;
             }
 
-            if (confirm(`🎯 Ready to take on "${challenge.title}"?\n\nThis challenge will reward you with ${challenge.tokens} tokens!\n\nClick OK to accept!`)) {
+            const challengeType = challenge.isCreatorChallenge ? 'Creator Challenge' : 'Challenge';
+            const emoji = challenge.isCreatorChallenge ? '👑' : '🎯';
+            
+            if (confirm(`${emoji} Ready to take on "${challenge.title}"?\n\nThis ${challengeType.toLowerCase()} will reward you with ${challenge.tokens} tokens!\n\nClick OK to accept!`)) {
                 // Update user tokens and stats
                 appState.updateUser({
                     tokens: appState.user.tokens + challenge.tokens,
@@ -1824,12 +2556,12 @@
                     showToast(`🎉 LEVEL UP! You're now level ${newLevel}!`, 'success');
                 }
                 
-                showToast(`🏆 Challenge "${challenge.title}" completed! +${challenge.tokens} tokens!`, 'success');
+                showToast(`🏆 ${challengeType} "${challenge.title}" completed! +${challenge.tokens} tokens!`, 'success');
                 
                 // Create celebration effect
-                createCelebrationEffect();
+                createCelebrationEffect(challenge.isCreatorChallenge);
                 
-                // Refresh challenges
+                // Refresh challenges in 2 seconds
                 setTimeout(() => {
                     generateAndDisplayChallenges();
                 }, 2000);
@@ -1856,22 +2588,26 @@
             showToast('🎯 Choose any challenge above to get started!', 'success');
         };
 
-        function createCelebrationEffect() {
+        function createCelebrationEffect(isCreatorChallenge = false) {
             // Create floating emojis
-            const emojis = ['🎉', '🏆', '⭐', '🎊', '🔥', '💫'];
+            const emojis = isCreatorChallenge ? 
+                ['👑', '💰', '⭐', '🏆', '✨', '💎'] : 
+                ['🎉', '🏆', '⭐', '🎊', '🔥', '💫'];
             
-            for (let i = 0; i < 10; i++) {
+            for (let i = 0; i < 15; i++) {
                 setTimeout(() => {
                     const emoji = document.createElement('div');
                     emoji.textContent = emojis[Math.floor(Math.random() * emojis.length)];
                     emoji.style.cssText = `
                         position: fixed;
-                        font-size: 24px;
+                        font-size: ${isCreatorChallenge ? '32px' : '24px'};
                         left: ${Math.random() * window.innerWidth}px;
                         top: ${window.innerHeight}px;
                         pointer-events: none;
                         z-index: 9999;
                         animation: float-up 3s ease-out forwards;
+                        color: ${isCreatorChallenge ? 'var(--creator-gold)' : 'var(--primary-pink)'};
+                        text-shadow: ${isCreatorChallenge ? '0 0 10px rgba(255, 170, 0, 0.8)' : '0 0 10px rgba(255, 107, 157, 0.8)'};
                     `;
                     
                     document.body.appendChild(emoji);
@@ -1881,7 +2617,7 @@
                             emoji.parentNode.removeChild(emoji);
                         }
                     }, 3000);
-                }, i * 200);
+                }, i * 100);
             }
         }
 
@@ -1959,14 +2695,16 @@
             initializeChallenges();
             appState.updateUserDisplay();
             
-            console.log('🚀 JomBro Real Authentication Platform Loaded!');
+            console.log('🚀 JomBro Creator Edition Platform Loaded!');
             console.log('✅ Real user authentication system activated');
             console.log('🔥 Firebase integration enabled');
             console.log('👥 Real-time user tracking active');
             console.log('💾 Firestore data persistence enabled');
-            console.log('📱 Phone, Google, Facebook authentication ready');
+            console.log('📱 Phone, Google, Facebook, Email authentication ready');
             console.log('🌐 Online status tracking functional');
-            console.log('🎯 Challenge system with real user progress');
+            console.log('🎯 Challenge system with 30-second auto-refresh');
+            console.log('👑 Creator account system with 1,000,000 tokens');
+            console.log('⏰ Auto-refresh timer active');
         }
 
         // Add CSS for floating animation
@@ -1988,13 +2726,54 @@
         // ===== EVENT LISTENERS =====
         
         document.addEventListener('DOMContentLoaded', function() {
-            console.log('🚀 JomBro Real Authentication Platform Initializing...');
+            console.log('🚀 JomBro Creator Edition Platform Initializing...');
             console.log('✅ All fake users removed');
             console.log('🔥 Real authentication systems activated');
+            console.log('⏰ 30-second auto-refresh system enabled');
+            console.log('👑 Creator account system ready');
             console.log('🌌 Enhanced cosmic night sky background active');
             console.log('💎 Floating glass interface ready');
+            
+            // Initialize challenge creation form if it exists
+            setTimeout(() => {
+                const form = document.getElementById('challengeCreationForm');
+                if (form && !form.hasAttribute('data-initialized')) {
+                    form.setAttribute('data-initialized', 'true');
+                    form.addEventListener('submit', createChallenge);
+                }
+            }, 1000);
+            
+            // Close modals when clicking outside
+            document.addEventListener('click', function(e) {
+                if (e.target.classList.contains('modal')) {
+                    const modalId = e.target.id.replace('Modal', '');
+                    hideModal(modalId);
+                }
+            });
+            
+            // Handle escape key for modals
+            document.addEventListener('keydown', function(e) {
+                if (e.key === 'Escape') {
+                    // Close any open modals
+                    const openModal = document.querySelector('.modal.show');
+                    if (openModal) {
+                        const modalId = openModal.id.replace('Modal', '');
+                        hideModal(modalId);
+                    }
+                }
+            });
         });
 
-    </script>
-</body>
-</html>
+        // ===== INITIALIZATION ON PAGE LOAD =====
+        
+        // Start the application when page loads
+        window.addEventListener('load', function() {
+            console.log('🌟 JomBro Creator Edition - All systems ready!');
+            console.log('🔄 Auto-refresh: Every 30 seconds');
+            console.log('👑 Creator Features: Challenge creation, token distribution');
+            console.log('🔐 Authentication: Google, Facebook, Phone, Email/Password');
+            console.log('⚡ Real-time: User presence, challenge updates');
+            console.log('💾 Persistent: Firebase Firestore integration');
+            console.log('🎯 Enhanced: Creator challenges with special styling');
+            console.log('📱 Responsive: Works on all devices');
+        });
