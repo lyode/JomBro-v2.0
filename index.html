@@ -8,34 +8,50 @@
     <meta name="mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="apple-mobile-web-app-title" content="JomBro">
     <meta name="theme-color" content="#ff6b9d">
+    <meta name="description" content="AI-Powered Social Challenge Platform - Connect, Challenge, Conquer!">
     
-    <title>JomBro - Challenge Platform</title>
+    <!-- Firebase SDK -->
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-app-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-auth-compat.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/10.7.1/firebase-firestore-compat.js"></script>
+    
+    <!-- Google Sign-In -->
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+    <meta name="google-signin-client_id" content="YOUR_GOOGLE_CLIENT_ID.apps.googleusercontent.com">
+       
+    <title>JomBro - Real Authentication Challenge Platform</title>
 
     <style>
-        /* ===== STABLE MOBILE-FIRST DESIGN ===== */
+        /* ===== ENHANCED LAYERED GLASS SYSTEM ===== */
         
         :root {
             --safe-area-top: env(safe-area-inset-top, 20px);
             --safe-area-bottom: env(safe-area-inset-bottom, 20px);
-            
-            --primary-color: #ff6b9d;
-            --primary-dark: #e55a87;
-            --secondary-color: #667eea;
-            --accent-color: #4facfe;
-            
+            --primary-pink: #ff6b9d;
+            --primary-purple: #8b5cf6;
+            --primary-blue: #00d4ff;
+            --accent-pink: #ff8cc8;
+            --accent-purple: #a855f7;
+            --accent-blue: #3b82f6;
             --dark-bg: #0a0a0a;
-            --glass-bg: rgba(20, 20, 30, 0.6);
-            --glass-border: rgba(255, 255, 255, 0.1);
+            --glass-bg: rgba(15, 15, 15, 0.45);
+            --glass-border: rgba(255, 255, 255, 0.08);
+            --glass-shadow: rgba(0, 0, 0, 0.8);
             --text-primary: #ffffff;
             --text-secondary: rgba(255, 255, 255, 0.7);
             --success-green: #10b981;
             --warning-orange: #f59e0b;
             --error-red: #ef4444;
+            --gold: #ffd700;
+            --silver: #c0c0c0;
+            --bronze: #cd7f32;
             
-            --touch-target: 44px;
-            --border-radius: 12px;
-            --shadow: 0 4px 20px rgba(0, 0, 0, 0.3);
+            /* Glass Layer System */
+            --glass-distance: 3mm;
+            --glass-blur: 25px;
+            --glass-opacity: 0.15;
         }
 
         * {
@@ -43,385 +59,442 @@
             padding: 0;
             box-sizing: border-box;
             -webkit-tap-highlight-color: transparent;
+            -webkit-font-smoothing: antialiased;
+            touch-action: manipulation;
         }
 
         html, body {
             height: 100vh;
+            width: 100%;
             font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', sans-serif;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: #000000;
             color: var(--text-primary);
             user-select: none;
             overflow: hidden;
-            -webkit-font-smoothing: antialiased;
+            perspective: 2000px;
+            perspective-origin: center center;
         }
 
-        /* Simple animated background */
-        .background {
+        /* ===== BOTTOM LAYER: NIGHT SKY BACKGROUND ===== */
+        
+        .background-layer {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: 
-                radial-gradient(circle at 20% 80%, rgba(120, 119, 198, 0.3) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(255, 119, 198, 0.3) 0%, transparent 50%),
-                linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             z-index: 1;
+            overflow: hidden;
+            transform: translateZ(-3mm);
+            transform-style: preserve-3d;
         }
 
-        /* Floating particles */
-        .particle {
+        .background-content {
             position: absolute;
-            width: 4px;
-            height: 4px;
-            background: rgba(255, 255, 255, 0.3);
-            border-radius: 50%;
-            animation: float 6s ease-in-out infinite;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            opacity: 0;
+            transition: opacity 1s ease-in-out;
         }
 
-        @keyframes float {
-            0%, 100% { transform: translateY(0px) rotate(0deg); opacity: 0.3; }
-            50% { transform: translateY(-20px) rotate(180deg); opacity: 1; }
+        .background-content.active {
+            opacity: 1;
         }
 
-        /* Main container */
-        .app-container {
-            position: relative;
-            z-index: 2;
-            height: 100vh;
-            display: flex;
-            flex-direction: column;
-        }
-
-        /* Glass card system */
-        .glass-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--border-radius);
-            box-shadow: var(--shadow);
-            padding: 20px;
-            margin: 10px 0;
-        }
-
-        /* Header */
-        .header {
-            padding: calc(var(--safe-area-top) + 16px) 20px 16px 20px;
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--glass-border);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 100;
-        }
-
-        .logo {
-            font-size: 24px;
-            font-weight: 300;
-            color: var(--text-primary);
-            text-shadow: 0 0 10px rgba(255, 255, 255, 0.5);
-        }
-
-        .user-info {
-            font-size: 12px;
-            color: var(--text-secondary);
-            text-align: right;
-        }
-
-        /* Main content */
-        .main-content {
-            flex: 1;
-            overflow-y: auto;
-            padding: 0 20px 100px 20px;
-            -webkit-overflow-scrolling: touch;
-        }
-
-        /* Stats cards */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 12px;
-            margin: 20px 0;
-        }
-
-        .stat-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(15px);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--border-radius);
-            padding: 16px;
-            text-align: center;
-            transition: transform 0.2s ease;
-            cursor: pointer;
-        }
-
-        .stat-card:active {
-            transform: scale(0.95);
-        }
-
-        .stat-value {
-            font-size: 20px;
-            font-weight: bold;
-            color: var(--primary-color);
-            margin-bottom: 4px;
-        }
-
-        .stat-label {
-            font-size: 11px;
-            color: var(--text-secondary);
-            text-transform: uppercase;
-        }
-
-        /* Challenge cards */
-        .challenge-grid {
-            display: grid;
-            grid-template-columns: 1fr;
-            gap: 16px;
-            margin: 20px 0;
-        }
-
-        .challenge-card {
-            background: var(--glass-bg);
-            backdrop-filter: blur(15px);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--border-radius);
-            padding: 20px;
-            cursor: pointer;
-            transition: all 0.3s ease;
+        /* Enhanced Clear Dark Night Sky with Ultra-Dense Blinking Stars */
+        .space-background {
+            background: 
+                linear-gradient(180deg, 
+                    #000011 0%, 
+                    #001122 15%, 
+                    #002244 25%, 
+                    #001a3a 35%,
+                    #002850 45%, 
+                    #001133 55%, 
+                    #001428 65%,
+                    #000822 75%, 
+                    #000511 85%,
+                    #000208 100%
+                );
             position: relative;
             overflow: hidden;
         }
 
-        .challenge-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 30px rgba(0, 0, 0, 0.4);
-            background: rgba(255, 255, 255, 0.1);
-        }
-
-        .challenge-card:active {
-            transform: translateY(0) scale(0.98);
-        }
-
-        .challenge-icon {
-            font-size: 32px;
-            text-align: center;
-            margin-bottom: 12px;
-        }
-
-        .challenge-title {
-            font-size: 16px;
-            font-weight: 600;
-            margin-bottom: 8px;
-            color: var(--text-primary);
-        }
-
-        .challenge-description {
-            font-size: 13px;
-            color: var(--text-secondary);
-            margin-bottom: 12px;
-            line-height: 1.4;
-        }
-
-        .challenge-meta {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            font-size: 12px;
-        }
-
-        .challenge-difficulty {
-            background: rgba(255, 255, 255, 0.1);
-            padding: 4px 8px;
-            border-radius: 6px;
-            color: var(--text-secondary);
-        }
-
-        .challenge-tokens {
-            background: var(--primary-color);
-            color: white;
-            padding: 4px 8px;
-            border-radius: 6px;
-            font-weight: 600;
-        }
-
-        /* Buttons */
-        .btn {
-            border: none;
-            border-radius: var(--border-radius);
-            padding: 16px 20px;
-            font-size: 16px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            width: 100%;
-            min-height: var(--touch-target);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 8px;
-        }
-
-        .btn-primary {
-            background: linear-gradient(45deg, var(--primary-color), var(--primary-dark));
-            color: white;
-            box-shadow: 0 4px 15px rgba(255, 107, 157, 0.4);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-1px);
-            box-shadow: 0 6px 20px rgba(255, 107, 157, 0.6);
-        }
-
-        .btn-primary:active {
-            transform: translateY(0) scale(0.98);
-        }
-
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.1);
-            color: var(--text-primary);
-            border: 1px solid rgba(255, 255, 255, 0.2);
-        }
-
-        .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.15);
-        }
-
-        .btn-secondary:active {
-            transform: scale(0.95);
-        }
-
-        /* Bottom navigation */
-        .bottom-nav {
-            position: fixed;
-            bottom: 0;
+        /* Multi-layered Star System */
+        .stars {
+            position: absolute;
+            top: 0;
             left: 0;
             right: 0;
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            border-top: 1px solid var(--glass-border);
-            padding: 12px 0 calc(var(--safe-area-bottom) + 12px) 0;
-            display: flex;
-            justify-content: space-around;
-            z-index: 1000;
+            bottom: 0;
+            background-image: 
+                /* Supernova Stars - Ultra Bright */
+                radial-gradient(6px 6px at 120px 50px, #ffffff, transparent),
+                radial-gradient(5px 5px at 300px 80px, rgba(255,255,255,0.98), transparent),
+                radial-gradient(6px 6px at 180px 150px, #ffffff, transparent),
+                radial-gradient(5px 5px at 350px 120px, rgba(255,255,255,0.95), transparent),
+                
+                /* Bright Major Stars - Large and Prominent */
+                radial-gradient(4px 4px at 25px 30px, #ffffff, transparent),
+                radial-gradient(3px 3px at 85px 20px, rgba(255,255,255,0.95), transparent),
+                radial-gradient(4px 4px at 145px 40px, #ffffff, transparent),
+                radial-gradient(3px 3px at 205px 65px, rgba(255,255,255,0.9), transparent),
+                radial-gradient(4px 4px at 265px 25px, #ffffff, transparent),
+                radial-gradient(3px 3px at 325px 55px, rgba(255,255,255,0.95), transparent),
+                radial-gradient(4px 4px at 385px 35px, #ffffff, transparent),
+                radial-gradient(3px 3px at 425px 75px, rgba(255,255,255,0.92), transparent),
+                radial-gradient(4px 4px at 465px 45px, #ffffff, transparent),
+                
+                /* Medium Bright Stars */
+                radial-gradient(2.5px 2.5px at 55px 50px, rgba(255,255,255,0.85), transparent),
+                radial-gradient(2px 2px at 115px 75px, rgba(255,255,255,0.8), transparent),
+                radial-gradient(2.5px 2.5px at 175px 15px, rgba(255,255,255,0.9), transparent),
+                radial-gradient(2px 2px at 235px 80px, rgba(255,255,255,0.75), transparent),
+                radial-gradient(2.5px 2.5px at 295px 45px, rgba(255,255,255,0.85), transparent),
+                radial-gradient(2px 2px at 355px 70px, rgba(255,255,255,0.8), transparent),
+                radial-gradient(2.5px 2.5px at 415px 25px, rgba(255,255,255,0.87), transparent),
+                radial-gradient(2px 2px at 475px 85px, rgba(255,255,255,0.78), transparent),
+                
+                /* Regular Stars - Dense Field */
+                radial-gradient(1.5px 1.5px at 15px 60px, rgba(255,255,255,0.7), transparent),
+                radial-gradient(1px 1px at 45px 25px, rgba(255,255,255,0.6), transparent),
+                radial-gradient(1.5px 1.5px at 75px 85px, rgba(255,255,255,0.75), transparent),
+                radial-gradient(1px 1px at 105px 35px, rgba(255,255,255,0.65), transparent),
+                radial-gradient(1.5px 1.5px at 135px 70px, rgba(255,255,255,0.7), transparent),
+                radial-gradient(1px 1px at 165px 90px, rgba(255,255,255,0.6), transparent),
+                radial-gradient(1.5px 1.5px at 195px 10px, rgba(255,255,255,0.75), transparent),
+                radial-gradient(1px 1px at 225px 45px, rgba(255,255,255,0.65), transparent),
+                radial-gradient(1.5px 1.5px at 255px 75px, rgba(255,255,255,0.7), transparent),
+                radial-gradient(1px 1px at 285px 20px, rgba(255,255,255,0.6), transparent),
+                radial-gradient(1.5px 1.5px at 315px 85px, rgba(255,255,255,0.75), transparent),
+                radial-gradient(1px 1px at 345px 15px, rgba(255,255,255,0.65), transparent),
+                radial-gradient(1.5px 1.5px at 375px 60px, rgba(255,255,255,0.7), transparent),
+                radial-gradient(1px 1px at 405px 90px, rgba(255,255,255,0.62), transparent),
+                radial-gradient(1.5px 1.5px at 435px 30px, rgba(255,255,255,0.72), transparent),
+                radial-gradient(1px 1px at 465px 65px, rgba(255,255,255,0.68), transparent);
+            background-repeat: repeat;
+            background-size: 500px 120px, 450px 140px, 400px 110px, 550px 100px, 380px 150px;
+            animation: cosmicTwinkle 4s ease-in-out infinite;
         }
 
-        .nav-item {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            padding: 8px;
-            border-radius: 8px;
-            cursor: pointer;
-            transition: all 0.2s ease;
-            min-width: var(--touch-target);
-            position: relative;
-        }
-
-        .nav-item:active {
-            transform: scale(0.9);
-        }
-
-        .nav-item.active {
-            background: rgba(255, 107, 157, 0.2);
-            color: var(--primary-color);
-        }
-
-        .nav-icon {
-            font-size: 20px;
-            margin-bottom: 4px;
-        }
-
-        .nav-label {
-            font-size: 10px;
-            font-weight: 600;
-        }
-
-        .badge {
+        /* Nebula Layer */
+        .stars::before {
+            content: '';
             position: absolute;
-            top: 2px;
-            right: 8px;
-            background: var(--primary-color);
-            color: white;
-            border-radius: 50%;
-            width: 16px;
-            height: 16px;
-            font-size: 10px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                /* Colorful Distant Stars */
+                radial-gradient(2px 2px at 40px 18px, rgba(173, 216, 230, 0.9), transparent),
+                radial-gradient(1.8px 1.8px at 90px 48px, rgba(255, 182, 193, 0.8), transparent),
+                radial-gradient(2px 2px at 140px 78px, rgba(221, 160, 221, 0.7), transparent),
+                radial-gradient(1.5px 1.5px at 190px 28px, rgba(255, 255, 224, 0.85), transparent),
+                radial-gradient(2px 2px at 240px 68px, rgba(176, 196, 222, 0.8), transparent),
+                radial-gradient(1.8px 1.8px at 290px 38px, rgba(255, 228, 196, 0.7), transparent),
+                radial-gradient(2px 2px at 340px 88px, rgba(230, 230, 250, 0.85), transparent),
+                radial-gradient(1.5px 1.5px at 390px 18px, rgba(255, 215, 0, 0.6), transparent),
+                radial-gradient(2px 2px at 440px 58px, rgba(255, 20, 147, 0.5), transparent),
+                
+                /* Nebula Clouds */
+                radial-gradient(ellipse 80px 40px at 150px 100px, rgba(138, 43, 226, 0.15), transparent),
+                radial-gradient(ellipse 60px 30px at 350px 150px, rgba(75, 0, 130, 0.12), transparent),
+                radial-gradient(ellipse 100px 50px at 250px 50px, rgba(25, 25, 112, 0.1), transparent),
+                
+                /* Very faint background stars */
+                radial-gradient(0.8px 0.8px at 30px 35px, rgba(255,255,255,0.3), transparent),
+                radial-gradient(0.5px 0.5px at 70px 55px, rgba(255,255,255,0.35), transparent),
+                radial-gradient(0.8px 0.8px at 120px 25px, rgba(255,255,255,0.25), transparent),
+                radial-gradient(0.5px 0.5px at 160px 85px, rgba(255,255,255,0.2), transparent),
+                radial-gradient(0.8px 0.8px at 210px 35px, rgba(255,255,255,0.3), transparent),
+                radial-gradient(0.5px 0.5px at 250px 75px, rgba(255,255,255,0.35), transparent),
+                radial-gradient(0.8px 0.8px at 300px 15px, rgba(255,255,255,0.25), transparent),
+                radial-gradient(0.5px 0.5px at 330px 55px, rgba(255,255,255,0.2), transparent),
+                radial-gradient(0.8px 0.8px at 370px 85px, rgba(255,255,255,0.3), transparent),
+                radial-gradient(0.5px 0.5px at 420px 45px, rgba(255,255,255,0.25), transparent),
+                radial-gradient(0.8px 0.8px at 460px 25px, rgba(255,255,255,0.3), transparent);
+            background-repeat: repeat;
+            background-size: 480px 160px, 520px 120px, 380px 140px;
+            animation: nebulaFlow 8s ease-in-out infinite;
         }
 
-        /* Modal system */
-        .modal {
+        /* Constellation Layer */
+        .stars::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background-image: 
+                /* Constellation Stars - Connected patterns */
+                radial-gradient(1.5px 1.5px at 80px 80px, rgba(255,255,255,0.8), transparent),
+                radial-gradient(1.2px 1.2px at 100px 90px, rgba(255,255,255,0.7), transparent),
+                radial-gradient(1.8px 1.8px at 120px 75px, rgba(255,255,255,0.85), transparent),
+                radial-gradient(1px 1px at 135px 85px, rgba(255,255,255,0.65), transparent),
+                radial-gradient(1.5px 1.5px at 150px 95px, rgba(255,255,255,0.75), transparent),
+                
+                /* Big Dipper Pattern */
+                radial-gradient(2px 2px at 300px 120px, rgba(255,255,255,0.9), transparent),
+                radial-gradient(1.8px 1.8px at 320px 115px, rgba(255,255,255,0.85), transparent),
+                radial-gradient(2px 2px at 340px 125px, rgba(255,255,255,0.9), transparent),
+                radial-gradient(1.5px 1.5px at 360px 130px, rgba(255,255,255,0.8), transparent),
+                radial-gradient(2px 2px at 380px 120px, rgba(255,255,255,0.9), transparent),
+                radial-gradient(1.8px 1.8px at 400px 135px, rgba(255,255,255,0.85), transparent),
+                radial-gradient(2px 2px at 420px 140px, rgba(255,255,255,0.9), transparent),
+                
+                /* Additional micro stars for ultra-dense effect */
+                radial-gradient(0.4px 0.4px at 10px 20px, rgba(255,255,255,0.2), transparent),
+                radial-gradient(0.3px 0.3px at 60px 40px, rgba(255,255,255,0.25), transparent),
+                radial-gradient(0.4px 0.4px at 110px 60px, rgba(255,255,255,0.2), transparent),
+                radial-gradient(0.3px 0.3px at 160px 10px, rgba(255,255,255,0.15), transparent),
+                radial-gradient(0.4px 0.4px at 220px 50px, rgba(255,255,255,0.2), transparent),
+                radial-gradient(0.3px 0.3px at 270px 70px, rgba(255,255,255,0.25), transparent),
+                radial-gradient(0.4px 0.4px at 320px 20px, rgba(255,255,255,0.2), transparent),
+                radial-gradient(0.3px 0.3px at 370px 90px, rgba(255,255,255,0.15), transparent),
+                radial-gradient(0.4px 0.4px at 420px 30px, rgba(255,255,255,0.2), transparent),
+                radial-gradient(0.3px 0.3px at 470px 80px, rgba(255,255,255,0.18), transparent);
+            background-repeat: repeat;
+            background-size: 500px 140px, 450px 160px;
+            animation: constellationGlow 12s ease-in-out infinite;
+        }
+
+        @keyframes cosmicTwinkle {
+            0%, 100% { 
+                opacity: 1; 
+                filter: brightness(1) contrast(1);
+            }
+            15% { 
+                opacity: 0.8; 
+                filter: brightness(1.1) contrast(1.1);
+            }
+            30% { 
+                opacity: 0.9; 
+                filter: brightness(0.95) contrast(1.05);
+            }
+            45% { 
+                opacity: 0.6; 
+                filter: brightness(1.15) contrast(1.2);
+            }
+            60% { 
+                opacity: 0.85; 
+                filter: brightness(1.05) contrast(1.1);
+            }
+            75% { 
+                opacity: 0.7; 
+                filter: brightness(1.2) contrast(1.15);
+            }
+        }
+
+        @keyframes nebulaFlow {
+            0%, 100% { 
+                opacity: 0.6; 
+                transform: translateX(0) translateY(0) scale(1);
+            }
+            25% { 
+                opacity: 0.8; 
+                transform: translateX(5px) translateY(-3px) scale(1.02);
+            }
+            50% { 
+                opacity: 0.7; 
+                transform: translateX(-3px) translateY(5px) scale(0.98);
+            }
+            75% { 
+                opacity: 0.9; 
+                transform: translateX(3px) translateY(-2px) scale(1.01);
+            }
+        }
+
+        @keyframes constellationGlow {
+            0%, 100% { 
+                opacity: 0.4; 
+                filter: hue-rotate(0deg);
+            }
+            33% { 
+                opacity: 0.7; 
+                filter: hue-rotate(30deg);
+            }
+            66% { 
+                opacity: 0.5; 
+                filter: hue-rotate(-30deg);
+            }
+        }
+
+        /* Enhanced Shooting Stars */
+        .shooting-star {
+            position: absolute;
+            width: 3px;
+            height: 3px;
+            background: linear-gradient(45deg, #ffffff, #00bfff);
+            border-radius: 50%;
+            box-shadow: 
+                0 0 8px 3px rgba(255, 255, 255, 0.9),
+                0 0 16px 6px rgba(0, 191, 255, 0.6),
+                0 0 24px 9px rgba(255, 255, 255, 0.3);
+            animation: meteorShower 6s linear infinite;
+        }
+
+        .shooting-star::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 2px;
+            height: 2px;
+            background: linear-gradient(45deg, transparent, rgba(255,255,255,0.8), transparent);
+            transform: translateX(-50px) translateY(-50px) rotate(45deg);
+            box-shadow: 0 0 20px rgba(255,255,255,0.5);
+        }
+
+        @keyframes meteorShower {
+            0% {
+                transform: translateX(-150px) translateY(-150px) scale(0);
+                opacity: 0;
+            }
+            5% {
+                opacity: 1;
+                transform: translateX(-100px) translateY(-100px) scale(1);
+            }
+            95% {
+                opacity: 1;
+                transform: translateX(calc(100vw + 50px)) translateY(calc(100vh + 50px)) scale(1);
+            }
+            100% {
+                transform: translateX(calc(100vw + 100px)) translateY(calc(100vh + 100px)) scale(0);
+                opacity: 0;
+            }
+        }
+
+        /* Aurora Effects */
+        .aurora {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 40%;
+            background: linear-gradient(
+                180deg,
+                rgba(0, 255, 150, 0.1) 0%,
+                rgba(0, 150, 255, 0.08) 25%,
+                rgba(150, 0, 255, 0.06) 50%,
+                rgba(255, 0, 150, 0.04) 75%,
+                transparent 100%
+            );
+            animation: auroraWave 15s ease-in-out infinite;
+            pointer-events: none;
+        }
+
+        @keyframes auroraWave {
+            0%, 100% { 
+                opacity: 0.3; 
+                transform: skewX(0deg);
+            }
+            25% { 
+                opacity: 0.6; 
+                transform: skewX(2deg);
+            }
+            50% { 
+                opacity: 0.4; 
+                transform: skewX(-1deg);
+            }
+            75% { 
+                opacity: 0.7; 
+                transform: skewX(1deg);
+            }
+        }
+
+        /* ===== TOP LAYER: FLOATING GLASS UI INTERFACE ===== */
+        
+        .glass-layer {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: rgba(0, 0, 0, 0.8);
-            backdrop-filter: blur(10px);
-            display: none;
-            align-items: flex-end;
-            justify-content: center;
-            z-index: 2000;
+            z-index: 1000;
+            transform: translateZ(3mm);
+            transform-style: preserve-3d;
+            will-change: transform;
+            pointer-events: auto;
+            
+            /* Enhanced Glass Floating Effect */
+            box-shadow: 
+                0 0 0 1px rgba(255, 255, 255, 0.02),
+                0 3mm 6mm rgba(0, 0, 0, 0.15),
+                0 1mm 3mm rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
         }
 
-        .modal.show {
-            display: flex;
-        }
-
-        .modal-content {
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--border-radius) var(--border-radius) 0 0;
-            padding: 20px;
-            width: 100%;
-            max-height: 80vh;
-            overflow-y: auto;
-            transform: translateY(100%);
-            transition: transform 0.3s ease;
-        }
-
-        .modal.show .modal-content {
-            transform: translateY(0);
-        }
-
-        /* Auth screen */
+        /* Auth Screen with Enhanced Floating Glass Effect */
         .auth-screen {
             position: fixed;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: var(--dark-bg);
             display: flex;
             align-items: center;
             justify-content: center;
-            z-index: 3000;
+            z-index: 5000;
             padding: 20px;
+            backdrop-filter: blur(8px);
+            background: rgba(0, 0, 0, 0.3);
+            transform: translateZ(2mm);
         }
 
         .auth-container {
-            background: var(--glass-bg);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
+            background: rgba(15, 15, 15, 0.15);
+            backdrop-filter: blur(25px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 25px;
             padding: 40px 30px;
             text-align: center;
-            box-shadow: var(--shadow);
+            box-shadow: 
+                0 6mm 12mm rgba(0, 0, 0, 0.25),
+                0 2mm 6mm rgba(0, 0, 0, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2),
+                inset 0 0 20px rgba(255, 255, 255, 0.05);
             max-width: 350px;
             width: 100%;
+            transform: translateZ(1mm);
+            position: relative;
+        }
+
+        .auth-container::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(
+                135deg,
+                rgba(255, 255, 255, 0.1) 0%,
+                rgba(255, 255, 255, 0.05) 25%,
+                rgba(255, 255, 255, 0.02) 50%,
+                rgba(255, 255, 255, 0.05) 75%,
+                rgba(255, 255, 255, 0.1) 100%
+            );
+            border-radius: 25px;
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        .auth-logo {
+            font-size: 48px;
+            margin-bottom: 10px;
+            text-shadow: 0 0 20px rgba(255, 107, 157, 0.5);
         }
 
         .auth-title {
             font-size: 28px;
             font-weight: 300;
+            color: var(--text-primary);
             margin-bottom: 8px;
-            background: linear-gradient(45deg, var(--primary-color), var(--secondary-color));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            text-shadow: 0 0 10px rgba(255, 255, 255, 0.3);
         }
 
         .auth-subtitle {
@@ -431,718 +504,1497 @@
         }
 
         .auth-btn {
-            background: var(--glass-bg);
-            border: 1px solid var(--glass-border);
-            border-radius: var(--border-radius);
-            padding: 16px;
-            color: var(--text-primary);
-            cursor: pointer;
-            transition: all 0.2s ease;
             width: 100%;
-            margin-bottom: 12px;
+            padding: 15px;
+            border: none;
+            border-radius: 12px;
+            font-size: 16px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 15px;
             display: flex;
             align-items: center;
             justify-content: center;
             gap: 10px;
-            font-size: 16px;
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .auth-btn.google {
+            background: rgba(255, 255, 255, 0.9);
+            color: #333;
+            box-shadow: 0 8px 32px rgba(255, 255, 255, 0.1);
+        }
+
+        .auth-btn.facebook {
+            background: rgba(24, 119, 242, 0.8);
+            color: #fff;
+            box-shadow: 0 8px 32px rgba(24, 119, 242, 0.3);
+        }
+
+        .auth-btn.phone {
+            background: rgba(255, 107, 157, 0.8);
+            color: #fff;
+            box-shadow: 0 8px 32px rgba(255, 107, 157, 0.3);
         }
 
         .auth-btn:hover {
-            background: rgba(255, 255, 255, 0.1);
-            transform: translateY(-1px);
+            transform: translateY(-2px) translateZ(2px);
+            box-shadow: 0 12px 40px rgba(0,0,0,0.3);
         }
 
-        .auth-btn:active {
-            transform: translateY(0) scale(0.98);
+        .auth-btn:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
         }
 
-        /* Form inputs */
+        /* Main App with Glass Effect */
+        .phone-container {
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            padding: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 1;
+        }
+
+        .glass-interface {
+            width: 100%;
+            max-width: 400px;
+            height: calc(100vh - 20px);
+            background: rgba(15, 15, 15, 0.12);
+            backdrop-filter: blur(20px) saturate(180%);
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            border-radius: 25px;
+            box-shadow: 
+                0 8mm 16mm rgba(0, 0, 0, 0.25),
+                0 2mm 8mm rgba(0, 0, 0, 0.15),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2),
+                inset 0 0 20px rgba(255, 255, 255, 0.05),
+                0 0 80px rgba(255, 107, 157, 0.15);
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            position: relative;
+            transform: translateZ(0.5mm);
+        }
+
+        .glass-interface::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(
+                135deg,
+                rgba(255, 255, 255, 0.1) 0%,
+                rgba(255, 255, 255, 0.05) 25%,
+                rgba(255, 255, 255, 0.02) 50%,
+                rgba(255, 255, 255, 0.05) 75%,
+                rgba(255, 255, 255, 0.1) 100%
+            );
+            border-radius: 25px;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        .glass-header {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            padding: calc(var(--safe-area-top) + 20px) 25px 20px 25px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.12);
+            background: rgba(15, 15, 15, 0.08);
+            backdrop-filter: blur(25px) saturate(180%);
+            transform: translateZ(0.2mm);
+            box-shadow: 
+                0 1mm 3mm rgba(0, 0, 0, 0.1),
+                inset 0 1px 0 rgba(255, 255, 255, 0.15);
+        }
+
+        .logo-section {
+            display: flex;
+            flex-direction: column;
+            cursor: pointer;
+        }
+
+        .logo-text {
+            font-size: 26px;
+            font-weight: 200;
+            color: var(--text-primary);
+            letter-spacing: -1px;
+            text-shadow: 0 0 20px rgba(255, 107, 157, 0.4);
+        }
+
+        .logo-slogan {
+            font-size: 10px;
+            color: var(--primary-pink);
+            margin-top: -2px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            opacity: 0.9;
+            animation: pulse 3s infinite;
+            text-shadow: 0 0 10px rgba(255, 107, 157, 0.6);
+        }
+
+        .logo-subtitle {
+            font-size: 9px;
+            color: var(--text-secondary);
+            margin-top: 2px;
+            opacity: 0.8;
+        }
+
+        .header-actions {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+        }
+
+        .header-btn {
+            width: 30px;
+            height: 30px;
+            border-radius: 15px;
+            background: rgba(255, 255, 255, 0.06);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            font-size: 14px;
+            color: var(--text-primary);
+            transition: all 0.3s ease;
+            position: relative;
+        }
+
+        .header-btn:hover {
+            background: rgba(255, 107, 157, 0.15);
+            border-color: var(--primary-pink);
+            transform: scale(1.1) translateZ(1px);
+            box-shadow: 0 0 20px rgba(255, 107, 157, 0.3);
+        }
+
+        .glass-content {
+            flex: 1;
+            overflow-y: auto;
+            overflow-x: hidden;
+            -webkit-overflow-scrolling: touch;
+            scroll-behavior: smooth;
+            position: relative;
+            z-index: 2;
+        }
+
+        .glass-section {
+            padding: 15px 25px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.08);
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(15px) saturate(180%);
+            position: relative;
+            transform: translateZ(0.1mm);
+            z-index: 2;
+        }
+
+        .glass-section::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(
+                90deg,
+                rgba(255, 255, 255, 0.02) 0%,
+                rgba(255, 255, 255, 0.05) 50%,
+                rgba(255, 255, 255, 0.02) 100%
+            );
+            pointer-events: none;
+            z-index: -1;
+        }
+
+        /* Challenge Cards */
+        .challenge-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 15px;
+            margin: 15px 0;
+        }
+
+        .challenge-card {
+            background: rgba(255, 255, 255, 0.03);
+            backdrop-filter: blur(25px);
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            border-radius: 15px;
+            padding: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 
+                0 8px 32px rgba(0, 0, 0, 0.3),
+                inset 0 1px 0 rgba(255, 255, 255, 0.1);
+        }
+
+        .challenge-card:hover {
+            background: rgba(255, 255, 255, 0.06);
+            transform: translateY(-5px) translateZ(3px);
+            box-shadow: 
+                0 15px 40px rgba(0, 0, 0, 0.4),
+                0 0 30px rgba(255, 107, 157, 0.2),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+
+        .challenge-category-badge {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            padding: 4px 8px;
+            border-radius: 8px;
+            font-size: 10px;
+            font-weight: 600;
+            text-transform: uppercase;
+            backdrop-filter: blur(15px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        /* Buttons */
+        .btn-primary {
+            background: linear-gradient(145deg, rgba(255, 107, 157, 0.8), rgba(196, 69, 105, 0.8));
+            backdrop-filter: blur(20px);
+            color: #fff;
+            border: 1px solid rgba(255, 107, 157, 0.3);
+            padding: 16px 24px;
+            border-radius: 15px;
+            font-size: 14px;
+            font-weight: 700;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+            transition: all 0.3s ease;
+            width: 100%;
+            box-shadow: 
+                0 6px 20px rgba(255, 107, 157, 0.4),
+                inset 0 1px 0 rgba(255, 255, 255, 0.2);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-3px) translateZ(2px);
+            box-shadow: 
+                0 8px 25px rgba(255, 107, 157, 0.6),
+                inset 0 1px 0 rgba(255, 255, 255, 0.3);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(20px);
+            color: var(--text-primary);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 12px 20px;
+            border-radius: 12px;
+            font-size: 14px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.12);
+            transform: translateY(-2px) translateZ(1px);
+            box-shadow: 0 4px 15px rgba(255, 255, 255, 0.1);
+        }
+
+        /* Form Elements */
         .form-input {
             width: 100%;
-            padding: 16px;
-            margin: 12px 0;
-            border: 1px solid var(--glass-border);
-            border-radius: var(--border-radius);
-            background: var(--glass-bg);
+            padding: 12px;
+            margin: 10px 0;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 8px;
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(15px);
             color: var(--text-primary);
             font-size: 16px;
-            backdrop-filter: blur(10px);
+            transition: all 0.3s ease;
         }
 
         .form-input:focus {
             outline: none;
-            border-color: var(--primary-color);
-            box-shadow: 0 0 0 3px rgba(255, 107, 157, 0.3);
+            border-color: var(--primary-pink);
+            box-shadow: 0 0 0 2px rgba(255, 107, 157, 0.2);
+            background: rgba(255, 255, 255, 0.08);
         }
 
         .form-input::placeholder {
             color: var(--text-secondary);
         }
 
-        /* Toast notifications */
-        .toast {
-            position: fixed;
-            top: calc(var(--safe-area-top) + 60px);
-            left: 50%;
-            transform: translateX(-50%);
-            background: var(--primary-color);
-            color: white;
-            padding: 12px 20px;
-            border-radius: var(--border-radius);
-            z-index: 4000;
-            font-size: 14px;
-            opacity: 0;
-            transition: opacity 0.3s ease;
-            max-width: calc(100% - 40px);
+        /* User Stats Display */
+        .user-stats {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 10px;
+            margin: 15px 0;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.05);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            border-radius: 12px;
+            padding: 15px;
             text-align: center;
+            backdrop-filter: blur(15px);
         }
 
-        .toast.show {
-            opacity: 1;
+        .stat-value {
+            font-size: 20px;
+            font-weight: 700;
+            color: var(--primary-pink);
+            margin-bottom: 5px;
         }
 
-        .toast.success { background: var(--success-green); }
-        .toast.warning { background: var(--warning-orange); }
-        .toast.error { background: var(--error-red); }
-
-        /* Loading state */
-        .loading {
-            opacity: 0.7;
-            pointer-events: none;
-            position: relative;
+        .stat-label {
+            font-size: 10px;
+            color: var(--text-secondary);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
-        .loading::after {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            width: 20px;
-            height: 20px;
-            margin: -10px 0 0 -10px;
-            border: 2px solid transparent;
-            border-top: 2px solid var(--primary-color);
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            to { transform: rotate(360deg); }
-        }
-
-        /* Progress bar */
         .progress-bar {
             width: 100%;
             height: 8px;
             background: rgba(255, 255, 255, 0.1);
             border-radius: 4px;
             overflow: hidden;
-            margin: 12px 0;
+            margin: 10px 0;
         }
 
         .progress-fill {
             height: 100%;
-            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            background: linear-gradient(90deg, var(--primary-pink), var(--primary-purple));
             border-radius: 4px;
-            transition: width 0.5s ease;
+            transition: width 0.3s ease;
         }
 
-        /* Responsive design */
+        /* Loading Spinner */
+        .loading-spinner {
+            border: 2px solid rgba(255, 255, 255, 0.3);
+            border-top: 2px solid var(--primary-pink);
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            animation: spin 1s linear infinite;
+            display: inline-block;
+            margin-left: 8px;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+
+        /* Error Message */
+        .error-message {
+            background: rgba(239, 68, 68, 0.1);
+            border: 1px solid rgba(239, 68, 68, 0.3);
+            color: var(--error-red);
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 14px;
+            margin: 10px 0;
+        }
+
+        .success-message {
+            background: rgba(16, 185, 129, 0.1);
+            border: 1px solid rgba(16, 185, 129, 0.3);
+            color: var(--success-green);
+            padding: 10px;
+            border-radius: 8px;
+            font-size: 14px;
+            margin: 10px 0;
+        }
+
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .challenge-grid {
+                grid-template-columns: 1fr;
+                gap: 12px;
+            }
+        }
+
         @media (max-width: 480px) {
-            .header {
-                padding: calc(var(--safe-area-top) + 12px) 16px 12px 16px;
+            .glass-interface {
+                max-width: 100%;
+                height: 100vh;
+                border-radius: 0;
+                margin: 0;
             }
             
-            .main-content {
-                padding: 0 16px 100px 16px;
-            }
-            
-            .glass-card {
-                padding: 16px;
-            }
-            
-            .auth-container {
-                margin: 16px;
-                padding: 32px 24px;
+            .phone-container {
+                padding: 0;
             }
         }
 
-        /* Utility classes */
-        .hidden { display: none !important; }
-        .text-center { text-align: center; }
-        .mt-20 { margin-top: 20px; }
-        .mb-20 { margin-bottom: 20px; }
-
-        /* Accessibility */
-        @media (prefers-reduced-motion: reduce) {
-            * {
-                animation-duration: 0.01ms !important;
-                animation-iteration-count: 1 !important;
-                transition-duration: 0.01ms !important;
-            }
+        /* Utility Classes */
+        .hidden {
+            display: none !important;
         }
 
-        @media (prefers-contrast: high) {
-            :root {
-                --glass-bg: rgba(0, 0, 0, 0.9);
-                --glass-border: rgba(255, 255, 255, 0.5);
+        .text-center {
+            text-align: center;
+        }
+
+        @keyframes pulse {
+            0%, 100% { 
+                opacity: 1; 
+                transform: scale(1);
+            }
+            50% { 
+                opacity: 0.8; 
+                transform: scale(1.02);
             }
         }
     </style>
 </head>
 <body>
-    <!-- Background -->
-    <div class="background">
-        <div class="particle" style="top: 10%; left: 10%; animation-delay: 0s;"></div>
-        <div class="particle" style="top: 20%; left: 80%; animation-delay: 1s;"></div>
-        <div class="particle" style="top: 80%; left: 20%; animation-delay: 2s;"></div>
-        <div class="particle" style="top: 60%; left: 90%; animation-delay: 3s;"></div>
-    </div>
+    <!-- reCAPTCHA -->
+    <div id="recaptcha-container"></div>
 
-    <!-- Auth Screen -->
-    <div id="authScreen" class="auth-screen">
-        <div class="auth-container">
-            <div style="font-size: 48px; margin-bottom: 16px;">🚀</div>
-            <div class="auth-title">Welcome to JomBro</div>
-            <div class="auth-subtitle">Connect with friends and tackle challenges together!</div>
-            
-            <div id="errorMessage" class="toast error" style="position: relative; margin-bottom: 16px; display: none;"></div>
-            
-            <div id="mainAuth">
-                <button class="auth-btn" onclick="signInWithGoogle()">
-                    🔍 Continue with Google
-                </button>
-                <button class="auth-btn" onclick="signInWithFacebook()">
-                    📘 Continue with Facebook
-                </button>
-                <button class="auth-btn" onclick="showPhoneForm()">
-                    📱 Continue with Phone
-                </button>
-                <button class="auth-btn" onclick="signInAnonymously()">
-                    🧪 Test Mode (Skip Login)
-                </button>
-            </div>
-
-            <div id="phoneForm" class="hidden">
-                <input type="tel" id="phoneInput" class="form-input" placeholder="+60123456789">
-                <input type="text" id="otpInput" class="form-input hidden" placeholder="Enter verification code">
-                <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 12px; margin-top: 16px;">
-                    <button class="btn btn-secondary" onclick="showMainAuth()">Back</button>
-                    <button class="btn btn-primary" id="phoneSubmitBtn" onclick="signInWithPhone()">Send Code</button>
-                </div>
-            </div>
-            
-            <div style="margin-top: 24px; font-size: 12px; color: var(--text-secondary);">
-                By continuing, you agree to our Terms & Privacy Policy
-            </div>
+    <!-- Bottom Layer: Animated Backgrounds -->
+    <div class="background-layer">
+        <!-- Space with Blinking Stars -->
+        <div class="background-content space-background active" id="spaceBackground">
+            <div class="aurora"></div>
+            <div class="stars"></div>
+            <div class="shooting-star" style="top: 15%; left: 5%; animation-delay: 0s;"></div>
+            <div class="shooting-star" style="top: 35%; left: 20%; animation-delay: 1.5s;"></div>
+            <div class="shooting-star" style="top: 60%; left: 30%; animation-delay: 2s;"></div>
+            <div class="shooting-star" style="top: 25%; left: 50%; animation-delay: 3s;"></div>
+            <div class="shooting-star" style="top: 80%; left: 60%; animation-delay: 4s;"></div>
+            <div class="shooting-star" style="top: 45%; left: 75%; animation-delay: 5s;"></div>
+            <div class="shooting-star" style="top: 70%; left: 85%; animation-delay: 6s;"></div>
+            <div class="shooting-star" style="top: 30%; left: 10%; animation-delay: 7s;"></div>
+            <div class="shooting-star" style="top: 65%; left: 40%; animation-delay: 8s;"></div>
+            <div class="shooting-star" style="top: 20%; left: 70%; animation-delay: 9s;"></div>
+            <div class="shooting-star" style="top: 85%; left: 25%; animation-delay: 10s;"></div>
+            <div class="shooting-star" style="top: 40%; left: 90%; animation-delay: 11s;"></div>
         </div>
     </div>
 
-    <!-- Main App -->
-    <div id="mainApp" class="app-container hidden">
-        <!-- Header -->
-        <div class="header">
-            <div class="logo">JomBro</div>
-            <div class="user-info">
-                <div id="userDisplayName">Demo User</div>
-                <div style="font-size: 10px; color: var(--primary-color);" id="userStatus">Level 5</div>
-            </div>
-        </div>
+    <!-- Top Layer: Glass UI Interface -->
+    <div class="glass-layer">
+        <!-- Auth Screen -->
+        <div id="authScreen" class="auth-screen">
+            <div class="auth-container">
+                <div class="auth-logo">🚀</div>
+                <div class="auth-title">Welcome to JomBro</div>
+                <div class="auth-subtitle">Connect with friends and tackle challenges together!</div>
+                
+                <div id="errorMessage" class="error-message" style="display: none;"></div>
+                <div id="successMessage" class="success-message" style="display: none;"></div>
+                
+                <!-- Main Auth Screen -->
+                <div id="mainAuth">
+                    <button class="auth-btn google" onclick="signInWithGoogle()" id="googleSignInBtn">
+                        🔍 Continue with Google
+                    </button>
+                    
+                    <button class="auth-btn facebook" onclick="signInWithFacebook()" id="facebookSignInBtn">
+                        📘 Continue with Facebook
+                    </button>
+                    
+                    <button class="auth-btn phone" onclick="showPhoneForm()">
+                        📱 Continue with Phone
+                    </button>
+                </div>
 
-        <!-- Main Content -->
-        <div class="main-content">
-            <!-- User Stats -->
-            <div class="stats-grid">
-                <div class="stat-card" onclick="showToast('Level details coming soon!', 'info')">
-                    <div class="stat-value" id="userLevelDisplay">5</div>
-                    <div class="stat-label">Level</div>
-                </div>
-                <div class="stat-card" onclick="showToast('Token details coming soon!', 'info')">
-                    <div class="stat-value" id="userTokensDisplay">2,450</div>
-                    <div class="stat-label">Tokens</div>
-                </div>
-                <div class="stat-card" onclick="showToast('Achievements coming soon!', 'info')">
-                    <div class="stat-value" id="userChallengesDisplay">12</div>
-                    <div class="stat-label">Completed</div>
-                </div>
-            </div>
-
-            <!-- Progress Bar -->
-            <div class="glass-card">
-                <div style="text-align: center; margin-bottom: 12px;">
-                    <div style="font-size: 14px; font-weight: 600;">Level Progress</div>
-                    <div style="font-size: 12px; color: var(--text-secondary);">1,550 / 2,500 XP to Level 6</div>
-                </div>
-                <div class="progress-bar">
-                    <div class="progress-fill" style="width: 65%;"></div>
-                </div>
-            </div>
-
-            <!-- Live Players -->
-            <div class="glass-card">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                    <div style="display: flex; align-items: center; gap: 8px;">
-                        <div style="width: 6px; height: 6px; background: var(--success-green); border-radius: 50%;"></div>
-                        <span style="font-size: 14px; font-weight: 600;">LIVE</span>
-                        <span style="background: rgba(16, 185, 129, 0.2); color: var(--success-green); padding: 4px 8px; border-radius: 8px; font-size: 11px;">5 online</span>
+                <!-- Phone Form -->
+                <div id="phoneForm" style="display: none; margin-top: 20px;">
+                    <input type="tel" id="phoneInput" class="form-input" placeholder="+60123456789" required>
+                    <div id="recaptcha-container"></div>
+                    <input type="text" id="otpInput" class="form-input" placeholder="Enter OTP" style="display:none;">
+                    <div style="display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-top: 15px;">
+                        <button class="btn-secondary" onclick="showMainAuth()">Back</button>
+                        <button class="btn-primary" id="phoneSubmitBtn" onclick="signInWithPhone()">Send OTP</button>
                     </div>
                 </div>
-                <div style="display: flex; gap: 12px; overflow-x: auto;" id="livePlayersContainer">
-                    <!-- Live players will be populated here -->
-                </div>
-            </div>
 
-            <!-- Challenges Section -->
-            <div class="glass-card">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px;">
-                    <h3 style="font-size: 18px; font-weight: 600;">🎯 Choose Your Challenge</h3>
-                    <button onclick="refreshChallenges()" style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: var(--text-primary); padding: 8px; border-radius: 8px; cursor: pointer;">✨</button>
+                <!-- User Info (After Login) -->
+                <div id="userInfo" style="display: none;">
+                    <h3 style="color: var(--text-primary); margin-bottom: 15px;">Welcome!</h3>
+                    <p id="userDetails" style="color: var(--text-secondary); margin-bottom: 20px;"></p>
+                    <button class="btn-primary" onclick="signOut()">Sign Out</button>
                 </div>
                 
-                <div id="challengeSelection" class="challenge-grid">
-                    <!-- Challenges will be populated here -->
+                <div style="margin-top: 20px; font-size: 12px; color: var(--text-secondary);">
+                    By continuing, you agree to our Terms & Privacy Policy
                 </div>
-            </div>
-
-            <!-- Action Button -->
-            <div class="glass-card text-center">
-                <div style="margin-bottom: 16px;">
-                    <div style="font-size: 16px; font-weight: 600; margin-bottom: 8px;">Ready to become a champion?</div>
-                    <div style="font-size: 13px; color: var(--text-secondary);">Complete challenges, upload proof, earn titles!</div>
-                </div>
-                <button class="btn btn-primary" onclick="startRandomChallenge()">
-                    🎯 START CHALLENGE
-                </button>
             </div>
         </div>
 
-        <!-- Bottom Navigation -->
-        <div class="bottom-nav">
-            <div class="nav-item active" onclick="switchTab('home')" data-tab="home">
-                <div class="nav-icon">🎯</div>
-                <div class="nav-label">Home</div>
-            </div>
-            <div class="nav-item" onclick="switchTab('challenges')" data-tab="challenges">
-                <div class="nav-icon">🏆</div>
-                <div class="nav-label">Champions</div>
-                <div class="badge">3</div>
-            </div>
-            <div class="nav-item" onclick="switchTab('chat')" data-tab="chat">
-                <div class="nav-icon">💬</div>
-                <div class="nav-label">Chat</div>
-            </div>
-            <div class="nav-item" onclick="switchTab('social')" data-tab="social">
-                <div class="nav-icon">👥</div>
-                <div class="nav-label">Social</div>
-                <div class="badge">5</div>
-            </div>
-            <div class="nav-item" onclick="switchTab('profile')" data-tab="profile">
-                <div class="nav-icon">👤</div>
-                <div class="nav-label">Profile</div>
+        <!-- Main App -->
+        <div id="mainApp" class="phone-container" style="display: none;">
+            <div class="glass-interface">
+                <!-- Header -->
+                <div class="glass-header">
+                    <div class="logo-section">
+                        <div class="logo-text">JomBro</div>
+                        <div class="logo-slogan">Let's Go! Let's Go!</div>
+                        <div class="logo-subtitle" id="userDisplayName">Loading...</div>
+                    </div>
+                    <div class="header-actions">
+                        <div class="header-btn" onclick="signOut()" title="Sign Out">🚪</div>
+                    </div>
+                </div>
+
+                <div class="glass-content">
+                    <!-- User Stats Dashboard -->
+                    <div class="glass-section">
+                        <div class="user-stats">
+                            <div class="stat-card">
+                                <div class="stat-value" id="userLevelDisplay">1</div>
+                                <div class="stat-label">Level</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value" id="userTokensDisplay">0</div>
+                                <div class="stat-label">Tokens</div>
+                            </div>
+                            <div class="stat-card">
+                                <div class="stat-value" id="userChallengesDisplay">0</div>
+                                <div class="stat-label">Completed</div>
+                            </div>
+                        </div>
+                        <div class="progress-bar">
+                            <div class="progress-fill" id="levelProgress" style="width: 0%;"></div>
+                        </div>
+                        <div style="text-align: center; font-size: 12px; color: var(--text-secondary); margin-top: 5px;">
+                            0 / 1,000 XP to Level 2
+                        </div>
+                    </div>
+
+                    <!-- Real Users Section -->
+                    <div class="glass-section">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px;">
+                            <div style="display: flex; align-items: center; gap: 8px;">
+                                <div style="width: 6px; height: 6px; background: #ff4757; border-radius: 50%; animation: pulse 2s infinite;"></div>
+                                <span style="font-size: 13px; font-weight: 600;">LIVE</span>
+                                <span style="background: rgba(0, 255, 150, 0.2); color: var(--success-green); padding: 2px 8px; border-radius: 10px; font-size: 10px;" id="onlineCount">0 online</span>
+                            </div>
+                            <div style="background: rgba(255, 107, 157, 0.1); border: 1px solid rgba(255, 107, 157, 0.3); color: var(--primary-pink); padding: 4px 10px; border-radius: 10px; font-size: 10px; font-weight: 600;">
+                                <span id="userStatus">New User</span>
+                            </div>
+                        </div>
+                        <div style="display: flex; gap: 12px; overflow-x: auto; padding-bottom: 5px;" id="livePlayersContainer">
+                            <div style="text-align: center; color: var(--text-secondary); font-size: 12px; padding: 20px;">
+                                No users online yet. Be the first to join!
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Main Challenge Selection -->
+                    <div style="flex: 1; padding: 20px 25px; min-height: 300px;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px;">
+                            <div style="display: flex; align-items: center; gap: 10px;">
+                                <h3 style="font-size: 18px; font-weight: 600; color: var(--text-primary);">🎯 Choose Your Challenge</h3>
+                                <div style="background: rgba(255, 255, 255, 0.1); color: var(--text-secondary); padding: 4px 8px; border-radius: 8px; font-size: 10px; backdrop-filter: blur(10px);">8 Choices Available</div>
+                            </div>
+                            <div style="display: flex; gap: 8px;">
+                                <button onclick="refreshChallenges()" style="background: rgba(255, 255, 255, 0.1); border: 1px solid rgba(255, 255, 255, 0.2); color: var(--text-primary); padding: 6px 8px; border-radius: 8px; cursor: pointer; font-size: 12px; backdrop-filter: blur(15px);" title="Generate New">✨</button>
+                            </div>
+                        </div>
+                        
+                        <div id="challengeSelection" class="challenge-grid">
+                            <!-- AI Generated challenges appear here -->
+                        </div>
+                    </div>
+
+                    <!-- Action Section -->
+                    <div style="padding: 18px 25px; background: linear-gradient(180deg, transparent 0%, rgba(255, 255, 255, 0.03) 100%); border-top: 1px solid rgba(255, 255, 255, 0.06);">
+                        <div style="text-align: center; margin-bottom: 15px;">
+                            <div style="font-size: 14px; font-weight: 600; margin-bottom: 5px; color: var(--text-primary);">Ready to become a champion?</div>
+                            <div style="font-size: 11px; color: var(--text-secondary);">Complete challenges, upload proof, earn prestigious titles!</div>
+                        </div>
+                        <button class="btn-primary" id="mainActionBtn" onclick="selectChallenge()">
+                            🎯 SELECT CHALLENGE
+                        </button>
+                    </div>
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        // ===== STABLE APPLICATION STATE =====
+        // ===== FIREBASE CONFIGURATION =====
         
-        class StableAppState {
+        // Initialize Firebase (Replace with your config)
+        const firebaseConfig = {
+            apiKey: "your-api-key",
+            authDomain: "your-auth-domain",
+            projectId: "your-project-id",
+            storageBucket: "your-storage-bucket",
+            messagingSenderId: "your-messaging-sender-id",
+            appId: "your-app-id"
+        };
+
+        // Initialize Firebase
+        let app, auth, db;
+        
+        try {
+            app = firebase.initializeApp(firebaseConfig);
+            auth = firebase.auth();
+            db = firebase.firestore();
+            console.log('✅ Firebase initialized successfully');
+        } catch (error) {
+            console.warn('⚠️ Firebase initialization failed:', error);
+            console.log('🔧 Running in demo mode without Firebase');
+        }
+
+        // ===== APPLICATION STATE MANAGEMENT =====
+        
+        class AppState {
             constructor() {
                 this.user = {
-                    name: 'Demo User',
-                    level: 5,
-                    tokens: 2450,
-                    completedChallenges: 12
+                    id: null,
+                    name: 'New User',
+                    email: null,
+                    level: 1,
+                    tokens: 0,
+                    completedChallenges: 0,
+                    xp: 0,
+                    avatar: '🤗',
+                    provider: null,
+                    uid: null
                 };
                 
-                this.currentTab = 'home';
-                this.isInitialized = false;
-                
-                this.init();
+                this.realUsers = new Map(); // Store real connected users
+                this.isOnline = false;
+                this.connectionStatus = 'offline';
             }
-
-            init() {
-                try {
-                    this.initializeData();
-                    this.isInitialized = true;
-                    console.log('✅ App initialized successfully');
-                } catch (error) {
-                    console.error('❌ Initialization failed:', error);
-                    this.showToast('Something went wrong. Please refresh.', 'error');
-                }
-            }
-
-            initializeData() {
+            
+            updateUser(updates) {
+                Object.assign(this.user, updates);
                 this.updateUserDisplay();
-                this.generateChallenges();
-                this.updateLivePlayersDisplay();
+                this.saveToFirestore();
             }
-
+            
             updateUserDisplay() {
+                // Update all user display elements
+                document.getElementById('userDisplayName').textContent = this.user.name;
+                document.getElementById('userLevelDisplay').textContent = this.user.level;
+                document.getElementById('userTokensDisplay').textContent = this.user.tokens.toLocaleString();
+                document.getElementById('userChallengesDisplay').textContent = this.user.completedChallenges;
+                document.getElementById('userStatus').textContent = `Level ${this.user.level}`;
+                
+                // Update level progress
+                const nextLevelXP = this.user.level * 1000;
+                const progress = (this.user.xp / nextLevelXP) * 100;
+                document.getElementById('levelProgress').style.width = `${Math.min(progress, 100)}%`;
+            }
+            
+            async saveToFirestore() {
+                if (!db || !this.user.uid) return;
+                
                 try {
-                    const elements = {
-                        'userDisplayName': this.user.name,
-                        'userLevelDisplay': this.user.level,
-                        'userTokensDisplay': this.user.tokens.toLocaleString(),
-                        'userChallengesDisplay': this.user.completedChallenges,
-                        'userStatus': `Level ${this.user.level}`
-                    };
-
-                    Object.entries(elements).forEach(([id, value]) => {
-                        const element = document.getElementById(id);
-                        if (element) {
-                            element.textContent = value;
-                        }
-                    });
+                    await db.collection('users').doc(this.user.uid).set({
+                        name: this.user.name,
+                        email: this.user.email,
+                        level: this.user.level,
+                        tokens: this.user.tokens,
+                        completedChallenges: this.user.completedChallenges,
+                        xp: this.user.xp,
+                        avatar: this.user.avatar,
+                        provider: this.user.provider,
+                        lastActive: firebase.firestore.FieldValue.serverTimestamp(),
+                        isOnline: true
+                    }, { merge: true });
+                    
+                    console.log('✅ User data saved to Firestore');
                 } catch (error) {
-                    console.error('Display update failed:', error);
+                    console.error('❌ Error saving to Firestore:', error);
                 }
             }
-
-            generateChallenges() {
+            
+            async loadFromFirestore(uid) {
+                if (!db) return;
+                
                 try {
-                    const challenges = [
-                        {
-                            id: 1,
-                            title: 'Coffee Shop Poetry Challenge',
-                            description: 'Visit a local coffee shop and ask them to write a poem on your cup',
-                            difficulty: 'Easy',
-                            tokens: 500,
-                            icon: '☕'
-                        },
-                        {
-                            id: 2,
-                            title: 'Street Art Photography',
-                            description: 'Find and photograph 5 different pieces of street art',
-                            difficulty: 'Medium',
-                            tokens: 650,
-                            icon: '🎨'
-                        },
-                        {
-                            id: 3,
-                            title: 'Random Acts of Kindness',
-                            description: 'Perform 3 random acts of kindness for strangers',
-                            difficulty: 'Easy',
-                            tokens: 750,
-                            icon: '💝'
-                        },
-                        {
-                            id: 4,
-                            title: 'Morning Workout',
-                            description: 'Complete a 30-minute workout before 9 AM',
-                            difficulty: 'Medium',
-                            tokens: 600,
-                            icon: '💪'
-                        }
-                    ];
-                    
-                    const container = document.getElementById('challengeSelection');
-                    if (!container) return;
-                    
-                    container.innerHTML = challenges.map(challenge => `
-                        <div class="challenge-card" onclick="selectChallenge(${challenge.id})">
-                            <div class="challenge-icon">${challenge.icon}</div>
-                            <div class="challenge-title">${challenge.title}</div>
-                            <div class="challenge-description">${challenge.description}</div>
-                            <div class="challenge-meta">
-                                <div class="challenge-difficulty">${challenge.difficulty}</div>
-                                <div class="challenge-tokens">${challenge.tokens} tokens</div>
-                            </div>
-                        </div>
-                    `).join('');
-                } catch (error) {
-                    console.error('Challenge generation failed:', error);
-                }
-            }
-
-            updateLivePlayersDisplay() {
-                try {
-                    const players = [
-                        { name: 'Alex', avatar: '😎', level: 5 },
-                        { name: 'Maya', avatar: '🌟', level: 3 },
-                        { name: 'Jordan', avatar: '🚀', level: 7 },
-                        { name: 'Sam', avatar: '🎨', level: 4 }
-                    ];
-                    
-                    const container = document.getElementById('livePlayersContainer');
-                    if (!container) return;
-                    
-                    container.innerHTML = players.map(player => `
-                        <div style="position: relative; flex-shrink: 0; cursor: pointer;" onclick="showToast('${player.name} - Level ${player.level}', 'info')">
-                            <div style="width: 44px; height: 44px; border-radius: 22px; background: linear-gradient(45deg, var(--primary-color), var(--secondary-color)); display: flex; align-items: center; justify-content: center; font-size: 18px;">
-                                ${player.avatar}
-                            </div>
-                            <div style="position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); background: var(--secondary-color); color: white; font-size: 9px; padding: 2px 6px; border-radius: 6px;">L${player.level}</div>
-                        </div>
-                    `).join('');
-                } catch (error) {
-                    console.error('Live players update failed:', error);
-                }
-            }
-
-            switchTab(tabName) {
-                try {
-                    this.currentTab = tabName;
-                    
-                    // Update nav active state
-                    document.querySelectorAll('.nav-item').forEach(item => {
-                        item.classList.remove('active');
-                    });
-                    
-                    const activeTab = document.querySelector(`[data-tab="${tabName}"]`);
-                    if (activeTab) {
-                        activeTab.classList.add('active');
+                    const doc = await db.collection('users').doc(uid).get();
+                    if (doc.exists) {
+                        const userData = doc.data();
+                        this.updateUser({
+                            ...userData,
+                            uid: uid
+                        });
+                        console.log('✅ User data loaded from Firestore');
                     }
-                    
-                    this.showToast(`Switched to ${tabName}`, 'info');
                 } catch (error) {
-                    console.error('Tab switching failed:', error);
+                    console.error('❌ Error loading from Firestore:', error);
                 }
             }
-
-            showToast(message, type = 'info', duration = 3000) {
-                try {
-                    // Remove existing toasts
-                    const existingToasts = document.querySelectorAll('.toast');
-                    existingToasts.forEach(toast => {
-                        if (toast.parentNode) {
-                            toast.parentNode.removeChild(toast);
-                        }
-                    });
-                    
-                    const toast = document.createElement('div');
-                    toast.className = `toast ${type}`;
-                    toast.textContent = message;
-                    
-                    document.body.appendChild(toast);
-                    
-                    requestAnimationFrame(() => {
-                        toast.classList.add('show');
-                    });
-                    
-                    setTimeout(() => {
-                        toast.classList.remove('show');
-                        setTimeout(() => {
-                            if (toast.parentNode) {
-                                toast.parentNode.removeChild(toast);
-                            }
-                        }, 300);
-                    }, duration);
-                } catch (error) {
-                    console.error('Toast creation failed:', error);
+            
+            setOnlineStatus(isOnline) {
+                this.isOnline = isOnline;
+                this.connectionStatus = isOnline ? 'online' : 'offline';
+                
+                if (db && this.user.uid) {
+                    db.collection('users').doc(this.user.uid).update({
+                        isOnline: isOnline,
+                        lastActive: firebase.firestore.FieldValue.serverTimestamp()
+                    }).catch(console.error);
+                }
+                
+                this.updateOnlineUsersDisplay();
+            }
+            
+            updateOnlineUsersDisplay() {
+                const count = this.realUsers.size + (this.isOnline ? 1 : 0);
+                document.getElementById('onlineCount').textContent = `${count} online`;
+                
+                const container = document.getElementById('livePlayersContainer');
+                if (this.realUsers.size === 0 && !this.isOnline) {
+                    container.innerHTML = `
+                        <div style="text-align: center; color: var(--text-secondary); font-size: 12px; padding: 20px; width: 100%;">
+                            No users online yet. Be the first to join!
+                        </div>
+                    `;
+                } else {
+                    container.innerHTML = Array.from(this.realUsers.values()).map(user => `
+                        <div style="position: relative; flex-shrink: 0;">
+                            <div style="width: 44px; height: 44px; border-radius: 22px; background: linear-gradient(45deg, var(--primary-pink), var(--primary-purple)); padding: 2px; cursor: pointer; transition: all 0.3s ease; box-shadow: 0 0 20px rgba(255, 107, 157, 0.3);" title="${user.name} - Level ${user.level}">
+                                <div style="width: 100%; height: 100%; border-radius: 50%; background: rgba(10, 10, 10, 0.8); backdrop-filter: blur(10px); display: flex; align-items: center; justify-content: center; font-size: 16px; overflow: hidden;">
+                                    <span style="font-size: 18px;">${user.avatar}</span>
+                                </div>
+                            </div>
+                            <div style="position: absolute; bottom: 0; right: 0; width: 10px; height: 10px; background: var(--success-green); border: 2px solid rgba(10, 10, 10, 0.8); border-radius: 50%; animation: pulse 2s infinite; box-shadow: 0 0 8px var(--success-green);"></div>
+                            <div style="position: absolute; bottom: -8px; left: 50%; transform: translateX(-50%); background: var(--primary-purple); color: white; font-size: 8px; font-weight: 700; padding: 2px 6px; border-radius: 8px; border: 1px solid rgba(0, 0, 0, 0.3); box-shadow: 0 2px 8px rgba(139, 92, 246, 0.4); min-width: 20px; text-align: center;">L${user.level}</div>
+                        </div>
+                    `).join('');
                 }
             }
         }
 
-        // Global app state
-        let appState;
+        // Initialize global app state
+        let appState = new AppState();
 
-        // ===== AUTHENTICATION FUNCTIONS =====
+        // ===== REAL AUTHENTICATION SYSTEM =====
+        
+        // Phone verification
+        let phoneVerificationInProgress = false;
+        let confirmationResult = null;
 
-        function signInWithGoogle() {
-            setLoadingState(true);
-            showToast('🔍 Connecting to Google...', 'info');
+        window.signInWithGoogle = async function() {
+            const btn = document.getElementById('googleSignInBtn');
+            btn.disabled = true;
+            btn.innerHTML = '🔍 Connecting...<div class="loading-spinner"></div>';
             
-            setTimeout(() => {
-                completeAuthentication({ name: 'Google User', avatar: '🔍' });
-                setLoadingState(false);
-            }, 1500);
-        }
+            try {
+                const provider = new firebase.auth.GoogleAuthProvider();
+                provider.addScope('email');
+                provider.addScope('profile');
+                
+                const result = await auth.signInWithPopup(provider);
+                const user = result.user;
+                
+                showMessage('✅ Google sign-in successful!', 'success');
+                await handleSuccessfulLogin(user, 'google');
+                
+            } catch (error) {
+                console.error('Google sign-in error:', error);
+                handleAuthError(error);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '🔍 Continue with Google';
+            }
+        };
 
-        function signInWithFacebook() {
-            setLoadingState(true);
-            showToast('📘 Connecting to Facebook...', 'info');
+        window.signInWithFacebook = async function() {
+            const btn = document.getElementById('facebookSignInBtn');
+            btn.disabled = true;
+            btn.innerHTML = '📘 Connecting...<div class="loading-spinner"></div>';
             
-            setTimeout(() => {
-                completeAuthentication({ name: 'Facebook User', avatar: '📘' });
-                setLoadingState(false);
-            }, 1500);
-        }
+            try {
+                const provider = new firebase.auth.FacebookAuthProvider();
+                provider.addScope('email');
+                provider.addScope('public_profile');
+                
+                const result = await auth.signInWithPopup(provider);
+                const user = result.user;
+                
+                showMessage('✅ Facebook sign-in successful!', 'success');
+                await handleSuccessfulLogin(user, 'facebook');
+                
+            } catch (error) {
+                console.error('Facebook sign-in error:', error);
+                handleAuthError(error);
+            } finally {
+                btn.disabled = false;
+                btn.innerHTML = '📘 Continue with Facebook';
+            }
+        };
 
-        function showPhoneForm() {
-            document.getElementById('mainAuth').classList.add('hidden');
-            document.getElementById('phoneForm').classList.remove('hidden');
-        }
+        window.showPhoneForm = function() {
+            document.getElementById('mainAuth').style.display = 'none';
+            document.getElementById('phoneForm').style.display = 'block';
+            
+            // Initialize reCAPTCHA
+            if (!window.recaptchaVerifier) {
+                window.recaptchaVerifier = new firebase.auth.RecaptchaVerifier('recaptcha-container', {
+                    'size': 'normal',
+                    'callback': function(response) {
+                        console.log('reCAPTCHA solved');
+                    },
+                    'expired-callback': function() {
+                        console.log('reCAPTCHA expired');
+                    }
+                });
+            }
+        };
 
-        function showMainAuth() {
-            document.getElementById('phoneForm').classList.add('hidden');
-            document.getElementById('mainAuth').classList.remove('hidden');
-        }
+        window.showMainAuth = function() {
+            document.getElementById('phoneForm').style.display = 'none';
+            document.getElementById('mainAuth').style.display = 'block';
+        };
 
-        function signInWithPhone() {
+        window.signInWithPhone = async function() {
+            if (phoneVerificationInProgress) return;
+            
             const phoneInput = document.getElementById('phoneInput');
+            const otpInput = document.getElementById('otpInput');
+            const submitBtn = document.getElementById('phoneSubmitBtn');
             const phone = phoneInput.value.trim();
             
-            if (!phone || phone.length < 10) {
-                showError('Please enter a valid phone number');
-                return;
-            }
-            
-            setLoadingState(true);
-            showToast('📱 Sending verification code...', 'info');
-            
-            setTimeout(() => {
-                document.getElementById('otpInput').classList.remove('hidden');
-                document.getElementById('phoneSubmitBtn').textContent = 'Verify Code';
-                document.getElementById('phoneSubmitBtn').onclick = verifyOTP;
-                showToast('📨 Code sent!', 'success');
-                setLoadingState(false);
-            }, 1500);
-        }
-
-        function verifyOTP() {
-            const otpInput = document.getElementById('otpInput');
-            const otp = otpInput.value.trim();
-            
-            if (!otp || otp.length < 4) {
-                showError('Please enter the verification code');
-                return;
-            }
-            
-            setLoadingState(true);
-            showToast('✅ Verifying...', 'info');
-            
-            setTimeout(() => {
-                completeAuthentication({ name: 'Phone User', avatar: '📱' });
-                setLoadingState(false);
-            }, 1000);
-        }
-
-        function signInAnonymously() {
-            setLoadingState(true);
-            showToast('🧪 Entering test mode...', 'info');
-            
-            setTimeout(() => {
-                completeAuthentication({ name: 'Demo Challenger', avatar: '🧪' });
-                setLoadingState(false);
-            }, 1000);
-        }
-
-        function completeAuthentication(user) {
-            try {
-                appState.user.name = user.name;
-                appState.user.avatar = user.avatar;
-                
-                showToast(`🎉 Welcome ${user.name}!`, 'success');
-                
-                setTimeout(() => {
-                    document.getElementById('authScreen').classList.add('hidden');
-                    document.getElementById('mainApp').classList.remove('hidden');
-                    
-                    appState.updateUserDisplay();
-                }, 1000);
-            } catch (error) {
-                console.error('Authentication failed:', error);
-                showToast('Authentication failed. Please try again.', 'error');
-            }
-        }
-
-        function setLoadingState(loading) {
-            const buttons = document.querySelectorAll('.auth-btn, .btn');
-            buttons.forEach(button => {
-                if (loading) {
-                    button.classList.add('loading');
-                    button.disabled = true;
-                } else {
-                    button.classList.remove('loading');
-                    button.disabled = false;
+            if (!confirmationResult) {
+                // Step 1: Send OTP
+                if (!phone) {
+                    showMessage('❌ Please enter your phone number!', 'error');
+                    return;
                 }
+                
+                if (!phone.startsWith('+')) {
+                    showMessage('❌ Please include country code (e.g., +60)', 'error');
+                    return;
+                }
+                
+                phoneVerificationInProgress = true;
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = 'Sending OTP...<div class="loading-spinner"></div>';
+                
+                try {
+                    confirmationResult = await auth.signInWithPhoneNumber(phone, window.recaptchaVerifier);
+                    
+                    phoneInput.style.display = 'none';
+                    otpInput.style.display = 'block';
+                    submitBtn.innerHTML = 'Verify OTP';
+                    submitBtn.disabled = false;
+                    
+                    showMessage('📱 OTP sent! Please check your phone.', 'success');
+                    
+                } catch (error) {
+                    console.error('Phone auth error:', error);
+                    handleAuthError(error);
+                    phoneVerificationInProgress = false;
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = 'Send OTP';
+                }
+            } else {
+                // Step 2: Verify OTP
+                const otp = otpInput.value.trim();
+                
+                if (!otp || otp.length !== 6) {
+                    showMessage('❌ Please enter the 6-digit OTP!', 'error');
+                    return;
+                }
+                
+                submitBtn.disabled = true;
+                submitBtn.innerHTML = 'Verifying...<div class="loading-spinner"></div>';
+                
+                try {
+                    const result = await confirmationResult.confirm(otp);
+                    const user = result.user;
+                    
+                    showMessage('✅ Phone verification successful!', 'success');
+                    await handleSuccessfulLogin(user, 'phone');
+                    
+                } catch (error) {
+                    console.error('OTP verification error:', error);
+                    handleAuthError(error);
+                    submitBtn.disabled = false;
+                    submitBtn.innerHTML = 'Verify OTP';
+                }
+            }
+        };
+
+        async function handleSuccessfulLogin(user, provider) {
+            try {
+                appState.updateUser({
+                    uid: user.uid,
+                    name: user.displayName || user.phoneNumber || 'User',
+                    email: user.email || user.phoneNumber,
+                    provider: provider
+                });
+                
+                // Load existing user data from Firestore
+                await appState.loadFromFirestore(user.uid);
+                
+                // Mark user as online
+                appState.setOnlineStatus(true);
+                
+                // Set up real-time listeners
+                setupRealtimeListeners();
+                
+                // Complete authentication
+                completeAuthentication();
+                
+            } catch (error) {
+                console.error('Error handling successful login:', error);
+                showMessage('⚠️ Login successful but setup failed. Please try again.', 'error');
+            }
+        }
+
+        function handleAuthError(error) {
+            let message = '❌ Authentication failed. Please try again.';
+            
+            switch (error.code) {
+                case 'auth/invalid-phone-number':
+                    message = '❌ Invalid phone number format.';
+                    break;
+                case 'auth/too-many-requests':
+                    message = '❌ Too many attempts. Please wait before trying again.';
+                    break;
+                case 'auth/invalid-verification-code':
+                    message = '❌ Invalid verification code. Please try again.';
+                    break;
+                case 'auth/popup-closed-by-user':
+                    message = '❌ Sign-in cancelled. Please try again.';
+                    break;
+                case 'auth/network-request-failed':
+                    message = '❌ Network error. Please check your connection.';
+                    break;
+                case 'auth/user-disabled':
+                    message = '❌ This account has been disabled.';
+                    break;
+                default:
+                    console.error('Auth error details:', error);
+            }
+            
+            showMessage(message, 'error');
+        }
+
+        function completeAuthentication() {
+            document.getElementById('authScreen').style.display = 'none';
+            document.getElementById('mainApp').style.display = 'block';
+            
+            showToast('✅ Welcome to JomBro!', 'success');
+            initializeApp();
+        }
+
+        window.signOut = async function() {
+            if (confirm('Are you sure you want to sign out?')) {
+                try {
+                    // Mark user as offline
+                    appState.setOnlineStatus(false);
+                    
+                    // Sign out from Firebase
+                    await auth.signOut();
+                    
+                    // Reset app state
+                    appState = new AppState();
+                    
+                    // Reset UI
+                    document.getElementById('authScreen').style.display = 'flex';
+                    document.getElementById('mainApp').style.display = 'none';
+                    
+                    // Reset phone form
+                    phoneVerificationInProgress = false;
+                    confirmationResult = null;
+                    document.getElementById('phoneForm').style.display = 'none';
+                    document.getElementById('mainAuth').style.display = 'block';
+                    document.getElementById('phoneInput').style.display = 'block';
+                    document.getElementById('otpInput').style.display = 'none';
+                    document.getElementById('phoneInput').value = '';
+                    document.getElementById('otpInput').value = '';
+                    document.getElementById('phoneSubmitBtn').innerHTML = 'Send OTP';
+                    
+                    showToast('👋 Signed out successfully!', 'success');
+                    
+                } catch (error) {
+                    console.error('Sign out error:', error);
+                    showToast('⚠️ Error signing out', 'error');
+                }
+            }
+        };
+
+        // ===== REAL-TIME USER MANAGEMENT =====
+        
+        function setupRealtimeListeners() {
+            if (!db) return;
+            
+            // Listen for online users
+            db.collection('users')
+                .where('isOnline', '==', true)
+                .onSnapshot((snapshot) => {
+                    appState.realUsers.clear();
+                    
+                    snapshot.forEach((doc) => {
+                        const userData = doc.data();
+                        if (doc.id !== appState.user.uid) { // Don't include current user
+                            appState.realUsers.set(doc.id, {
+                                id: doc.id,
+                                name: userData.name,
+                                avatar: userData.avatar,
+                                level: userData.level,
+                                activity: userData.activity || 'Online'
+                            });
+                        }
+                    });
+                    
+                    appState.updateOnlineUsersDisplay();
+                }, (error) => {
+                    console.error('Error listening to online users:', error);
+                });
+        }
+
+        // Handle connection state
+        auth.onAuthStateChanged((user) => {
+            if (user) {
+                // User is signed in
+                console.log('User is signed in:', user.uid);
+                
+                if (!appState.user.uid) {
+                    // First time login or page refresh
+                    handleSuccessfulLogin(user, user.providerData[0]?.providerId || 'unknown');
+                }
+            } else {
+                // User is signed out
+                console.log('User is signed out');
+                appState.setOnlineStatus(false);
+            }
+        });
+
+        // Handle page visibility for online status
+        document.addEventListener('visibilitychange', () => {
+            if (appState.user.uid) {
+                appState.setOnlineStatus(!document.hidden);
+            }
+        });
+
+        // Handle page unload
+        window.addEventListener('beforeunload', () => {
+            if (appState.user.uid) {
+                appState.setOnlineStatus(false);
+            }
+        });
+
+        // ===== CHALLENGE SYSTEM =====
+        
+        const MASTER_CHALLENGE_DATABASE = {
+            SOCIAL: {
+                name: 'Social Connection',
+                icon: '👥',
+                color: '#ff6b9d',
+                challenges: [
+                    {
+                        id: 'social_001',
+                        title: 'Coffee Shop Poetry Challenge',
+                        description: 'Visit any coffee shop and ask the barista to write a short poem on your cup or napkin! Share your experience with friends and see who gets the most creative poem!',
+                        difficulty: 'Easy',
+                        duration: '30m',
+                        tokens: 500,
+                        hashtags: ['#CoffeePoetry', '#Connection', '#JomBro']
+                    },
+                    {
+                        id: 'social_002',
+                        title: 'Random Compliment Challenge',
+                        description: 'Give genuine compliments to 5 strangers today. Watch how their faces light up and document the positive reactions!',
+                        difficulty: 'Easy',
+                        duration: '1h',
+                        tokens: 400,
+                        hashtags: ['#Kindness', '#Social', '#GoodVibes']
+                    },
+                    {
+                        id: 'social_003',
+                        title: 'Language Exchange Adventure',
+                        description: 'Find someone who speaks a different language and teach each other 10 words. Record a video of your mini language lesson!',
+                        difficulty: 'Medium',
+                        duration: '45m',
+                        tokens: 650,
+                        hashtags: ['#Language', '#Cultural', '#Learning']
+                    }
+                ]
+            },
+            FITNESS: {
+                name: 'Fitness & Health',
+                icon: '💪',
+                color: '#10b981',
+                challenges: [
+                    {
+                        id: 'fitness_001',
+                        title: 'Sunrise Workout Challenge',
+                        description: 'Wake up early and do a 20-minute workout outside during sunrise. Capture the golden hour and inspire others with your dedication!',
+                        difficulty: 'Medium',
+                        duration: '45m',
+                        tokens: 600,
+                        hashtags: ['#SunriseWorkout', '#Fitness', '#EarlyBird']
+                    },
+                    {
+                        id: 'fitness_002',
+                        title: 'Stair Climbing Marathon',
+                        description: 'For one full day, take stairs instead of elevators/escalators. Count total floors climbed and celebrate your achievement!',
+                        difficulty: 'Easy',
+                        duration: '1 day',
+                        tokens: 400,
+                        hashtags: ['#Stairs', '#Fitness', '#HealthyChoices']
+                    }
+                ]
+            },
+            CREATIVE: {
+                name: 'Creative Expression',
+                icon: '🎨',
+                color: '#8b5cf6',
+                challenges: [
+                    {
+                        id: 'creative_001',
+                        title: 'One-Minute Story Challenge',
+                        description: 'Record yourself telling a complete story in exactly 60 seconds. It can be real or fictional - just make it engaging and memorable!',
+                        difficulty: 'Medium',
+                        duration: '30m',
+                        tokens: 550,
+                        hashtags: ['#Storytelling', '#Creative', '#VideoChallenge']
+                    },
+                    {
+                        id: 'creative_002',
+                        title: 'Food Art Masterpiece',
+                        description: 'Create art using only food items. Make a face with your breakfast, build a landscape with vegetables, or design edible sculptures!',
+                        difficulty: 'Easy',
+                        duration: '20m',
+                        tokens: 350,
+                        hashtags: ['#FoodArt', '#Creative', '#Breakfast']
+                    }
+                ]
+            },
+            ADVENTURE: {
+                name: 'Adventure & Exploration',
+                icon: '🗺️',
+                color: '#f59e0b',
+                challenges: [
+                    {
+                        id: 'adventure_001',
+                        title: 'Mystery Location Challenge',
+                        description: 'Close your eyes, point to a spot on a map within 10km, and visit that exact location. Discover something new about your area!',
+                        difficulty: 'Hard',
+                        duration: '3h',
+                        tokens: 900,
+                        hashtags: ['#Adventure', '#Exploration', '#Mystery']
+                    }
+                ]
+            },
+            MINDFULNESS: {
+                name: 'Mindfulness & Growth',
+                icon: '🧠',
+                color: '#06b6d4',
+                challenges: [
+                    {
+                        id: 'mindful_001',
+                        title: 'Digital Detox Hour',
+                        description: 'Spend 1 hour completely disconnected from all digital devices. Document what you discovered about yourself during this time!',
+                        difficulty: 'Hard',
+                        duration: '1h',
+                        tokens: 600,
+                        hashtags: ['#DigitalDetox', '#Mindfulness', '#SelfCare']
+                    }
+                ]
+            }
+        };
+
+        let currentChallengeSet = [];
+
+        function getAllChallenges() {
+            const allChallenges = [];
+            Object.keys(MASTER_CHALLENGE_DATABASE).forEach(categoryKey => {
+                const category = MASTER_CHALLENGE_DATABASE[categoryKey];
+                category.challenges.forEach(challenge => {
+                    allChallenges.push({
+                        ...challenge,
+                        category: categoryKey,
+                        categoryInfo: category
+                    });
+                });
+            });
+            return allChallenges;
+        }
+
+        async function generateSmartChallengeSet(count = 8) {
+            const allChallenges = getAllChallenges();
+            const shuffled = allChallenges.sort(() => 0.5 - Math.random());
+            return shuffled.slice(0, count);
+        }
+
+        function initializeChallenges() {
+            generateAndDisplayChallenges();
+        }
+
+        async function generateAndDisplayChallenges() {
+            currentChallengeSet = await generateSmartChallengeSet(8);
+            displayChallengeSelection();
+        }
+
+        function displayChallengeSelection() {
+            const container = document.getElementById('challengeSelection');
+            container.innerHTML = '';
+
+            currentChallengeSet.forEach((challenge, index) => {
+                const challengeCard = document.createElement('div');
+                challengeCard.className = 'challenge-card';
+                
+                challengeCard.innerHTML = `
+                    <div class="challenge-category-badge" style="background: ${challenge.categoryInfo.color}">
+                        ${challenge.categoryInfo.icon} ${challenge.categoryInfo.name}
+                    </div>
+                    <div style="margin-top: 30px;">
+                        <div style="font-size: 18px; font-weight: 600; margin-bottom: 10px; color: var(--primary-pink);">
+                            ${challenge.title}
+                        </div>
+                        <div style="font-size: 13px; line-height: 1.4; margin-bottom: 15px; opacity: 0.9; color: var(--text-secondary);">
+                            ${challenge.description}
+                        </div>
+                        <div style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; margin-bottom: 15px;">
+                            <div style="text-align: center; background: rgba(255, 255, 255, 0.1); padding: 8px; border-radius: 8px; backdrop-filter: blur(15px);">
+                                <div style="font-size: 14px; font-weight: 700; color: var(--primary-pink);">${challenge.tokens}</div>
+                                <div style="font-size: 9px; color: var(--text-secondary);">TOKENS</div>
+                            </div>
+                            <div style="text-align: center; background: rgba(255, 255, 255, 0.1); padding: 8px; border-radius: 8px; backdrop-filter: blur(15px);">
+                                <div style="font-size: 14px; font-weight: 700; color: var(--primary-pink);">${challenge.difficulty}</div>
+                                <div style="font-size: 9px; color: var(--text-secondary);">LEVEL</div>
+                            </div>
+                            <div style="text-align: center; background: rgba(255, 255, 255, 0.1); padding: 8px; border-radius: 8px; backdrop-filter: blur(15px);">
+                                <div style="font-size: 14px; font-weight: 700; color: var(--primary-pink);">${challenge.duration}</div>
+                                <div style="font-size: 9px; color: var(--text-secondary);">TIME</div>
+                            </div>
+                        </div>
+                        <div style="display: flex; flex-wrap: wrap; gap: 4px; margin-bottom: 15px;">
+                            ${challenge.hashtags.map(tag => `<span style="font-size: 9px; padding: 2px 6px; background: rgba(255, 107, 157, 0.1); color: var(--primary-pink); border-radius: 6px;">${tag}</span>`).join('')}
+                        </div>
+                        <button class="btn-primary" onclick="takeChallenge(${index})" style="width: 100%; padding: 12px; font-size: 13px;">
+                            🚀 TAKE CHALLENGE
+                        </button>
+                    </div>
+                `;
+
+                container.appendChild(challengeCard);
             });
         }
 
-        function showError(message) {
-            const errorElement = document.getElementById('errorMessage');
-            if (errorElement) {
-                errorElement.textContent = message;
-                errorElement.classList.remove('hidden');
-                setTimeout(() => {
-                    errorElement.classList.add('hidden');
-                }, 5000);
+        window.takeChallenge = function(index) {
+            const challenge = currentChallengeSet[index];
+            if (!challenge) {
+                showToast('⚠️ Challenge not found!', 'error');
+                return;
             }
-            showToast(message, 'error');
+
+            if (confirm(`🎯 Ready to take on "${challenge.title}"?\n\nThis challenge will reward you with ${challenge.tokens} tokens!\n\nClick OK to accept!`)) {
+                // Update user tokens and stats
+                appState.updateUser({
+                    tokens: appState.user.tokens + challenge.tokens,
+                    completedChallenges: appState.user.completedChallenges + 1,
+                    xp: appState.user.xp + Math.floor(challenge.tokens / 10)
+                });
+                
+                // Check for level up
+                const newLevel = Math.floor(appState.user.xp / 1000) + 1;
+                if (newLevel > appState.user.level) {
+                    appState.updateUser({ level: newLevel });
+                    showToast(`🎉 LEVEL UP! You're now level ${newLevel}!`, 'success');
+                }
+                
+                showToast(`🏆 Challenge "${challenge.title}" completed! +${challenge.tokens} tokens!`, 'success');
+                
+                // Create celebration effect
+                createCelebrationEffect();
+                
+                // Refresh challenges
+                setTimeout(() => {
+                    generateAndDisplayChallenges();
+                }, 2000);
+            }
+        };
+
+        window.refreshChallenges = async function() {
+            const refreshBtn = document.querySelector('[onclick="refreshChallenges()"]');
+            refreshBtn.style.opacity = '0.5';
+            refreshBtn.style.pointerEvents = 'none';
+            
+            try {
+                await generateAndDisplayChallenges();
+                showToast('✨ New challenges generated!', 'success');
+            } catch (error) {
+                showToast('⚠️ Challenge refresh failed', 'error');
+            } finally {
+                refreshBtn.style.opacity = '1';
+                refreshBtn.style.pointerEvents = 'auto';
+            }
+        };
+
+        window.selectChallenge = function() {
+            showToast('🎯 Choose any challenge above to get started!', 'success');
+        };
+
+        function createCelebrationEffect() {
+            // Create floating emojis
+            const emojis = ['🎉', '🏆', '⭐', '🎊', '🔥', '💫'];
+            
+            for (let i = 0; i < 10; i++) {
+                setTimeout(() => {
+                    const emoji = document.createElement('div');
+                    emoji.textContent = emojis[Math.floor(Math.random() * emojis.length)];
+                    emoji.style.cssText = `
+                        position: fixed;
+                        font-size: 24px;
+                        left: ${Math.random() * window.innerWidth}px;
+                        top: ${window.innerHeight}px;
+                        pointer-events: none;
+                        z-index: 9999;
+                        animation: float-up 3s ease-out forwards;
+                    `;
+                    
+                    document.body.appendChild(emoji);
+                    
+                    setTimeout(() => {
+                        if (emoji.parentNode) {
+                            emoji.parentNode.removeChild(emoji);
+                        }
+                    }, 3000);
+                }, i * 200);
+            }
         }
 
-        // ===== MAIN APP FUNCTIONS =====
-
-        function selectChallenge(challengeId) {
-            showToast(`🎯 Challenge ${challengeId} selected!`, 'success');
+        // ===== UTILITY FUNCTIONS =====
+        
+        function showMessage(message, type = 'info') {
+            const errorEl = document.getElementById('errorMessage');
+            const successEl = document.getElementById('successMessage');
+            
+            // Hide both first
+            errorEl.style.display = 'none';
+            successEl.style.display = 'none';
+            
+            if (type === 'error') {
+                errorEl.textContent = message;
+                errorEl.style.display = 'block';
+            } else if (type === 'success') {
+                successEl.textContent = message;
+                successEl.style.display = 'block';
+            }
+            
+            // Auto-hide after 5 seconds
+            setTimeout(() => {
+                errorEl.style.display = 'none';
+                successEl.style.display = 'none';
+            }, 5000);
         }
-
-        function startRandomChallenge() {
-            const randomId = Math.floor(Math.random() * 4) + 1;
-            selectChallenge(randomId);
-        }
-
-        function refreshChallenges() {
-            showToast('✨ Generating new challenges...', 'info');
+        
+        function showToast(message, type = 'info') {
+            const toast = document.createElement('div');
+            toast.textContent = message;
+            
+            Object.assign(toast.style, {
+                position: 'fixed',
+                top: '20px',
+                left: '50%',
+                transform: 'translateX(-50%)',
+                background: type === 'success' ? 'var(--success-green)' : 
+                           type === 'error' ? 'var(--error-red)' : 'var(--primary-pink)',
+                color: 'white',
+                padding: '12px 20px',
+                borderRadius: '10px',
+                zIndex: '4000',
+                fontSize: '14px',
+                fontWeight: '600',
+                opacity: '0',
+                transition: 'all 0.3s ease',
+                maxWidth: '90%',
+                textAlign: 'center',
+                backdropFilter: 'blur(20px)',
+                border: '1px solid rgba(255, 255, 255, 0.1)',
+                boxShadow: '0 8px 32px rgba(0, 0, 0, 0.3)'
+            });
+            
+            document.body.appendChild(toast);
             
             setTimeout(() => {
-                if (appState) {
-                    appState.generateChallenges();
-                }
-                showToast('🎯 New challenges available!', 'success');
-            }, 1000);
+                toast.style.opacity = '1';
+                toast.style.transform = 'translateX(-50%) translateY(10px)';
+            }, 100);
+            
+            setTimeout(() => {
+                toast.style.opacity = '0';
+                setTimeout(() => {
+                    if (toast.parentNode) {
+                        toast.parentNode.removeChild(toast);
+                    }
+                }, 300);
+            }, 3000);
         }
 
-        function switchTab(tabName) {
-            if (appState) {
-                appState.switchTab(tabName);
-            }
-        }
-
-        function showToast(message, type = 'info', duration = 3000) {
-            if (appState) {
-                appState.showToast(message, type, duration);
-            } else {
-                console.log(`Toast: ${message}`);
-            }
-        }
-
-        // ===== INITIALIZATION =====
-
-        document.addEventListener('DOMContentLoaded', function() {
-            try {
-                console.log('🚀 JomBro Stable Platform Loading...');
-                
-                // Initialize app state
-                appState = new StableAppState();
-                
-                // Start with auth screen
-                document.getElementById('authScreen').classList.remove('hidden');
-                document.getElementById('mainApp').classList.add('hidden');
-                
-                console.log('✅ JomBro Platform Ready!');
-                
-            } catch (error) {
-                console.error('❌ Platform initialization failed:', error);
-                
-                // Fallback
-                document.body.innerHTML = `
-                    <div style="display: flex; align-items: center; justify-content: center; height: 100vh; background: #0a0a0a; color: white; text-align: center; padding: 20px; font-family: -apple-system, BlinkMacSystemFont, sans-serif;">
-                        <div>
-                            <div style="font-size: 48px; margin-bottom: 20px;">🚨</div>
-                            <div style="font-size: 20px; font-weight: 600; margin-bottom: 10px;">Something went wrong</div>
-                            <div style="font-size: 14px; color: #999; margin-bottom: 20px;">Please refresh to try again</div>
-                            <button onclick="location.reload()" style="background: #ff6b9d; color: white; border: none; padding: 12px 24px; border-radius: 8px; font-size: 16px; cursor: pointer;">🔄 Refresh</button>
-                        </div>
-                    </div>
-                `;
-            }
-        });
-
-        // Simple error handling
-        window.addEventListener('error', function(event) {
-            console.error('Global error:', event.error);
-            if (appState) {
-                appState.showToast('Something went wrong', 'error');
-            }
-        });
-
-        // Clean up on page unload
-        window.addEventListener('beforeunload', function() {
-            console.log('👋 App closing...');
-        });
+        // ===== APP INITIALIZATION =====
         
+        function initializeApp() {
+            initializeChallenges();
+            appState.updateUserDisplay();
+            
+            console.log('🚀 JomBro Real Authentication Platform Loaded!');
+            console.log('✅ Real user authentication system activated');
+            console.log('🔥 Firebase integration enabled');
+            console.log('👥 Real-time user tracking active');
+            console.log('💾 Firestore data persistence enabled');
+            console.log('📱 Phone, Google, Facebook authentication ready');
+            console.log('🌐 Online status tracking functional');
+            console.log('🎯 Challenge system with real user progress');
+        }
+
+        // Add CSS for floating animation
+        const style = document.createElement('style');
+        style.textContent = `
+            @keyframes float-up {
+                0% {
+                    transform: translateY(0) rotate(0deg);
+                    opacity: 1;
+                }
+                100% {
+                    transform: translateY(-${window.innerHeight}px) rotate(360deg);
+                    opacity: 0;
+                }
+            }
+        `;
+        document.head.appendChild(style);
+
+        // ===== EVENT LISTENERS =====
+        
+        document.addEventListener('DOMContentLoaded', function() {
+            console.log('🚀 JomBro Real Authentication Platform Initializing...');
+            console.log('✅ All fake users removed');
+            console.log('🔥 Real authentication systems activated');
+            console.log('🌌 Enhanced cosmic night sky background active');
+            console.log('💎 Floating glass interface ready');
+        });
+
     </script>
 </body>
 </html>
