@@ -2,11 +2,18 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <meta name="theme-color" content="#7c3aed">
-    <title>LUNA Analytics Dashboard - Enterprise Monitoring</title>
+    <meta name="description" content="LUNA - Personal AI Voice Assistant">
+    <title>LUNA - AI Voice Assistant</title>
+    
+    <!-- Preconnect to improve performance -->
+    <link rel="preconnect" href="https://api.voiceassistant.com">
     
     <style>
+        /* Critical CSS - Above the fold styles */
         :root {
             --primary: #7c3aed;
             --primary-dark: #6d28d9;
@@ -17,444 +24,1198 @@
             --error: #ef4444;
             --warning: #f59e0b;
             --info: #3b82f6;
-            --bg-primary: #0f172a;
-            --bg-secondary: #1e293b;
-            --bg-tertiary: #334155;
-            --text-primary: #f1f5f9;
-            --text-secondary: #cbd5e1;
-            --text-tertiary: #94a3b8;
-            --border: #334155;
-            --gradient-1: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-            --gradient-2: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
-            --gradient-3: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%);
-            --gradient-4: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%);
+            --bg-primary: #111827;
+            --bg-secondary: #1f2937;
+            --bg-tertiary: #374151;
+            --text-primary: #f9fafb;
+            --text-secondary: #e5e7eb;
+            --text-tertiary: #9ca3af;
+            --border: #374151;
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --animation-duration: 0.3s;
+            
+            /* Light mode variables */
+            --light-bg-primary: #ffffff;
+            --light-bg-secondary: #f9fafb;
+            --light-bg-tertiary: #f3f4f6;
+            --light-text-primary: #111827;
+            --light-text-secondary: #4b5563;
+            --light-text-tertiary: #6b7280;
+            --light-border: #e5e7eb;
         }
         
         * {
             margin: 0;
             padding: 0;
             box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
         }
         
         body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
             background: var(--bg-primary);
             color: var(--text-primary);
             overflow-x: hidden;
+            position: relative;
+            min-height: 100vh;
             -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
         }
         
-        /* Grid Layout */
-        .dashboard {
-            display: grid;
-            grid-template-columns: 250px 1fr;
-            grid-template-rows: 70px 1fr;
-            height: 100vh;
-            position: relative;
+        /* Light mode */
+        body.light-mode {
+            --bg-primary: var(--light-bg-primary);
+            --bg-secondary: var(--light-bg-secondary);
+            --bg-tertiary: var(--light-bg-tertiary);
+            --text-primary: var(--light-text-primary);
+            --text-secondary: var(--light-text-secondary);
+            --text-tertiary: var(--light-text-tertiary);
+            --border: var(--light-border);
+            --glass: rgba(0, 0, 0, 0.02);
+            --glass-border: rgba(0, 0, 0, 0.05);
+        }
+        
+        /* Optimized scrollbar */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+            transition: background 0.2s;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary);
+        }
+        
+        /* Loading skeleton */
+        .skeleton {
+            animation: skeleton-loading 1s linear infinite alternate;
+        }
+        
+        @keyframes skeleton-loading {
+            0% {
+                background-color: var(--bg-secondary);
+            }
+            100% {
+                background-color: var(--bg-tertiary);
+            }
+        }
+        
+        /* App Container */
+        .app-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-primary);
         }
         
         /* Header */
         .header {
-            grid-column: 1 / -1;
-            background: var(--bg-secondary);
-            border-bottom: 1px solid var(--border);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 2rem;
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 1rem 0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1);
             position: sticky;
             top: 0;
-            z-index: 100;
+            z-index: 40;
+            backdrop-filter: blur(12px);
+            will-change: transform;
         }
         
-        .header-left {
+        .header-content {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 1rem;
             display: flex;
+            justify-content: space-between;
             align-items: center;
-            gap: 2rem;
         }
         
-        .logo {
+        .logo-section {
             display: flex;
             align-items: center;
             gap: 0.75rem;
         }
         
-        .logo-icon {
+        .logo {
             width: 40px;
             height: 40px;
-            background: var(--primary);
-            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 1.5rem;
         }
         
-        .logo-text {
-            font-size: 1.25rem;
+        .logo-text h1 {
+            font-size: 1.5rem;
             font-weight: 700;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
+            letter-spacing: -0.025em;
         }
         
-        .header-stats {
-            display: flex;
-            gap: 2rem;
-        }
-        
-        .header-stat {
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-        }
-        
-        .header-stat-value {
-            font-size: 1.25rem;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-        
-        .header-stat-label {
+        .logo-text p {
             font-size: 0.75rem;
-            color: var(--text-tertiary);
+            opacity: 0.8;
         }
         
-        .header-right {
+        .header-actions {
             display: flex;
             align-items: center;
-            gap: 1rem;
+            gap: 0.5rem;
         }
         
-        .live-indicator {
+        .connection-status {
             display: flex;
             align-items: center;
             gap: 0.5rem;
             padding: 0.5rem 1rem;
-            background: var(--bg-tertiary);
+            background: rgba(255, 255, 255, 0.1);
             border-radius: 9999px;
             font-size: 0.875rem;
         }
         
-        .live-dot {
+        .status-dot {
             width: 8px;
             height: 8px;
-            background: var(--success);
             border-radius: 50%;
             animation: pulse 2s infinite;
         }
         
-        @keyframes pulse {
-            0% {
-                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0.7);
-            }
-            70% {
-                box-shadow: 0 0 0 10px rgba(16, 185, 129, 0);
-            }
-            100% {
-                box-shadow: 0 0 0 0 rgba(16, 185, 129, 0);
-            }
+        .status-dot.connected {
+            background: #10b981;
         }
         
-        .date-range {
-            padding: 0.5rem 1rem;
-            background: var(--bg-tertiary);
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            color: var(--text-primary);
-            font-size: 0.875rem;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 0.5rem;
+        .status-dot.disconnected {
+            background: #ef4444;
+            animation: none;
         }
         
-        /* Sidebar */
-        .sidebar {
-            background: var(--bg-secondary);
-            border-right: 1px solid var(--border);
-            padding: 1.5rem 0;
-            overflow-y: auto;
-        }
-        
-        .sidebar-section {
-            margin-bottom: 2rem;
-        }
-        
-        .sidebar-title {
-            font-size: 0.75rem;
-            font-weight: 600;
-            color: var(--text-tertiary);
-            text-transform: uppercase;
-            letter-spacing: 0.05em;
-            padding: 0 1.5rem;
-            margin-bottom: 0.5rem;
-        }
-        
-        .sidebar-item {
-            display: flex;
-            align-items: center;
-            gap: 0.75rem;
-            padding: 0.75rem 1.5rem;
-            color: var(--text-secondary);
-            text-decoration: none;
-            transition: all 0.2s;
-            position: relative;
-            cursor: pointer;
-        }
-        
-        .sidebar-item:hover {
-            background: var(--bg-tertiary);
-            color: var(--text-primary);
-        }
-        
-        .sidebar-item.active {
-            background: var(--bg-tertiary);
-            color: var(--primary);
-        }
-        
-        .sidebar-item.active::before {
-            content: '';
-            position: absolute;
-            left: 0;
-            top: 0;
-            bottom: 0;
-            width: 3px;
-            background: var(--primary);
-        }
-        
-        .sidebar-icon {
-            width: 20px;
-            height: 20px;
+        .header-button {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
             display: flex;
             align-items: center;
             justify-content: center;
+            cursor: pointer;
+            transition: all var(--animation-duration);
+            position: relative;
+        }
+        
+        .header-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+        }
+        
+        .header-button:active {
+            transform: translateY(0);
+        }
+        
+        .notification-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background: var(--error);
+            color: white;
+            font-size: 0.75rem;
+            min-width: 18px;
+            height: 18px;
+            border-radius: 9999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            padding: 0 4px;
+        }
+        
+        /* Navigation */
+        .nav-container {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 72px;
+            z-index: 30;
+            backdrop-filter: blur(8px);
+        }
+        
+        .nav-tabs {
+            max-width: 1280px;
+            margin: 0 auto;
+            display: flex;
+            gap: 2px;
+            padding: 0 1rem;
+            overflow-x: auto;
+            scrollbar-width: none;
+            -ms-overflow-style: none;
+        }
+        
+        .nav-tabs::-webkit-scrollbar {
+            display: none;
+        }
+        
+        .nav-tab {
+            flex: 1;
+            max-width: 200px;
+            padding: 1rem;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--animation-duration);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            white-space: nowrap;
+        }
+        
+        .nav-tab:hover {
+            color: var(--text-primary);
+            background: var(--glass);
+        }
+        
+        .nav-tab.active {
+            color: var(--primary);
+            background: var(--glass);
+        }
+        
+        .nav-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--primary);
+        }
+        
+        .nav-tab svg {
+            width: 18px;
+            height: 18px;
         }
         
         /* Main Content */
         .main-content {
-            padding: 2rem;
-            overflow-y: auto;
-            background: var(--bg-primary);
+            flex: 1;
+            max-width: 1280px;
+            margin: 0 auto;
+            width: 100%;
+            padding: 2rem 1rem;
         }
         
-        /* Metric Cards Grid */
-        .metrics-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
+        .tab-content {
+            display: none;
+            animation: fadeIn var(--animation-duration) ease-out;
         }
         
-        .metric-card {
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* Chat Interface */
+        .chat-container {
+            max-width: 900px;
+            margin: 0 auto;
             background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 1.5rem;
-            position: relative;
+            border-radius: 16px;
             overflow: hidden;
-            transition: all 0.3s;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
         }
         
-        .metric-card:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-        }
-        
-        .metric-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            right: 0;
-            height: 3px;
-        }
-        
-        .metric-card.primary::before { background: var(--gradient-1); }
-        .metric-card.secondary::before { background: var(--gradient-2); }
-        .metric-card.success::before { background: var(--gradient-3); }
-        .metric-card.warning::before { background: var(--gradient-4); }
-        
-        .metric-header {
+        .chat-messages {
+            height: 500px;
+            overflow-y: auto;
+            padding: 1.5rem;
             display: flex;
-            justify-content: space-between;
-            align-items: flex-start;
-            margin-bottom: 1rem;
+            flex-direction: column;
+            gap: 1rem;
+            scroll-behavior: smooth;
         }
         
-        .metric-title {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-            font-weight: 500;
+        .message {
+            display: flex;
+            gap: 0.75rem;
+            animation: slideIn var(--animation-duration) ease-out;
+            will-change: transform;
         }
         
-        .metric-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 10px;
+        .message.user {
+            flex-direction: row-reverse;
+        }
+        
+        .message-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
+            flex-shrink: 0;
+            font-size: 1.25rem;
+        }
+        
+        .message.assistant .message-avatar {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        }
+        
+        .message.user .message-avatar {
             background: var(--bg-tertiary);
         }
         
-        .metric-value {
-            font-size: 2rem;
-            font-weight: 700;
-            margin-bottom: 0.5rem;
-            background: linear-gradient(135deg, var(--text-primary) 0%, var(--text-secondary) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-        
-        .metric-change {
+        .message-content {
+            max-width: 70%;
             display: flex;
-            align-items: center;
+            flex-direction: column;
             gap: 0.25rem;
-            font-size: 0.875rem;
         }
         
-        .metric-change.positive {
-            color: var(--success);
+        .message-bubble {
+            padding: 0.75rem 1rem;
+            border-radius: 16px;
+            position: relative;
+            word-wrap: break-word;
         }
         
-        .metric-change.negative {
-            color: var(--error);
-        }
-        
-        .metric-change svg {
-            width: 16px;
-            height: 16px;
-        }
-        
-        /* Charts Section */
-        .charts-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(500px, 1fr));
-            gap: 1.5rem;
-            margin-bottom: 2rem;
-        }
-        
-        .chart-container {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 1.5rem;
-        }
-        
-        .chart-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 1.5rem;
-        }
-        
-        .chart-title {
-            font-size: 1.125rem;
-            font-weight: 600;
-        }
-        
-        .chart-options {
-            display: flex;
-            gap: 0.5rem;
-        }
-        
-        .chart-option {
-            padding: 0.5rem 0.75rem;
+        .message.assistant .message-bubble {
             background: var(--bg-tertiary);
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-            cursor: pointer;
-            transition: all 0.2s;
+            border-left: 3px solid transparent;
         }
         
-        .chart-option:hover {
-            border-color: var(--primary);
-            color: var(--primary);
+        .message.assistant .message-bubble.emotion-happy {
+            border-left-color: var(--success);
         }
         
-        .chart-option.active {
+        .message.assistant .message-bubble.emotion-sad {
+            border-left-color: var(--info);
+        }
+        
+        .message.assistant .message-bubble.emotion-excited {
+            border-left-color: var(--warning);
+        }
+        
+        .message.assistant .message-bubble.emotion-concerned {
+            border-left-color: var(--error);
+        }
+        
+        .message.assistant .message-bubble.emotion-friendly {
+            border-left-color: var(--primary);
+        }
+        
+        .message.user .message-bubble {
             background: var(--primary);
-            border-color: var(--primary);
             color: white;
         }
         
-        .chart {
-            position: relative;
-            height: 300px;
+        .message-meta {
+            font-size: 0.75rem;
+            color: var(--text-tertiary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0 0.5rem;
         }
         
-        /* Real-time Activity Feed */
-        .activity-section {
+        .confidence-score {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.7rem;
+            opacity: 0.7;
+        }
+        
+        .typing-indicator {
+            display: none;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.75rem 1rem;
+            background: var(--bg-tertiary);
+            border-radius: 16px;
+            width: fit-content;
+        }
+        
+        .typing-indicator.active {
+            display: flex;
+        }
+        
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--text-tertiary);
+            animation: typing 1.4s infinite;
+        }
+        
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+        
+        /* Audio Visualizer */
+        .audio-visualizer {
+            padding: 1rem;
+            background: var(--glass);
+            border-top: 1px solid var(--border);
+            display: none;
+        }
+        
+        .audio-visualizer.active {
+            display: block;
+        }
+        
+        .visualizer-bars {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            height: 40px;
+        }
+        
+        .visualizer-bar {
+            width: 3px;
+            background: var(--primary);
+            border-radius: 3px;
+            transition: height 0.1s ease;
+            will-change: height;
+        }
+        
+        .transcript-preview {
+            text-align: center;
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            min-height: 20px;
+        }
+        
+        /* Input Area */
+        .input-area {
+            padding: 1rem;
+            background: var(--bg-tertiary);
+            border-top: 1px solid var(--border);
+        }
+        
+        .input-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .voice-button {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            transition: all var(--animation-duration);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            color: white;
+        }
+        
+        .voice-button.idle {
+            background: var(--primary);
+        }
+        
+        .voice-button.listening {
+            background: var(--error);
+            animation: pulse 1.5s infinite;
+        }
+        
+        .voice-button:hover {
+            transform: scale(1.05);
+        }
+        
+        .voice-button:active {
+            transform: scale(0.95);
+        }
+        
+        .voice-button svg {
+            width: 24px;
+            height: 24px;
+        }
+        
+        .input-field {
+            flex: 1;
             background: var(--bg-secondary);
             border: 1px solid var(--border);
             border-radius: 12px;
-            padding: 1.5rem;
+            padding: 0.75rem 1rem;
+            font-size: 0.875rem;
+            color: var(--text-primary);
+            transition: all var(--animation-duration);
         }
         
-        .activity-header {
+        .input-field:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+        }
+        
+        .send-button {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: var(--primary);
+            border: none;
+            color: white;
             display: flex;
-            justify-content: space-between;
             align-items: center;
-            margin-bottom: 1.5rem;
+            justify-content: center;
+            cursor: pointer;
+            transition: all var(--animation-duration);
         }
         
-        .activity-title {
-            font-size: 1.125rem;
-            font-weight: 600;
+        .send-button:hover:not(:disabled) {
+            background: var(--primary-dark);
         }
         
-        .activity-filter {
+        .send-button:active:not(:disabled) {
+            transform: scale(0.95);
+        }
+        
+        .send-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .send-button svg {
+            width: 20px;
+            height: 20px;
+        }
+        
+        /* Quick Actions */
+        .quick-actions {
             display: flex;
+            flex-wrap: wrap;
             gap: 0.5rem;
+            margin-top: 0.75rem;
         }
         
-        .filter-chip {
-            padding: 0.25rem 0.75rem;
-            background: var(--bg-tertiary);
+        .quick-action {
+            padding: 0.5rem 0.75rem;
+            background: var(--bg-secondary);
             border: 1px solid var(--border);
             border-radius: 9999px;
             font-size: 0.75rem;
             color: var(--text-secondary);
             cursor: pointer;
-            transition: all 0.2s;
+            transition: all var(--animation-duration);
         }
         
-        .filter-chip:hover {
+        .quick-action:hover {
             border-color: var(--primary);
             color: var(--primary);
+            transform: translateY(-1px);
         }
         
-        .filter-chip.active {
-            background: var(--primary);
+        .quick-action:active {
+            transform: translateY(0);
+        }
+        
+        /* Commands Grid */
+        .commands-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .command-category {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+            transition: all var(--animation-duration);
+        }
+        
+        .command-category:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
             border-color: var(--primary);
+        }
+        
+        .category-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .category-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
             color: white;
         }
         
-        .activity-feed {
+        .category-icon.productivity {
+            background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+        }
+        
+        .category-icon.information {
+            background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
+        }
+        
+        .category-icon.entertainment {
+            background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+        }
+        
+        .category-icon.system {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+        
+        .category-icon svg {
+            width: 24px;
+            height: 24px;
+        }
+        
+        .category-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+        
+        .command-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .command-item {
+            padding: 0.75rem 1rem;
+            background: var(--glass);
+            border: 1px solid transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all var(--animation-duration);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+        
+        .command-item:hover {
+            background: var(--bg-tertiary);
+            border-color: var(--primary);
+            color: var(--text-primary);
+            transform: translateX(4px);
+        }
+        
+        .command-item svg {
+            width: 16px;
+            height: 16px;
+            opacity: 0;
+            transition: opacity var(--animation-duration);
+        }
+        
+        .command-item:hover svg {
+            opacity: 1;
+        }
+        
+        /* History */
+        .history-container {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+        }
+        
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+            flex-wrap: wrap;
+            gap: 1rem;
+        }
+        
+        .history-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .history-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .action-button {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            border: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--animation-duration);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .action-button.primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .action-button.primary:hover {
+            background: var(--primary-dark);
+        }
+        
+        .action-button.danger {
+            background: var(--error);
+            color: white;
+        }
+        
+        .action-button.danger:hover {
+            background: #dc2626;
+        }
+        
+        .action-button svg {
+            width: 16px;
+            height: 16px;
+        }
+        
+        .history-list {
+            max-height: 500px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        
+        .history-item {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all var(--animation-duration);
+        }
+        
+        .history-item:hover {
+            border-color: var(--primary);
+            transform: translateY(-1px);
+        }
+        
+        .history-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+        
+        .history-item-type {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--primary);
+        }
+        
+        .history-item-time {
+            font-size: 0.75rem;
+            color: var(--text-tertiary);
+        }
+        
+        .history-item-content {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+        
+        /* Settings */
+        .settings-container {
+            max-width: 800px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        
+        .settings-section {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+        }
+        
+        .settings-section-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            font-size: 1.125rem;
+            font-weight: 600;
+        }
+        
+        .settings-section-header svg {
+            width: 20px;
+            height: 20px;
+            color: var(--primary);
+        }
+        
+        .settings-group {
             display: flex;
             flex-direction: column;
             gap: 1rem;
+        }
+        
+        .settings-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .settings-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+        
+        .settings-description {
+            font-size: 0.75rem;
+            color: var(--text-tertiary);
+        }
+        
+        .settings-input {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 0.875rem;
+            transition: all var(--animation-duration);
+        }
+        
+        .settings-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+        }
+        
+        .settings-select {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all var(--animation-duration);
+        }
+        
+        .settings-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+        }
+        
+        .settings-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+        }
+        
+        .settings-toggle-info {
+            flex: 1;
+        }
+        
+        .toggle-switch {
+            position: relative;
+            width: 48px;
+            height: 24px;
+            background: var(--bg-tertiary);
+            border-radius: 9999px;
+            cursor: pointer;
+            transition: background var(--animation-duration);
+        }
+        
+        .toggle-switch.active {
+            background: var(--primary);
+        }
+        
+        .toggle-slider {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: transform var(--animation-duration);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .toggle-switch.active .toggle-slider {
+            transform: translateX(24px);
+        }
+        
+        .settings-range {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .range-slider {
+            flex: 1;
+            height: 6px;
+            background: var(--bg-tertiary);
+            border-radius: 3px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        .range-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--primary);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .range-value {
+            min-width: 50px;
+            text-align: right;
+            font-weight: 500;
+        }
+        
+        /* Command Palette */
+        .command-palette-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(8px);
+            z-index: 100;
+            display: none;
+            align-items: flex-start;
+            justify-content: center;
+            padding-top: 10vh;
+        }
+        
+        .command-palette-overlay.active {
+            display: flex;
+        }
+        
+        .command-palette {
+            width: 90%;
+            max-width: 600px;
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            border: 1px solid var(--border);
+            animation: slideDown var(--animation-duration) ease-out;
+        }
+        
+        .command-palette-header {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .command-palette-search {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 0.875rem;
+        }
+        
+        .command-palette-search:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        .command-palette-list {
             max-height: 400px;
             overflow-y: auto;
         }
         
-        .activity-item {
+        .command-palette-item {
+            padding: 0.75rem 1rem;
             display: flex;
-            gap: 1rem;
-            padding: 1rem;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+            transition: all var(--animation-duration);
+            border-left: 3px solid transparent;
+        }
+        
+        .command-palette-item:hover {
             background: var(--bg-tertiary);
-            border-radius: 8px;
-            transition: all 0.2s;
-            animation: slideIn 0.3s ease-out;
+            border-left-color: var(--primary);
+        }
+        
+        .command-palette-item svg {
+            width: 20px;
+            height: 20px;
+            color: var(--text-tertiary);
+        }
+        
+        .command-palette-item-text {
+            flex: 1;
+        }
+        
+        .command-palette-item-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+        
+        .command-palette-item-description {
+            font-size: 0.75rem;
+            color: var(--text-tertiary);
+        }
+        
+        .command-palette-shortcut {
+            font-size: 0.75rem;
+            color: var(--text-tertiary);
+            background: var(--bg-tertiary);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+        }
+        
+        /* Notifications */
+        .notifications-container {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 200;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            pointer-events: none;
+        }
+        
+        .notification {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem;
+            min-width: 300px;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            animation: slideInRight var(--animation-duration) ease-out;
+            pointer-events: auto;
+            cursor: pointer;
+        }
+        
+        .notification.success {
+            border-left: 3px solid var(--success);
+        }
+        
+        .notification.error {
+            border-left: 3px solid var(--error);
+        }
+        
+        .notification.warning {
+            border-left: 3px solid var(--warning);
+        }
+        
+        .notification.info {
+            border-left: 3px solid var(--info);
+        }
+        
+        .notification-icon {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+        
+        .notification.success .notification-icon {
+            color: var(--success);
+        }
+        
+        .notification.error .notification-icon {
+            color: var(--error);
+        }
+        
+        .notification.warning .notification-icon {
+            color: var(--warning);
+        }
+        
+        .notification.info .notification-icon {
+            color: var(--info);
+        }
+        
+        .notification-content {
+            flex: 1;
+        }
+        
+        .notification-title {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+        
+        .notification-message {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+        
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
         }
         
         @keyframes slideIn {
             from {
                 opacity: 0;
-                transform: translateX(-10px);
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
             }
             to {
                 opacity: 1;
@@ -462,1193 +1223,1866 @@
             }
         }
         
-        .activity-icon {
-            width: 40px;
-            height: 40px;
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 20px rgba(124, 58, 237, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(124, 58, 237, 0);
+            }
+        }
+        
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+                opacity: 0.7;
+            }
+            30% {
+                transform: translateY(-10px);
+                opacity: 1;
+            }
+        }
+        
+        /* Loading Spinner */
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--text-tertiary);
             border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-        
-        .activity-icon.command { background: var(--gradient-1); }
-        .activity-icon.error { background: var(--gradient-2); }
-        .activity-icon.success { background: var(--gradient-3); }
-        .activity-icon.warning { background: var(--gradient-4); }
-        
-        .activity-content {
-            flex: 1;
-        }
-        
-        .activity-text {
-            font-size: 0.875rem;
-            color: var(--text-primary);
-            margin-bottom: 0.25rem;
-        }
-        
-        .activity-meta {
-            font-size: 0.75rem;
-            color: var(--text-tertiary);
-            display: flex;
-            gap: 1rem;
-        }
-        
-        /* Performance Metrics */
-        .performance-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 1rem;
-            margin-bottom: 2rem;
-        }
-        
-        .performance-card {
-            background: var(--bg-tertiary);
-            border-radius: 8px;
-            padding: 1.5rem;
-            text-align: center;
-        }
-        
-        .performance-icon {
-            width: 60px;
-            height: 60px;
-            margin: 0 auto 1rem;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-        }
-        
-        .performance-ring {
-            position: absolute;
-            inset: 0;
-            border-radius: 50%;
-            border: 4px solid var(--bg-secondary);
-        }
-        
-        .performance-ring::after {
-            content: '';
-            position: absolute;
-            inset: -4px;
-            border-radius: 50%;
-            border: 4px solid transparent;
             border-top-color: var(--primary);
-            animation: rotate 2s linear infinite;
+            animation: spin 1s linear infinite;
         }
         
-        @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-        
-        .performance-value {
-            font-size: 1.5rem;
-            font-weight: 700;
-            margin-bottom: 0.25rem;
-        }
-        
-        .performance-label {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-        }
-        
-        /* User Insights */
-        .insights-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 1.5rem;
-        }
-        
-        .insight-card {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 1.5rem;
-        }
-        
-        .insight-header {
-            display: flex;
-            align-items: center;
-            gap: 1rem;
-            margin-bottom: 1rem;
-        }
-        
-        .insight-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .insight-title {
-            font-size: 1rem;
-            font-weight: 600;
-        }
-        
-        .insight-list {
-            display: flex;
-            flex-direction: column;
-            gap: 0.75rem;
-        }
-        
-        .insight-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 0.5rem 0;
-            border-bottom: 1px solid var(--border);
-        }
-        
-        .insight-item:last-child {
-            border-bottom: none;
-        }
-        
-        .insight-label {
-            font-size: 0.875rem;
-            color: var(--text-secondary);
-        }
-        
-        .insight-value {
-            font-size: 0.875rem;
-            font-weight: 600;
-            color: var(--text-primary);
-        }
-        
-        .insight-bar {
-            width: 100px;
-            height: 6px;
-            background: var(--bg-tertiary);
-            border-radius: 3px;
-            overflow: hidden;
-        }
-        
-        .insight-bar-fill {
-            height: 100%;
-            background: var(--primary);
-            transition: width 0.5s ease;
-        }
-        
-        /* Heatmap */
-        .heatmap-container {
-            background: var(--bg-secondary);
-            border: 1px solid var(--border);
-            border-radius: 12px;
-            padding: 1.5rem;
-        }
-        
-        .heatmap-grid {
-            display: grid;
-            grid-template-columns: 60px repeat(7, 1fr);
-            gap: 4px;
-            margin-top: 1rem;
-        }
-        
-        .heatmap-hour {
-            font-size: 0.75rem;
-            color: var(--text-tertiary);
-            text-align: right;
-            padding-right: 0.5rem;
-            display: flex;
-            align-items: center;
-            justify-content: flex-end;
-        }
-        
-        .heatmap-cell {
-            aspect-ratio: 1;
-            background: var(--bg-tertiary);
-            border-radius: 4px;
-            position: relative;
-            cursor: pointer;
-            transition: all 0.2s;
-        }
-        
-        .heatmap-cell:hover {
-            transform: scale(1.1);
-            box-shadow: 0 4px 12px rgba(0, 0, 0, 0.3);
-        }
-        
-        .heatmap-cell.low { background: rgba(124, 58, 237, 0.2); }
-        .heatmap-cell.medium { background: rgba(124, 58, 237, 0.5); }
-        .heatmap-cell.high { background: rgba(124, 58, 237, 0.8); }
-        .heatmap-cell.very-high { background: var(--primary); }
-        
-        .heatmap-days {
-            display: grid;
-            grid-template-columns: 60px repeat(7, 1fr);
-            gap: 4px;
-            margin-bottom: 0.5rem;
-        }
-        
-        .heatmap-day {
-            font-size: 0.75rem;
-            color: var(--text-secondary);
-            text-align: center;
-        }
-        
-        /* Loading States */
-        .skeleton {
-            animation: shimmer 2s infinite;
-            background: linear-gradient(90deg, var(--bg-tertiary) 0%, var(--bg-secondary) 50%, var(--bg-tertiary) 100%);
-            background-size: 200% 100%;
-            border-radius: 4px;
-        }
-        
-        @keyframes shimmer {
-            0% { background-position: -200% 0; }
-            100% { background-position: 200% 0; }
-        }
-        
-        /* Responsive */
-        @media (max-width: 1024px) {
-            .dashboard {
-                grid-template-columns: 1fr;
-            }
-            
-            .sidebar {
-                display: none;
-            }
-            
-            .charts-grid {
-                grid-template-columns: 1fr;
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
             }
         }
         
+        /* Responsive Design */
         @media (max-width: 768px) {
-            .header {
-                padding: 0 1rem;
+            .header-content {
+                padding: 0 0.75rem;
             }
             
-            .header-stats {
+            .logo-text h1 {
+                font-size: 1.25rem;
+            }
+            
+            .logo-text p {
                 display: none;
             }
             
-            .main-content {
-                padding: 1rem;
+            .connection-status span {
+                display: none;
             }
             
-            .metrics-grid {
+            .nav-tab span {
+                display: none;
+            }
+            
+            .nav-tab {
+                padding: 1rem 0.5rem;
+            }
+            
+            .chat-messages {
+                height: 400px;
+            }
+            
+            .message-content {
+                max-width: 85%;
+            }
+            
+            .commands-grid {
                 grid-template-columns: 1fr;
+            }
+            
+            .history-header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+            
+            .notifications-container {
+                left: 1rem;
+                right: 1rem;
+            }
+            
+            .notification {
+                min-width: auto;
             }
         }
         
-        /* Canvas placeholder for charts */
-        .chart canvas {
-            width: 100% !important;
-            height: 100% !important;
+        /* PWA specific styles */
+        @media (display-mode: standalone) {
+            .header {
+                padding-top: env(safe-area-inset-top);
+            }
+        }
+        
+        /* Print styles */
+        @media print {
+            .header,
+            .nav-container,
+            .input-area,
+            .quick-actions,
+            .action-button {
+                display: none !important;
+            }
+            
+            .chat-messages {
+                height: auto;
+                max-height: none;
+            }
+        }
+        
+        /* Focus visible for accessibility */
+        *:focus-visible {
+            outline: 2px solid var(--primary);
+            outline-offset: 2px;
+        }
+        
+        /* Reduced motion */
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+                transition-duration: 0.01ms !important;
+            }
+        }
+        
+        /* High contrast mode */
+        @media (prefers-contrast: high) {
+            :root {
+                --primary: #8a2be2;
+                --bg-primary: #000;
+                --text-primary: #fff;
+            }
         }
     </style>
 </head>
 <body>
-    <div class="dashboard">
+    <div class="app-container">
         <!-- Header -->
         <header class="header">
-            <div class="header-left">
-                <div class="logo">
-                    <div class="logo-icon">📊</div>
-                    <div class="logo-text">LUNA Analytics</div>
-                </div>
-                <div class="header-stats">
-                    <div class="header-stat">
-                        <div class="header-stat-value" id="totalUsers">0</div>
-                        <div class="header-stat-label">Active Users</div>
-                    </div>
-                    <div class="header-stat">
-                        <div class="header-stat-value" id="totalCommands">0</div>
-                        <div class="header-stat-label">Commands Today</div>
-                    </div>
-                    <div class="header-stat">
-                        <div class="header-stat-value" id="avgResponseTime">0ms</div>
-                        <div class="header-stat-label">Avg Response</div>
+            <div class="header-content">
+                <div class="logo-section">
+                    <div class="logo">🤖</div>
+                    <div class="logo-text">
+                        <h1>LUNA</h1>
+                        <p>Personal Voice Assistant</p>
                     </div>
                 </div>
-            </div>
-            <div class="header-right">
-                <div class="live-indicator">
-                    <div class="live-dot"></div>
-                    <span>Live</span>
+                <div class="header-actions">
+                    <div class="connection-status">
+                        <div class="status-dot disconnected" id="statusDot"></div>
+                        <span id="statusText">Offline</span>
+                    </div>
+                    <button class="header-button" id="commandPaletteBtn" aria-label="Open command palette">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="9" y1="3" x2="9" y2="21"></line>
+                        </svg>
+                    </button>
+                    <button class="header-button" id="notificationBtn" aria-label="View notifications">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                        </svg>
+                        <span class="notification-badge" id="notificationBadge" style="display: none;">0</span>
+                    </button>
+                    <button class="header-button" id="themeToggle" aria-label="Toggle theme">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="5"></circle>
+                            <line x1="12" y1="1" x2="12" y2="3"></line>
+                            <line x1="12" y1="21" x2="12" y2="23"></line>
+                            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                            <line x1="1" y1="12" x2="3" y2="12"></line>
+                            <line x1="21" y1="12" x2="23" y2="12"></line>
+                            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                        </svg>
+                    </button>
                 </div>
-                <button class="date-range">
-                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                        <rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect>
-                        <line x1="16" y1="2" x2="16" y2="6"></line>
-                        <line x1="8" y1="2" x2="8" y2="6"></line>
-                        <line x1="3" y1="10" x2="21" y2="10"></line>
-                    </svg>
-                    Last 24 Hours
-                </button>
             </div>
         </header>
         
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="sidebar-section">
-                <div class="sidebar-title">Overview</div>
-                <a class="sidebar-item active" data-page="overview">
-                    <div class="sidebar-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                            <line x1="3" y1="9" x2="21" y2="9"></line>
-                            <line x1="9" y1="21" x2="9" y2="9"></line>
-                        </svg>
-                    </div>
-                    <span>Dashboard</span>
-                </a>
-                <a class="sidebar-item" data-page="realtime">
-                    <div class="sidebar-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polyline points="22 12 18 12 15 21 9 3 6 12 2 12"></polyline>
-                        </svg>
-                    </div>
-                    <span>Real-time Monitor</span>
-                </a>
+        <!-- Navigation -->
+        <nav class="nav-container">
+            <div class="nav-tabs" role="tablist">
+                <button class="nav-tab active" data-tab="chat" role="tab" aria-selected="true">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                    <span>Chat</span>
+                </button>
+                <button class="nav-tab" data-tab="commands" role="tab" aria-selected="false">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="9" y1="9" x2="15" y2="9"></line>
+                        <line x1="9" y1="15" x2="15" y2="15"></line>
+                    </svg>
+                    <span>Commands</span>
+                </button>
+                <button class="nav-tab" data-tab="history" role="tab" aria-selected="false">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="1 4 1 10 7 10"></polyline>
+                        <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+                    </svg>
+                    <span>History</span>
+                </button>
+                <button class="nav-tab" data-tab="settings" role="tab" aria-selected="false">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M12 1v6m0 6v6m-9-9h6m6 0h6"></path>
+                    </svg>
+                    <span>Settings</span>
+                </button>
             </div>
-            
-            <div class="sidebar-section">
-                <div class="sidebar-title">Analytics</div>
-                <a class="sidebar-item" data-page="usage">
-                    <div class="sidebar-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <line x1="12" y1="20" x2="12" y2="10"></line>
-                            <line x1="18" y1="20" x2="18" y2="4"></line>
-                            <line x1="6" y1="20" x2="6" y2="16"></line>
-                        </svg>
-                    </div>
-                    <span>Usage Analytics</span>
-                </a>
-                <a class="sidebar-item" data-page="performance">
-                    <div class="sidebar-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"></path>
-                        </svg>
-                    </div>
-                    <span>Performance</span>
-                </a>
-                <a class="sidebar-item" data-page="intents">
-                    <div class="sidebar-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <line x1="2" y1="12" x2="22" y2="12"></line>
-                            <path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path>
-                        </svg>
-                    </div>
-                    <span>Intent Analysis</span>
-                </a>
-                <a class="sidebar-item" data-page="sentiment">
-                    <div class="sidebar-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <path d="M8 14s1.5 2 4 2 4-2 4-2"></path>
-                            <line x1="9" y1="9" x2="9.01" y2="9"></line>
-                            <line x1="15" y1="9" x2="15.01" y2="9"></line>
-                        </svg>
-                    </div>
-                    <span>Sentiment Analysis</span>
-                </a>
-            </div>
-            
-            <div class="sidebar-section">
-                <div class="sidebar-title">Users</div>
-                <a class="sidebar-item" data-page="demographics">
-                    <div class="sidebar-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"></path>
-                            <circle cx="9" cy="7" r="4"></circle>
-                            <path d="M23 21v-2a4 4 0 0 0-3-3.87"></path>
-                            <path d="M16 3.13a4 4 0 0 1 0 7.75"></path>
-                        </svg>
-                    </div>
-                    <span>Demographics</span>
-                </a>
-                <a class="sidebar-item" data-page="behavior">
-                    <div class="sidebar-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polyline points="21 8 21 21 3 21 3 8"></polyline>
-                            <rect x="1" y="3" width="22" height="5"></rect>
-                            <line x1="10" y1="12" x2="14" y2="12"></line>
-                        </svg>
-                    </div>
-                    <span>User Behavior</span>
-                </a>
-            </div>
-            
-            <div class="sidebar-section">
-                <div class="sidebar-title">System</div>
-                <a class="sidebar-item" data-page="errors">
-                    <div class="sidebar-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <polygon points="7.86 2 16.14 2 22 7.86 22 16.14 16.14 22 7.86 22 2 16.14 2 7.86 7.86 2"></polygon>
-                            <line x1="12" y1="8" x2="12" y2="12"></line>
-                            <line x1="12" y1="16" x2="12.01" y2="16"></line>
-                        </svg>
-                    </div>
-                    <span>Error Logs</span>
-                </a>
-                <a class="sidebar-item" data-page="infrastructure">
-                    <div class="sidebar-icon">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <rect x="4" y="4" width="16" height="16" rx="2" ry="2"></rect>
-                            <rect x="9" y="9" width="6" height="6"></rect>
-                            <line x1="9" y1="1" x2="9" y2="4"></line>
-                            <line x1="15" y1="1" x2="15" y2="4"></line>
-                            <line x1="9" y1="20" x2="9" y2="23"></line>
-                            <line x1="15" y1="20" x2="15" y2="23"></line>
-                            <line x1="20" y1="9" x2="23" y2="9"></line>
-                            <line x1="20" y1="14" x2="23" y2="14"></line>
-                            <line x1="1" y1="9" x2="4" y2="9"></line>
-                            <line x1="1" y1="14" x2="4" y2="14"></line>
-                        </svg>
-                    </div>
-                    <span>Infrastructure</span>
-                </a>
-            </div>
-        </aside>
+        </nav>
         
         <!-- Main Content -->
         <main class="main-content">
-            <!-- Metrics Cards -->
-            <div class="metrics-grid">
-                <div class="metric-card primary">
-                    <div class="metric-header">
-                        <div>
-                            <div class="metric-title">Total Commands</div>
-                            <div class="metric-value">45,287</div>
-                            <div class="metric-change positive">
-                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline>
-                                    <polyline points="17 18 23 18 23 12"></polyline>
+            <!-- Chat Tab -->
+            <div class="tab-content active" data-tab="chat" role="tabpanel">
+                <div class="chat-container">
+                    <div class="chat-messages" id="chatMessages" role="log" aria-live="polite" aria-label="Chat messages">
+                        <!-- Messages will be dynamically added here -->
+                    </div>
+                    
+                    <div class="typing-indicator" id="typingIndicator" aria-hidden="true">
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                    </div>
+                    
+                    <div class="audio-visualizer" id="audioVisualizer" aria-hidden="true">
+                        <div class="visualizer-bars" id="visualizerBars">
+                            <div class="visualizer-bar" style="height: 8px;"></div>
+                            <div class="visualizer-bar" style="height: 16px;"></div>
+                            <div class="visualizer-bar" style="height: 12px;"></div>
+                            <div class="visualizer-bar" style="height: 20px;"></div>
+                            <div class="visualizer-bar" style="height: 14px;"></div>
+                            <div class="visualizer-bar" style="height: 18px;"></div>
+                            <div class="visualizer-bar" style="height: 10px;"></div>
+                        </div>
+                        <div class="transcript-preview" id="transcriptPreview">Listening...</div>
+                    </div>
+                    
+                    <div class="input-area">
+                        <div class="input-controls">
+                            <button class="voice-button idle" id="voiceButton" aria-label="Start voice input">
+                                <svg viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+                                    <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
                                 </svg>
-                                <span>12.5% from last week</span>
-                            </div>
-                        </div>
-                        <div class="metric-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
-                                <line x1="9" y1="9" x2="15" y2="9"></line>
-                                <line x1="9" y1="15" x2="15" y2="15"></line>
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="metric-card secondary">
-                    <div class="metric-header">
-                        <div>
-                            <div class="metric-title">Success Rate</div>
-                            <div class="metric-value">97.8%</div>
-                            <div class="metric-change positive">
+                            </button>
+                            <input type="text" class="input-field" id="textInput" placeholder="Type a message or use voice..." aria-label="Message input" />
+                            <button class="send-button" id="sendButton" disabled aria-label="Send message">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline>
-                                    <polyline points="17 18 23 18 23 12"></polyline>
+                                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
                                 </svg>
-                                <span>2.3% improvement</span>
-                            </div>
+                            </button>
                         </div>
-                        <div class="metric-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path>
-                                <polyline points="22 4 12 14.01 9 11.01"></polyline>
-                            </svg>
+                        <div class="quick-actions">
+                            <button class="quick-action" data-command="What's the weather today?">What's the weather?</button>
+                            <button class="quick-action" data-command="Set a timer for 5 minutes">Set a timer</button>
+                            <button class="quick-action" data-command="Tell me a joke">Tell me a joke</button>
+                            <button class="quick-action" data-command="Search the web for latest news">Search the web</button>
+                            <button class="quick-action" data-command="What can you do?">Help</button>
                         </div>
                     </div>
                 </div>
-                
-                <div class="metric-card success">
-                    <div class="metric-header">
-                        <div>
-                            <div class="metric-title">Avg Response Time</div>
-                            <div class="metric-value">182ms</div>
-                            <div class="metric-change positive">
+            </div>
+            
+            <!-- Commands Tab -->
+            <div class="tab-content" data-tab="commands" role="tabpanel">
+                <div class="commands-grid">
+                    <!-- Command categories will be dynamically added here -->
+                </div>
+            </div>
+            
+            <!-- History Tab -->
+            <div class="tab-content" data-tab="history" role="tabpanel">
+                <div class="history-container">
+                    <div class="history-header">
+                        <h2 class="history-title">Conversation History</h2>
+                        <div class="history-actions">
+                            <button class="action-button primary" id="exportButton">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <polyline points="23 18 13.5 8.5 8.5 13.5 1 6"></polyline>
-                                    <polyline points="17 18 23 18 23 12"></polyline>
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                    <polyline points="7 10 12 15 17 10"></polyline>
+                                    <line x1="12" y1="15" x2="12" y2="3"></line>
                                 </svg>
-                                <span>15ms faster</span>
-                            </div>
-                        </div>
-                        <div class="metric-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
-                            </svg>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="metric-card warning">
-                    <div class="metric-header">
-                        <div>
-                            <div class="metric-title">Active Sessions</div>
-                            <div class="metric-value">3,842</div>
-                            <div class="metric-change negative">
+                                Export
+                            </button>
+                            <button class="action-button danger" id="clearHistoryButton">
                                 <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                    <polyline points="23 6 13.5 15.5 8.5 10.5 1 18"></polyline>
-                                    <polyline points="17 6 23 6 23 12"></polyline>
+                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
                                 </svg>
-                                <span>5.2% decrease</span>
-                            </div>
+                                Clear
+                            </button>
                         </div>
-                        <div class="metric-icon">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                                <path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path>
-                                <circle cx="12" cy="7" r="4"></circle>
-                            </svg>
-                        </div>
+                    </div>
+                    <div class="history-list" id="historyList">
+                        <!-- History items will be dynamically added here -->
                     </div>
                 </div>
             </div>
             
-            <!-- Charts Section -->
-            <div class="charts-grid">
-                <div class="chart-container">
-                    <div class="chart-header">
-                        <h3 class="chart-title">Command Volume</h3>
-                        <div class="chart-options">
-                            <button class="chart-option active">Day</button>
-                            <button class="chart-option">Week</button>
-                            <button class="chart-option">Month</button>
-                        </div>
-                    </div>
-                    <div class="chart">
-                        <canvas id="volumeChart"></canvas>
-                    </div>
-                </div>
-                
-                <div class="chart-container">
-                    <div class="chart-header">
-                        <h3 class="chart-title">Intent Distribution</h3>
-                        <div class="chart-options">
-                            <button class="chart-option active">Today</button>
-                            <button class="chart-option">7 Days</button>
-                        </div>
-                    </div>
-                    <div class="chart">
-                        <canvas id="intentChart"></canvas>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Performance Metrics -->
-            <div class="performance-grid">
-                <div class="performance-card">
-                    <div class="performance-icon">
-                        <div class="performance-ring"></div>
-                        <span style="font-size: 1.5rem;">⚡</span>
-                    </div>
-                    <div class="performance-value">99.9%</div>
-                    <div class="performance-label">Uptime</div>
-                </div>
-                
-                <div class="performance-card">
-                    <div class="performance-icon">
-                        <div class="performance-ring"></div>
-                        <span style="font-size: 1.5rem;">🎯</span>
-                    </div>
-                    <div class="performance-value">94.2%</div>
-                    <div class="performance-label">Accuracy</div>
-                </div>
-                
-                <div class="performance-card">
-                    <div class="performance-icon">
-                        <div class="performance-ring"></div>
-                        <span style="font-size: 1.5rem;">📊</span>
-                    </div>
-                    <div class="performance-value">87.5%</div>
-                    <div class="performance-label">Satisfaction</div>
-                </div>
-                
-                <div class="performance-card">
-                    <div class="performance-icon">
-                        <div class="performance-ring"></div>
-                        <span style="font-size: 1.5rem;">🔄</span>
-                    </div>
-                    <div class="performance-value">2.3</div>
-                    <div class="performance-label">Avg Turns/Session</div>
-                </div>
-            </div>
-            
-            <!-- Usage Heatmap -->
-            <div class="heatmap-container">
-                <div class="chart-header">
-                    <h3 class="chart-title">Usage Heatmap</h3>
-                </div>
-                <div class="heatmap-days">
-                    <div></div>
-                    <div class="heatmap-day">Mon</div>
-                    <div class="heatmap-day">Tue</div>
-                    <div class="heatmap-day">Wed</div>
-                    <div class="heatmap-day">Thu</div>
-                    <div class="heatmap-day">Fri</div>
-                    <div class="heatmap-day">Sat</div>
-                    <div class="heatmap-day">Sun</div>
-                </div>
-                <div class="heatmap-grid" id="heatmapGrid">
-                    <!-- Heatmap cells will be generated here -->
-                </div>
-            </div>
-            
-            <!-- User Insights -->
-            <div class="insights-grid">
-                <div class="insight-card">
-                    <div class="insight-header">
-                        <div class="insight-icon" style="background: var(--gradient-1);">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
-                                <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                            </svg>
-                        </div>
-                        <h3 class="insight-title">Top Intents</h3>
-                    </div>
-                    <div class="insight-list">
-                        <div class="insight-item">
-                            <span class="insight-label">Weather Query</span>
-                            <div class="insight-bar">
-                                <div class="insight-bar-fill" style="width: 85%;"></div>
-                            </div>
-                            <span class="insight-value">3,245</span>
-                        </div>
-                        <div class="insight-item">
-                            <span class="insight-label">Set Reminder</span>
-                            <div class="insight-bar">
-                                <div class="insight-bar-fill" style="width: 72%;"></div>
-                            </div>
-                            <span class="insight-value">2,753</span>
-                        </div>
-                        <div class="insight-item">
-                            <span class="insight-label">Play Music</span>
-                            <div class="insight-bar">
-                                <div class="insight-bar-fill" style="width: 65%;"></div>
-                            </div>
-                            <span class="insight-value">2,482</span>
-                        </div>
-                        <div class="insight-item">
-                            <span class="insight-label">Information</span>
-                            <div class="insight-bar">
-                                <div class="insight-bar-fill" style="width: 58%;"></div>
-                            </div>
-                            <span class="insight-value">2,214</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="insight-card">
-                    <div class="insight-header">
-                        <div class="insight-icon" style="background: var(--gradient-2);">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
-                                <circle cx="12" cy="12" r="10"></circle>
-                                <polyline points="12 6 12 12 16 14"></polyline>
-                            </svg>
-                        </div>
-                        <h3 class="insight-title">Peak Hours</h3>
-                    </div>
-                    <div class="insight-list">
-                        <div class="insight-item">
-                            <span class="insight-label">9:00 AM - 10:00 AM</span>
-                            <div class="insight-bar">
-                                <div class="insight-bar-fill" style="width: 90%;"></div>
-                            </div>
-                            <span class="insight-value">4,532</span>
-                        </div>
-                        <div class="insight-item">
-                            <span class="insight-label">2:00 PM - 3:00 PM</span>
-                            <div class="insight-bar">
-                                <div class="insight-bar-fill" style="width: 78%;"></div>
-                            </div>
-                            <span class="insight-value">3,924</span>
-                        </div>
-                        <div class="insight-item">
-                            <span class="insight-label">6:00 PM - 7:00 PM</span>
-                            <div class="insight-bar">
-                                <div class="insight-bar-fill" style="width: 82%;"></div>
-                            </div>
-                            <span class="insight-value">4,123</span>
-                        </div>
-                        <div class="insight-item">
-                            <span class="insight-label">8:00 PM - 9:00 PM</span>
-                            <div class="insight-bar">
-                                <div class="insight-bar-fill" style="width: 68%;"></div>
-                            </div>
-                            <span class="insight-value">3,418</span>
-                        </div>
-                    </div>
-                </div>
-                
-                <div class="insight-card">
-                    <div class="insight-header">
-                        <div class="insight-icon" style="background: var(--gradient-3);">
-                            <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2">
-                                <rect x="2" y="7" width="20" height="14" rx="2" ry="2"></rect>
-                                <path d="M16 21V5a2 2 0 0 0-2-2h-4a2 2 0 0 0-2 2v16"></path>
-                            </svg>
-                        </div>
-                        <h3 class="insight-title">Device Types</h3>
-                    </div>
-                    <div class="insight-list">
-                        <div class="insight-item">
-                            <span class="insight-label">Mobile</span>
-                            <div class="insight-bar">
-                                <div class="insight-bar-fill" style="width: 65%;"></div>
-                            </div>
-                            <span class="insight-value">65%</span>
-                        </div>
-                        <div class="insight-item">
-                            <span class="insight-label">Desktop</span>
-                            <div class="insight-bar">
-                                <div class="insight-bar-fill" style="width: 20%;"></div>
-                            </div>
-                            <span class="insight-value">20%</span>
-                        </div>
-                        <div class="insight-item">
-                            <span class="insight-label">Smart Speaker</span>
-                            <div class="insight-bar">
-                                <div class="insight-bar-fill" style="width: 10%;"></div>
-                            </div>
-                            <span class="insight-value">10%</span>
-                        </div>
-                        <div class="insight-item">
-                            <span class="insight-label">Other</span>
-                            <div class="insight-bar">
-                                <div class="insight-bar-fill" style="width: 5%;"></div>
-                            </div>
-                            <span class="insight-value">5%</span>
-                        </div>
-                    </div>
-                </div>
-            </div>
-            
-            <!-- Real-time Activity Feed -->
-            <div class="activity-section">
-                <div class="activity-header">
-                    <h3 class="activity-title">Real-time Activity</h3>
-                    <div class="activity-filter">
-                        <button class="filter-chip active">All</button>
-                        <button class="filter-chip">Commands</button>
-                        <button class="filter-chip">Errors</button>
-                        <button class="filter-chip">System</button>
-                    </div>
-                </div>
-                <div class="activity-feed" id="activityFeed">
-                    <!-- Activity items will be dynamically added here -->
+            <!-- Settings Tab -->
+            <div class="tab-content" data-tab="settings" role="tabpanel">
+                <div class="settings-container">
+                    <!-- Settings sections will be dynamically added here -->
                 </div>
             </div>
         </main>
+        
+        <!-- Command Palette -->
+        <div class="command-palette-overlay" id="commandPalette" role="dialog" aria-modal="true" aria-label="Command palette">
+            <div class="command-palette">
+                <div class="command-palette-header">
+                    <input type="text" class="command-palette-search" id="commandPaletteSearch" placeholder="Type a command or search..." aria-label="Search commands" />
+                </div>
+                <div class="command-palette-list" role="listbox">
+                    <!-- Command items will be dynamically added here -->
+                </div>
+            </div>
+        </div>
+        
+        <!-- Notifications Container -->
+        <div class="notifications-container" id="notificationsContainer" aria-live="polite" aria-label="Notifications">
+            <!-- Notifications will be dynamically added here -->
+        </div>
     </div>
     
-    <script>
-        // Analytics Dashboard Controller
-        class AnalyticsDashboard {
-            constructor() {
-                this.charts = {};
-                this.activityFeed = [];
-                this.realTimeData = {
-                    activeUsers: 0,
-                    commandsToday: 0,
-                    avgResponseTime: 0
+    <script type="module">
+        // Optimized LUNA AI Voice Assistant
+        
+        // Utility functions
+        const utils = {
+            debounce(func, wait) {
+                let timeout;
+                return function executedFunction(...args) {
+                    const later = () => {
+                        clearTimeout(timeout);
+                        func(...args);
+                    };
+                    clearTimeout(timeout);
+                    timeout = setTimeout(later, wait);
                 };
-                this.wsConnection = null;
+            },
+            
+            throttle(func, limit) {
+                let inThrottle;
+                return function(...args) {
+                    if (!inThrottle) {
+                        func.apply(this, args);
+                        inThrottle = true;
+                        setTimeout(() => inThrottle = false, limit);
+                    }
+                };
+            },
+            
+            sanitizeHTML(text) {
+                const div = document.createElement('div');
+                div.textContent = text;
+                return div.innerHTML;
+            },
+            
+            formatTime(date) {
+                const now = new Date();
+                const diff = now - date;
+                
+                if (diff < 60000) return 'Just now';
+                if (diff < 3600000) {
+                    const minutes = Math.floor(diff / 60000);
+                    return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+                }
+                if (diff < 86400000) {
+                    return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+                }
+                return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+            },
+            
+            generateId() {
+                return Date.now().toString(36) + Math.random().toString(36).substr(2);
+            }
+        };
+        
+        // State management
+        class StateManager {
+            constructor() {
+                this.state = {
+                    messages: [],
+                    settings: this.loadSettings(),
+                    isConnected: false,
+                    isListening: false,
+                    currentTab: 'chat',
+                    notifications: []
+                };
+                this.listeners = new Map();
+            }
+            
+            subscribe(key, callback) {
+                if (!this.listeners.has(key)) {
+                    this.listeners.set(key, new Set());
+                }
+                this.listeners.get(key).add(callback);
+                
+                return () => {
+                    this.listeners.get(key)?.delete(callback);
+                };
+            }
+            
+            setState(key, value) {
+                const oldValue = this.state[key];
+                this.state[key] = value;
+                
+                if (oldValue !== value) {
+                    this.listeners.get(key)?.forEach(callback => callback(value, oldValue));
+                }
+            }
+            
+            getState(key) {
+                return this.state[key];
+            }
+            
+            loadSettings() {
+                const defaults = {
+                    apiKey: '',
+                    voiceType: 'female',
+                    language: 'en-US',
+                    speechRate: 1.0,
+                    enableEmotions: true,
+                    enableDiarization: false,
+                    autoListen: false,
+                    wakeWord: false,
+                    saveHistory: true,
+                    analytics: false,
+                    darkMode: true,
+                    maxHistory: 100
+                };
+                
+                try {
+                    const saved = localStorage.getItem('lunaSettings');
+                    return saved ? { ...defaults, ...JSON.parse(saved) } : defaults;
+                } catch (error) {
+                    console.error('Failed to load settings:', error);
+                    return defaults;
+                }
+            }
+            
+            saveSettings() {
+                try {
+                    localStorage.setItem('lunaSettings', JSON.stringify(this.state.settings));
+                } catch (error) {
+                    console.error('Failed to save settings:', error);
+                }
+            }
+        }
+        
+        // Audio Manager
+        class AudioManager {
+            constructor() {
+                this.audioContext = null;
+                this.analyser = null;
+                this.source = null;
+                this.stream = null;
+                this.animationFrame = null;
+            }
+            
+            async initialize() {
+                try {
+                    this.stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    this.analyser = this.audioContext.createAnalyser();
+                    this.source = this.audioContext.createMediaStreamSource(this.stream);
+                    this.source.connect(this.analyser);
+                    this.analyser.fftSize = 256;
+                    return true;
+                } catch (error) {
+                    console.error('Audio initialization failed:', error);
+                    return false;
+                }
+            }
+            
+            startVisualization(callback) {
+                if (!this.analyser) return;
+                
+                const dataArray = new Uint8Array(this.analyser.frequencyBinCount);
+                
+                const animate = () => {
+                    this.analyser.getByteFrequencyData(dataArray);
+                    callback(dataArray);
+                    this.animationFrame = requestAnimationFrame(animate);
+                };
+                
+                animate();
+            }
+            
+            stopVisualization() {
+                if (this.animationFrame) {
+                    cancelAnimationFrame(this.animationFrame);
+                    this.animationFrame = null;
+                }
+            }
+            
+            cleanup() {
+                this.stopVisualization();
+                if (this.source) {
+                    this.source.disconnect();
+                    this.source = null;
+                }
+                if (this.stream) {
+                    this.stream.getTracks().forEach(track => track.stop());
+                    this.stream = null;
+                }
+                if (this.audioContext) {
+                    this.audioContext.close();
+                    this.audioContext = null;
+                }
+            }
+        }
+        
+        // WebSocket Manager
+        class WebSocketManager {
+            constructor(stateManager) {
+                this.stateManager = stateManager;
+                this.ws = null;
+                this.reconnectTimer = null;
+                this.reconnectDelay = 5000;
+                this.maxReconnectDelay = 30000;
+            }
+            
+            connect() {
+                const apiKey = this.stateManager.getState('settings').apiKey;
+                if (!apiKey) return;
+                
+                try {
+                    this.ws = new WebSocket('wss://api.voiceassistant.com/ws/v1/assistant');
+                    
+                    this.ws.onopen = () => this.handleOpen();
+                    this.ws.onmessage = (event) => this.handleMessage(event);
+                    this.ws.onerror = (error) => this.handleError(error);
+                    this.ws.onclose = () => this.handleClose();
+                } catch (error) {
+                    console.error('WebSocket connection failed:', error);
+                    this.scheduleReconnect();
+                }
+            }
+            
+            handleOpen() {
+                this.stateManager.setState('isConnected', true);
+                this.reconnectDelay = 5000;
+                
+                this.send({
+                    type: 'auth',
+                    apiKey: this.stateManager.getState('settings').apiKey
+                });
+            }
+            
+            handleMessage(event) {
+                try {
+                    const data = JSON.parse(event.data);
+                    this.processMessage(data);
+                } catch (error) {
+                    console.error('Failed to parse message:', error);
+                }
+            }
+            
+            handleError(error) {
+                console.error('WebSocket error:', error);
+                this.stateManager.setState('isConnected', false);
+            }
+            
+            handleClose() {
+                this.stateManager.setState('isConnected', false);
+                this.scheduleReconnect();
+            }
+            
+            scheduleReconnect() {
+                if (this.reconnectTimer) return;
+                
+                this.reconnectTimer = setTimeout(() => {
+                    this.reconnectTimer = null;
+                    if (this.stateManager.getState('settings').apiKey) {
+                        this.connect();
+                    }
+                }, this.reconnectDelay);
+                
+                this.reconnectDelay = Math.min(this.reconnectDelay * 2, this.maxReconnectDelay);
+            }
+            
+            processMessage(data) {
+                switch (data.type) {
+                    case 'assistant_response':
+                        this.handleAssistantResponse(data.response);
+                        break;
+                    case 'interim_transcript':
+                        this.handleInterimTranscript(data.transcript);
+                        break;
+                    case 'error':
+                        this.handleServerError(data.error);
+                        break;
+                    case 'auth_success':
+                        this.handleAuthSuccess();
+                        break;
+                }
+            }
+            
+            handleAssistantResponse(response) {
+                // Implement response handling
+                const message = {
+                    id: utils.generateId(),
+                    type: 'assistant',
+                    content: response.text,
+                    timestamp: new Date(),
+                    emotion: response.emotion,
+                    confidence: response.confidence
+                };
+                
+                // Add message to state
+                const messages = [...this.stateManager.getState('messages'), message];
+                this.stateManager.setState('messages', messages);
+                
+                // Play audio if available
+                if (response.audio_url && this.stateManager.getState('settings').voiceEnabled !== false) {
+                    this.playAudioResponse(response.audio_url);
+                }
+            }
+            
+            handleInterimTranscript(transcript) {
+                document.getElementById('transcriptPreview').textContent = transcript;
+            }
+            
+            handleServerError(error) {
+                console.error('Server error:', error);
+                // Show notification
+            }
+            
+            handleAuthSuccess() {
+                console.log('Authentication successful');
+                // Show notification
+            }
+            
+            send(data) {
+                if (this.ws?.readyState === WebSocket.OPEN) {
+                    this.ws.send(JSON.stringify(data));
+                }
+            }
+            
+            disconnect() {
+                if (this.reconnectTimer) {
+                    clearTimeout(this.reconnectTimer);
+                    this.reconnectTimer = null;
+                }
+                if (this.ws) {
+                    this.ws.close();
+                    this.ws = null;
+                }
+            }
+            
+            playAudioResponse(audioUrl) {
+                const audio = new Audio(audioUrl);
+                audio.play().catch(error => {
+                    console.error('Audio playback failed:', error);
+                });
+            }
+        }
+        
+        // UI Components
+        class UIComponents {
+            static createMessage(message) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${message.type}`;
+                messageDiv.id = `message-${message.id}`;
+                
+                const avatar = document.createElement('div');
+                avatar.className = 'message-avatar';
+                avatar.textContent = message.type === 'user' ? '👤' : '🤖';
+                
+                const content = document.createElement('div');
+                content.className = 'message-content';
+                
+                const bubble = document.createElement('div');
+                bubble.className = `message-bubble${message.emotion ? ` emotion-${message.emotion}` : ''}`;
+                bubble.textContent = message.content;
+                
+                const meta = document.createElement('div');
+                meta.className = 'message-meta';
+                
+                const time = document.createElement('span');
+                time.className = 'message-time';
+                time.textContent = utils.formatTime(message.timestamp);
+                meta.appendChild(time);
+                
+                if (message.confidence && message.type === 'assistant') {
+                    const confidence = document.createElement('span');
+                    confidence.className = 'confidence-score';
+                    confidence.innerHTML = `
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                        </svg>
+                        ${Math.round(message.confidence * 100)}%
+                    `;
+                    meta.appendChild(confidence);
+                }
+                
+                content.appendChild(bubble);
+                content.appendChild(meta);
+                
+                messageDiv.appendChild(avatar);
+                messageDiv.appendChild(content);
+                
+                return messageDiv;
+            }
+            
+            static createNotification(message, type = 'info') {
+                const notification = document.createElement('div');
+                notification.className = `notification ${type}`;
+                notification.innerHTML = `
+                    <svg class="notification-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        ${this.getNotificationIcon(type)}
+                    </svg>
+                    <div class="notification-content">
+                        <div class="notification-message">${utils.sanitizeHTML(message)}</div>
+                    </div>
+                `;
+                return notification;
+            }
+            
+            static getNotificationIcon(type) {
+                const icons = {
+                    success: '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline>',
+                    error: '<circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line>',
+                    warning: '<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line>',
+                    info: '<circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line>'
+                };
+                return icons[type] || icons.info;
+            }
+            
+            static createCommandCategory(category) {
+                const div = document.createElement('div');
+                div.className = 'command-category';
+                div.innerHTML = `
+                    <div class="category-header">
+                        <div class="category-icon ${category.type}">
+                            ${category.icon}
+                        </div>
+                        <div>
+                            <h3 class="category-title">${category.title}</h3>
+                        </div>
+                    </div>
+                    <div class="command-list">
+                        ${category.commands.map(cmd => `
+                            <div class="command-item" data-command="${cmd.command}">
+                                ${cmd.label}
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="9 18 15 12 9 6"></polyline>
+                                </svg>
+                            </div>
+                        `).join('')}
+                    </div>
+                `;
+                return div;
+            }
+            
+            static createHistoryItem(conversation) {
+                const div = document.createElement('div');
+                div.className = 'history-item';
+                
+                const userMessage = conversation.find(m => m.type === 'user');
+                const assistantMessage = conversation.find(m => m.type === 'assistant');
+                
+                if (userMessage && assistantMessage) {
+                    div.innerHTML = `
+                        <div class="history-item-header">
+                            <span class="history-item-type">Conversation</span>
+                            <span class="history-item-time">${utils.formatTime(userMessage.timestamp)}</span>
+                        </div>
+                        <div class="history-item-content">
+                            <strong>You:</strong> ${utils.sanitizeHTML(userMessage.content)}<br>
+                            <strong>LUNA:</strong> ${utils.sanitizeHTML(assistantMessage.content.substring(0, 100))}${assistantMessage.content.length > 100 ? '...' : ''}
+                        </div>
+                    `;
+                }
+                
+                return div;
+            }
+        }
+        
+        // Main Application
+        class LunaAssistant {
+            constructor() {
+                this.stateManager = new StateManager();
+                this.audioManager = new AudioManager();
+                this.wsManager = new WebSocketManager(this.stateManager);
+                this.recognition = null;
+                this.synthesis = window.speechSynthesis;
                 
                 this.init();
             }
             
-            init() {
+            async init() {
+                this.initializeSpeechRecognition();
                 this.setupEventListeners();
-                this.initializeCharts();
-                this.generateHeatmap();
-                this.startRealTimeUpdates();
-                this.connectWebSocket();
-                this.animateCounters();
+                this.loadInitialData();
+                this.setupStateSubscriptions();
+                
+                // Apply saved theme
+                if (!this.stateManager.getState('settings').darkMode) {
+                    document.body.classList.add('light-mode');
+                }
+                
+                // Try to connect if API key exists
+                if (this.stateManager.getState('settings').apiKey) {
+                    this.wsManager.connect();
+                }
+                
+                // Add initial greeting
+                this.addInitialGreeting();
+                
+                // Register service worker
+                this.registerServiceWorker();
+            }
+            
+            initializeSpeechRecognition() {
+                if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                    this.recognition = new SpeechRecognition();
+                    this.recognition.continuous = true;
+                    this.recognition.interimResults = true;
+                    this.recognition.lang = this.stateManager.getState('settings').language;
+                    
+                    this.recognition.onstart = () => this.onRecognitionStart();
+                    this.recognition.onresult = (event) => this.onRecognitionResult(event);
+                    this.recognition.onerror = (event) => this.onRecognitionError(event);
+                    this.recognition.onend = () => this.onRecognitionEnd();
+                } else {
+                    this.showNotification('Speech recognition not supported', 'error');
+                }
             }
             
             setupEventListeners() {
-                // Sidebar navigation
-                document.querySelectorAll('.sidebar-item').forEach(item => {
-                    item.addEventListener('click', (e) => {
+                // Voice button
+                const voiceButton = document.getElementById('voiceButton');
+                voiceButton.addEventListener('click', () => this.toggleListening());
+                
+                // Text input
+                const textInput = document.getElementById('textInput');
+                const sendButton = document.getElementById('sendButton');
+                
+                textInput.addEventListener('input', utils.debounce((e) => {
+                    sendButton.disabled = !e.target.value.trim();
+                }, 100));
+                
+                textInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
                         e.preventDefault();
-                        document.querySelectorAll('.sidebar-item').forEach(i => i.classList.remove('active'));
-                        item.classList.add('active');
-                        // In production, this would load different dashboard views
+                        this.sendTextMessage();
+                    }
+                });
+                
+                sendButton.addEventListener('click', () => this.sendTextMessage());
+                
+                // Navigation tabs
+                document.querySelectorAll('.nav-tab').forEach(tab => {
+                    tab.addEventListener('click', () => {
+                        this.switchTab(tab.dataset.tab);
                     });
                 });
                 
-                // Chart time range options
-                document.querySelectorAll('.chart-option').forEach(option => {
-                    option.addEventListener('click', (e) => {
-                        const siblings = e.target.parentElement.querySelectorAll('.chart-option');
-                        siblings.forEach(s => s.classList.remove('active'));
-                        e.target.classList.add('active');
-                        // Update chart data based on selected range
-                        this.updateChartData(e.target.closest('.chart-container'));
+                // Quick actions
+                document.querySelectorAll('.quick-action').forEach(action => {
+                    action.addEventListener('click', () => {
+                        this.processCommand(action.dataset.command);
                     });
                 });
                 
-                // Activity filter
-                document.querySelectorAll('.filter-chip').forEach(chip => {
-                    chip.addEventListener('click', (e) => {
-                        document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-                        e.target.classList.add('active');
-                        this.filterActivityFeed(e.target.textContent.toLowerCase());
-                    });
+                // Command palette
+                const commandPaletteBtn = document.getElementById('commandPaletteBtn');
+                const commandPalette = document.getElementById('commandPalette');
+                
+                commandPaletteBtn.addEventListener('click', () => {
+                    commandPalette.classList.add('active');
+                    document.getElementById('commandPaletteSearch').focus();
+                });
+                
+                commandPalette.addEventListener('click', (e) => {
+                    if (e.target === commandPalette) {
+                        commandPalette.classList.remove('active');
+                    }
+                });
+                
+                // Theme toggle
+                document.getElementById('themeToggle').addEventListener('click', () => {
+                    this.toggleTheme();
+                });
+                
+                // History actions
+                document.getElementById('exportButton').addEventListener('click', () => {
+                    this.exportConversation();
+                });
+                
+                document.getElementById('clearHistoryButton').addEventListener('click', () => {
+                    if (confirm('Are you sure you want to clear all history?')) {
+                        this.clearHistory();
+                    }
+                });
+                
+                // Keyboard shortcuts
+                document.addEventListener('keydown', (e) => {
+                    if (e.metaKey || e.ctrlKey) {
+                        switch (e.key) {
+                            case 'k':
+                                e.preventDefault();
+                                commandPalette.classList.toggle('active');
+                                break;
+                            case 'e':
+                                e.preventDefault();
+                                this.exportConversation();
+                                break;
+                            case 'd':
+                                e.preventDefault();
+                                this.toggleTheme();
+                                break;
+                        }
+                    }
+                });
+                
+                // Visibility change
+                document.addEventListener('visibilitychange', () => {
+                    if (document.hidden && this.stateManager.getState('isListening')) {
+                        this.recognition?.stop();
+                    }
                 });
             }
             
-            initializeCharts() {
-                // Volume Chart
-                const volumeCtx = document.getElementById('volumeChart');
-                if (volumeCtx) {
-                    this.charts.volume = this.createLineChart(volumeCtx);
-                }
-                
-                // Intent Distribution Chart
-                const intentCtx = document.getElementById('intentChart');
-                if (intentCtx) {
-                    this.charts.intent = this.createDoughnutChart(intentCtx);
-                }
-            }
-            
-            createLineChart(canvas) {
-                const ctx = canvas.getContext('2d');
-                const gradient = ctx.createLinearGradient(0, 0, 0, 300);
-                gradient.addColorStop(0, 'rgba(124, 58, 237, 0.4)');
-                gradient.addColorStop(1, 'rgba(124, 58, 237, 0)');
-                
-                // Simulate chart data
-                const hours = Array.from({length: 24}, (_, i) => `${i}:00`);
-                const data = Array.from({length: 24}, () => Math.floor(Math.random() * 1000) + 500);
-                
-                // Draw simple line chart
-                this.drawLineChart(ctx, hours, data, gradient);
-                
-                return { ctx, data, hours };
-            }
-            
-            drawLineChart(ctx, labels, data, gradient) {
-                const width = ctx.canvas.width = ctx.canvas.offsetWidth;
-                const height = ctx.canvas.height = ctx.canvas.offsetHeight;
-                const padding = 40;
-                const chartWidth = width - padding * 2;
-                const chartHeight = height - padding * 2;
-                
-                ctx.clearRect(0, 0, width, height);
-                
-                // Find max value
-                const maxValue = Math.max(...data);
-                const scale = chartHeight / maxValue;
-                
-                // Draw grid lines
-                ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
-                ctx.lineWidth = 1;
-                for (let i = 0; i <= 5; i++) {
-                    const y = padding + (chartHeight / 5) * i;
-                    ctx.beginPath();
-                    ctx.moveTo(padding, y);
-                    ctx.lineTo(width - padding, y);
-                    ctx.stroke();
-                }
-                
-                // Draw line
-                ctx.strokeStyle = '#7c3aed';
-                ctx.lineWidth = 2;
-                ctx.beginPath();
-                
-                data.forEach((value, index) => {
-                    const x = padding + (chartWidth / (data.length - 1)) * index;
-                    const y = padding + chartHeight - (value * scale);
+            setupStateSubscriptions() {
+                // Connection status
+                this.stateManager.subscribe('isConnected', (isConnected) => {
+                    const statusDot = document.getElementById('statusDot');
+                    const statusText = document.getElementById('statusText');
                     
-                    if (index === 0) {
-                        ctx.moveTo(x, y);
+                    if (isConnected) {
+                        statusDot.classList.add('connected');
+                        statusDot.classList.remove('disconnected');
+                        statusText.textContent = 'Connected';
+                        this.showNotification('Connected to LUNA servers', 'success');
                     } else {
-                        ctx.lineTo(x, y);
+                        statusDot.classList.remove('connected');
+                        statusDot.classList.add('disconnected');
+                        statusText.textContent = 'Offline';
                     }
                 });
                 
-                ctx.stroke();
+                // Messages
+                this.stateManager.subscribe('messages', (messages) => {
+                    this.updateMessagesView();
+                    this.saveHistory();
+                });
                 
-                // Fill area under line
-                ctx.lineTo(width - padding, height - padding);
-                ctx.lineTo(padding, height - padding);
-                ctx.closePath();
-                ctx.fillStyle = gradient;
-                ctx.fill();
-                
-                // Draw labels
-                ctx.fillStyle = 'rgba(255, 255, 255, 0.5)';
-                ctx.font = '12px sans-serif';
-                ctx.textAlign = 'center';
-                
-                // X-axis labels (show every 4th hour)
-                labels.forEach((label, index) => {
-                    if (index % 4 === 0) {
-                        const x = padding + (chartWidth / (labels.length - 1)) * index;
-                        ctx.fillText(label, x, height - 10);
-                    }
+                // Notifications
+                this.stateManager.subscribe('notifications', (notifications) => {
+                    this.updateNotificationBadge();
                 });
             }
             
-            createDoughnutChart(canvas) {
-                const ctx = canvas.getContext('2d');
-                const width = ctx.canvas.width = ctx.canvas.offsetWidth;
-                const height = ctx.canvas.height = ctx.canvas.offsetHeight;
+            loadInitialData() {
+                // Load commands
+                this.loadCommands();
                 
-                const data = [
-                    { label: 'Information', value: 35, color: '#7c3aed' },
-                    { label: 'Action', value: 25, color: '#3b82f6' },
-                    { label: 'Entertainment', value: 20, color: '#10b981' },
-                    { label: 'Productivity', value: 15, color: '#f59e0b' },
-                    { label: 'Other', value: 5, color: '#ef4444' }
+                // Load settings UI
+                this.loadSettingsUI();
+                
+                // Load command palette
+                this.loadCommandPalette();
+                
+                // Load history
+                this.loadHistory();
+            }
+            
+            loadCommands() {
+                const categories = [
+                    {
+                        type: 'productivity',
+                        title: 'Productivity',
+                        icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon></svg>',
+                        commands: [
+                            { label: 'Set a reminder for...', command: 'Set a reminder for tomorrow at 3 PM' },
+                            { label: 'Create a todo list', command: 'Create a todo list' },
+                            { label: 'Schedule a meeting', command: 'Schedule a meeting' },
+                            { label: 'Take a note', command: 'Take a note' }
+                        ]
+                    },
+                    {
+                        type: 'information',
+                        title: 'Information',
+                        icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>',
+                        commands: [
+                            { label: 'What\'s the weather?', command: 'What\'s the weather forecast?' },
+                            { label: 'Search for...', command: 'Search for restaurants near me' },
+                            { label: 'Latest news', command: 'What\'s the latest news?' },
+                            { label: 'Define...', command: 'Define artificial intelligence' }
+                        ]
+                    },
+                    {
+                        type: 'entertainment',
+                        title: 'Entertainment',
+                        icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>',
+                        commands: [
+                            { label: 'Play music', command: 'Play some relaxing music' },
+                            { label: 'Tell me a joke', command: 'Tell me a joke' },
+                            { label: 'Fun fact', command: 'Give me a fun fact' },
+                            { label: 'Movie recommendations', command: 'Recommend a movie' }
+                        ]
+                    },
+                    {
+                        type: 'system',
+                        title: 'System',
+                        icon: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2L2 7l10 5 10-5-10-5z"></path><path d="M2 17l10 5 10-5M2 12l10 5 10-5"></path></svg>',
+                        commands: [
+                            { label: 'System status', command: 'Check system status' },
+                            { label: 'Battery level', command: 'What\'s my battery level?' },
+                            { label: 'Network info', command: 'Show network information' },
+                            { label: 'Device settings', command: 'Open device settings' }
+                        ]
+                    }
                 ];
                 
-                this.drawDoughnutChart(ctx, data);
+                const container = document.querySelector('.commands-grid');
+                container.innerHTML = '';
                 
-                return { ctx, data };
-            }
-            
-            drawDoughnutChart(ctx, data) {
-                const width = ctx.canvas.width;
-                const height = ctx.canvas.height;
-                const centerX = width / 2;
-                const centerY = height / 2;
-                const radius = Math.min(width, height) / 2 - 40;
-                const innerRadius = radius * 0.6;
-                
-                ctx.clearRect(0, 0, width, height);
-                
-                let currentAngle = -Math.PI / 2;
-                const total = data.reduce((sum, item) => sum + item.value, 0);
-                
-                // Draw segments
-                data.forEach((segment, index) => {
-                    const sliceAngle = (segment.value / total) * 2 * Math.PI;
+                categories.forEach(category => {
+                    const categoryEl = UIComponents.createCommandCategory(category);
+                    container.appendChild(categoryEl);
                     
-                    // Draw outer arc
-                    ctx.beginPath();
-                    ctx.arc(centerX, centerY, radius, currentAngle, currentAngle + sliceAngle);
-                    ctx.arc(centerX, centerY, innerRadius, currentAngle + sliceAngle, currentAngle, true);
-                    ctx.closePath();
-                    ctx.fillStyle = segment.color;
-                    ctx.fill();
-                    
-                    // Draw label
-                    const labelAngle = currentAngle + sliceAngle / 2;
-                    const labelX = centerX + Math.cos(labelAngle) * (radius + 20);
-                    const labelY = centerY + Math.sin(labelAngle) * (radius + 20);
-                    
-                    ctx.fillStyle = 'rgba(255, 255, 255, 0.8)';
-                    ctx.font = '12px sans-serif';
-                    ctx.textAlign = labelX > centerX ? 'left' : 'right';
-                    ctx.textBaseline = 'middle';
-                    ctx.fillText(`${segment.label} ${segment.value}%`, labelX, labelY);
-                    
-                    currentAngle += sliceAngle;
-                });
-                
-                // Draw center text
-                ctx.fillStyle = 'white';
-                ctx.font = 'bold 24px sans-serif';
-                ctx.textAlign = 'center';
-                ctx.textBaseline = 'middle';
-                ctx.fillText('Intents', centerX, centerY);
-            }
-            
-            generateHeatmap() {
-                const heatmapGrid = document.getElementById('heatmapGrid');
-                const hours = ['12am', '2am', '4am', '6am', '8am', '10am', '12pm', '2pm', '4pm', '6pm', '8pm', '10pm'];
-                
-                hours.forEach(hour => {
-                    // Hour label
-                    const hourDiv = document.createElement('div');
-                    hourDiv.className = 'heatmap-hour';
-                    hourDiv.textContent = hour;
-                    heatmapGrid.appendChild(hourDiv);
-                    
-                    // Day cells
-                    for (let day = 0; day < 7; day++) {
-                        const cell = document.createElement('div');
-                        cell.className = 'heatmap-cell';
-                        
-                        // Random intensity
-                        const intensity = Math.random();
-                        if (intensity > 0.75) cell.classList.add('very-high');
-                        else if (intensity > 0.5) cell.classList.add('high');
-                        else if (intensity > 0.25) cell.classList.add('medium');
-                        else cell.classList.add('low');
-                        
-                        // Tooltip on hover
-                        cell.title = `${Math.floor(intensity * 1000)} commands`;
-                        
-                        heatmapGrid.appendChild(cell);
-                    }
+                    // Add event listeners
+                    categoryEl.querySelectorAll('.command-item').forEach(item => {
+                        item.addEventListener('click', () => {
+                            this.processCommand(item.dataset.command);
+                        });
+                    });
                 });
             }
             
-            startRealTimeUpdates() {
-                // Update metrics every 2 seconds
-                setInterval(() => {
-                    this.updateMetrics();
-                    this.addActivityItem();
-                }, 2000);
-                
-                // Update charts every 5 seconds
-                setInterval(() => {
-                    this.updateCharts();
-                }, 5000);
-            }
-            
-            updateMetrics() {
-                // Simulate real-time metric updates
-                const metrics = {
-                    activeUsers: Math.floor(Math.random() * 500) + 3500,
-                    commandsToday: Math.floor(Math.random() * 5000) + 40000,
-                    avgResponseTime: Math.floor(Math.random() * 50) + 150
-                };
-                
-                // Update with animation
-                this.animateValue('totalUsers', this.realTimeData.activeUsers, metrics.activeUsers, 500);
-                this.animateValue('totalCommands', this.realTimeData.commandsToday, metrics.commandsToday, 500);
-                
-                document.getElementById('avgResponseTime').textContent = `${metrics.avgResponseTime}ms`;
-                
-                this.realTimeData = metrics;
-            }
-            
-            animateValue(elementId, start, end, duration) {
-                const element = document.getElementById(elementId);
-                const range = end - start;
-                const startTime = performance.now();
-                
-                const update = (currentTime) => {
-                    const elapsed = currentTime - startTime;
-                    const progress = Math.min(elapsed / duration, 1);
-                    const current = Math.floor(start + range * progress);
-                    
-                    element.textContent = current.toLocaleString();
-                    
-                    if (progress < 1) {
-                        requestAnimationFrame(update);
-                    }
-                };
-                
-                requestAnimationFrame(update);
-            }
-            
-            animateCounters() {
-                // Initial animation
-                this.animateValue('totalUsers', 0, 3842, 1000);
-                this.animateValue('totalCommands', 0, 45287, 1500);
-                document.getElementById('avgResponseTime').textContent = '182ms';
-            }
-            
-            updateCharts() {
-                // Update line chart with new data point
-                if (this.charts.volume) {
-                    const { ctx, data, hours } = this.charts.volume;
-                    // Shift data and add new point
-                    data.shift();
-                    data.push(Math.floor(Math.random() * 1000) + 500);
-                    
-                    const gradient = ctx.createLinearGradient(0, 0, 0, 300);
-                    gradient.addColorStop(0, 'rgba(124, 58, 237, 0.4)');
-                    gradient.addColorStop(1, 'rgba(124, 58, 237, 0)');
-                    
-                    this.drawLineChart(ctx, hours, data, gradient);
-                }
-            }
-            
-            updateChartData(container) {
-                // In production, this would fetch new data based on time range
-                const chart = container.querySelector('canvas');
-                if (chart && this.charts.volume && chart.id === 'volumeChart') {
-                    const newData = Array.from({length: 24}, () => Math.floor(Math.random() * 1000) + 500);
-                    this.charts.volume.data = newData;
-                    this.updateCharts();
-                }
-            }
-            
-            addActivityItem() {
-                const activities = [
-                    { type: 'command', icon: '💬', text: 'User asked: "What\'s the weather today?"', user: 'User #' + Math.floor(Math.random() * 9999), location: 'New York, US' },
-                    { type: 'success', icon: '✅', text: 'Successfully processed weather query', responseTime: Math.floor(Math.random() * 200) + 100 + 'ms' },
-                    { type: 'error', icon: '❌', text: 'Speech recognition failed', error: 'Network timeout', user: 'User #' + Math.floor(Math.random() * 9999) },
-                    { type: 'command', icon: '💬', text: 'User asked: "Set a reminder for 3 PM"', user: 'User #' + Math.floor(Math.random() * 9999), location: 'London, UK' },
-                    { type: 'warning', icon: '⚠️', text: 'High latency detected', latency: Math.floor(Math.random() * 500) + 500 + 'ms', region: 'EU-West' },
-                    { type: 'success', icon: '✅', text: 'New user registration', user: 'User #' + Math.floor(Math.random() * 9999), plan: 'Premium' },
-                    { type: 'command', icon: '💬', text: 'User asked: "Play some music"', user: 'User #' + Math.floor(Math.random() * 9999), device: 'Smart Speaker' }
-                ];
-                
-                const activity = activities[Math.floor(Math.random() * activities.length)];
-                const activityFeed = document.getElementById('activityFeed');
-                
-                const activityItem = document.createElement('div');
-                activityItem.className = `activity-item ${activity.type}`;
-                activityItem.innerHTML = `
-                    <div class="activity-icon ${activity.type}">
-                        ${activity.icon}
+            loadSettingsUI() {
+                const settingsContainer = document.querySelector('.settings-container');
+                settingsContainer.innerHTML = `
+                    <!-- API Configuration -->
+                    <div class="settings-section">
+                        <div class="settings-section-header">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="11" width="18" height="10" rx="2" ry="2"></rect>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                            </svg>
+                            API Configuration
+                        </div>
+                        <div class="settings-group">
+                            <div class="settings-item">
+                                <label class="settings-label">API Key</label>
+                                <p class="settings-description">Enter your LUNA API key to enable cloud features</p>
+                                <input type="password" class="settings-input" id="apiKeyInput" placeholder="sk-..." />
+                            </div>
+                        </div>
                     </div>
-                    <div class="activity-content">
-                        <div class="activity-text">${activity.text}</div>
-                        <div class="activity-meta">
-                            ${activity.user ? `<span>${activity.user}</span>` : ''}
-                            ${activity.location ? `<span>${activity.location}</span>` : ''}
-                            ${activity.responseTime ? `<span>${activity.responseTime}</span>` : ''}
-                            ${activity.error ? `<span style="color: var(--error)">${activity.error}</span>` : ''}
-                            ${activity.latency ? `<span style="color: var(--warning)">${activity.latency}</span>` : ''}
-                            ${activity.device ? `<span>${activity.device}</span>` : ''}
-                            <span>${new Date().toLocaleTimeString()}</span>
+                    
+                    <!-- Voice Settings -->
+                    <div class="settings-section">
+                        <div class="settings-section-header">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                                <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                            </svg>
+                            Voice Settings
+                        </div>
+                        <div class="settings-group">
+                            <div class="settings-item">
+                                <label class="settings-label">Voice Type</label>
+                                <select class="settings-select" id="voiceTypeSelect">
+                                    <option value="female">Female</option>
+                                    <option value="male">Male</option>
+                                    <option value="neutral">Neutral</option>
+                                </select>
+                            </div>
+                            <div class="settings-item">
+                                <label class="settings-label">Language</label>
+                                <select class="settings-select" id="languageSelect">
+                                    <option value="en-US">English (US)</option>
+                                    <option value="en-GB">English (UK)</option>
+                                    <option value="es-ES">Spanish</option>
+                                    <option value="fr-FR">French</option>
+                                    <option value="de-DE">German</option>
+                                    <option value="ja-JP">Japanese</option>
+                                    <option value="zh-CN">Chinese</option>
+                                </select>
+                            </div>
+                            <div class="settings-item">
+                                <label class="settings-label">Speech Rate</label>
+                                <div class="settings-range">
+                                    <input type="range" class="range-slider" id="speechRateSlider" min="0.5" max="2" step="0.1" value="1" />
+                                    <span class="range-value" id="speechRateValue">1.0x</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Advanced Features -->
+                    <div class="settings-section">
+                        <div class="settings-section-header">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 1 1 7.072 0l-.548.547A3.374 3.374 0 0 0 14 18.469V19a2 2 0 1 1-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                            </svg>
+                            Advanced Features
+                        </div>
+                        <div class="settings-group">
+                            <div class="settings-toggle">
+                                <div class="settings-toggle-info">
+                                    <div class="settings-label">Emotion Detection</div>
+                                    <div class="settings-description">Analyze and display emotional context in responses</div>
+                                </div>
+                                <div class="toggle-switch" id="emotionToggle">
+                                    <div class="toggle-slider"></div>
+                                </div>
+                            </div>
+                            <div class="settings-toggle">
+                                <div class="settings-toggle-info">
+                                    <div class="settings-label">Auto Listen</div>
+                                    <div class="settings-description">Continue listening after assistant responds</div>
+                                </div>
+                                <div class="toggle-switch" id="autoListenToggle">
+                                    <div class="toggle-slider"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Privacy -->
+                    <div class="settings-section">
+                        <div class="settings-section-header">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                            </svg>
+                            Privacy & Data
+                        </div>
+                        <div class="settings-group">
+                            <div class="settings-toggle">
+                                <div class="settings-toggle-info">
+                                    <div class="settings-label">Save History Locally</div>
+                                    <div class="settings-description">Store conversation history on this device</div>
+                                </div>
+                                <div class="toggle-switch active" id="saveHistoryToggle">
+                                    <div class="toggle-slider"></div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 `;
                 
-                // Add to feed (keep only last 10 items)
-                activityFeed.insertBefore(activityItem, activityFeed.firstChild);
-                if (activityFeed.children.length > 10) {
-                    activityFeed.removeChild(activityFeed.lastChild);
+                // Setup settings listeners
+                this.setupSettingsListeners();
+            }
+            
+            loadCommandPalette() {
+                const commands = [
+                    { action: 'clear-conversation', label: 'Clear Conversation', description: 'Remove all messages from current session', shortcut: '⌘K', icon: '<polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>' },
+                    { action: 'export-data', label: 'Export Conversation', description: 'Download chat history as JSON', shortcut: '⌘E', icon: '<path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path><polyline points="7 10 12 15 17 10"></polyline><line x1="12" y1="15" x2="12" y2="3"></line>' },
+                    { action: 'toggle-theme', label: 'Toggle Theme', description: 'Switch between light and dark mode', shortcut: '⌘D', icon: '<circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line>' },
+                    { action: 'disconnect', label: 'Disconnect', description: 'Close connection to LUNA servers', shortcut: '', icon: '<path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path><line x1="12" y1="2" x2="12" y2="12"></line>' },
+                    { action: 'help', label: 'Help & Documentation', description: 'View LUNA user guide', shortcut: '⌘?', icon: '<circle cx="12" cy="12" r="10"></circle><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path><line x1="12" y1="17" x2="12.01" y2="17"></line>' }
+                ];
+                
+                const listEl = document.querySelector('.command-palette-list');
+                listEl.innerHTML = '';
+                
+                commands.forEach(cmd => {
+                    const item = document.createElement('div');
+                    item.className = 'command-palette-item';
+                    item.dataset.action = cmd.action;
+                    item.innerHTML = `
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            ${cmd.icon}
+                        </svg>
+                        <div class="command-palette-item-text">
+                            <div class="command-palette-item-label">${cmd.label}</div>
+                            <div class="command-palette-item-description">${cmd.description}</div>
+                        </div>
+                        ${cmd.shortcut ? `<span class="command-palette-shortcut">${cmd.shortcut}</span>` : ''}
+                    `;
+                    
+                    item.addEventListener('click', () => {
+                        this.executeCommand(cmd.action);
+                        document.getElementById('commandPalette').classList.remove('active');
+                    });
+                    
+                    listEl.appendChild(item);
+                });
+                
+                // Setup search
+                const searchInput = document.getElementById('commandPaletteSearch');
+                searchInput.addEventListener('input', utils.debounce((e) => {
+                    const query = e.target.value.toLowerCase();
+                    const items = listEl.querySelectorAll('.command-palette-item');
+                    
+                    items.forEach(item => {
+                        const text = item.textContent.toLowerCase();
+                        item.style.display = text.includes(query) ? '' : 'none';
+                    });
+                }, 200));
+            }
+            
+            setupSettingsListeners() {
+                const settings = this.stateManager.getState('settings');
+                
+                // API Key
+                const apiKeyInput = document.getElementById('apiKeyInput');
+                apiKeyInput.value = settings.apiKey || '';
+                apiKeyInput.addEventListener('change', (e) => {
+                    settings.apiKey = e.target.value;
+                    this.stateManager.saveSettings();
+                    
+                    if (e.target.value) {
+                        this.wsManager.connect();
+                    } else {
+                        this.wsManager.disconnect();
+                    }
+                });
+                
+                // Voice settings
+                document.getElementById('voiceTypeSelect').value = settings.voiceType;
+                document.getElementById('voiceTypeSelect').addEventListener('change', (e) => {
+                    settings.voiceType = e.target.value;
+                    this.stateManager.saveSettings();
+                });
+                
+                document.getElementById('languageSelect').value = settings.language;
+                document.getElementById('languageSelect').addEventListener('change', (e) => {
+                    settings.language = e.target.value;
+                    this.recognition.lang = e.target.value;
+                    this.stateManager.saveSettings();
+                });
+                
+                const speechRateSlider = document.getElementById('speechRateSlider');
+                const speechRateValue = document.getElementById('speechRateValue');
+                speechRateSlider.value = settings.speechRate;
+                speechRateValue.textContent = `${settings.speechRate}x`;
+                
+                speechRateSlider.addEventListener('input', (e) => {
+                    settings.speechRate = parseFloat(e.target.value);
+                    speechRateValue.textContent = `${e.target.value}x`;
+                    this.stateManager.saveSettings();
+                });
+                
+                // Toggle switches
+                const toggles = [
+                    { id: 'emotionToggle', setting: 'enableEmotions' },
+                    { id: 'autoListenToggle', setting: 'autoListen' },
+                    { id: 'saveHistoryToggle', setting: 'saveHistory' }
+                ];
+                
+                toggles.forEach(toggle => {
+                    const element = document.getElementById(toggle.id);
+                    if (settings[toggle.setting]) {
+                        element.classList.add('active');
+                    }
+                    
+                    element.addEventListener('click', () => {
+                        element.classList.toggle('active');
+                        settings[toggle.setting] = element.classList.contains('active');
+                        this.stateManager.saveSettings();
+                    });
+                });
+            }
+            
+            addInitialGreeting() {
+                const greeting = {
+                    id: utils.generateId(),
+                    type: 'assistant',
+                    content: "Hello! I'm LUNA, your personal AI assistant. How can I help you today?",
+                    timestamp: new Date(),
+                    emotion: 'friendly',
+                    confidence: 1.0
+                };
+                
+                this.stateManager.setState('messages', [greeting]);
+            }
+            
+            async onRecognitionStart() {
+                this.stateManager.setState('isListening', true);
+                const voiceButton = document.getElementById('voiceButton');
+                voiceButton.classList.remove('idle');
+                voiceButton.classList.add('listening');
+                voiceButton.setAttribute('aria-label', 'Stop voice input');
+                
+                document.getElementById('audioVisualizer').classList.add('active');
+                
+                // Initialize audio visualization
+                const initialized = await this.audioManager.initialize();
+                if (initialized) {
+                    this.audioManager.startVisualization((dataArray) => {
+                        const bars = document.querySelectorAll('.visualizer-bar');
+                        bars.forEach((bar, index) => {
+                            const value = dataArray[index * 10] || 0;
+                            const height = Math.max(8, (value / 255) * 40);
+                            bar.style.height = `${height}px`;
+                        });
+                    });
                 }
             }
             
-            filterActivityFeed(filter) {
-                const items = document.querySelectorAll('.activity-item');
-                items.forEach(item => {
-                    if (filter === 'all' || item.classList.contains(filter)) {
-                        item.style.display = 'flex';
+            onRecognitionEnd() {
+                this.stateManager.setState('isListening', false);
+                const voiceButton = document.getElementById('voiceButton');
+                voiceButton.classList.remove('listening');
+                voiceButton.classList.add('idle');
+                voiceButton.setAttribute('aria-label', 'Start voice input');
+                
+                document.getElementById('audioVisualizer').classList.remove('active');
+                document.getElementById('transcriptPreview').textContent = 'Listening...';
+                
+                this.audioManager.cleanup();
+            }
+            
+            onRecognitionResult(event) {
+                let finalTranscript = '';
+                let interimTranscript = '';
+                
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    const transcript = event.results[i][0].transcript;
+                    if (event.results[i].isFinal) {
+                        finalTranscript += transcript;
                     } else {
-                        item.style.display = 'none';
+                        interimTranscript += transcript;
                     }
+                }
+                
+                // Update preview
+                document.getElementById('transcriptPreview').textContent = 
+                    interimTranscript || finalTranscript || 'Listening...';
+                
+                if (finalTranscript) {
+                    this.processCommand(finalTranscript);
+                    
+                    // Stop listening unless auto-listen is enabled
+                    if (!this.stateManager.getState('settings').autoListen) {
+                        this.recognition.stop();
+                    }
+                }
+            }
+            
+            onRecognitionError(event) {
+                console.error('Speech recognition error:', event.error);
+                
+                let errorMessage = 'Speech recognition error';
+                switch (event.error) {
+                    case 'no-speech':
+                        errorMessage = 'No speech detected';
+                        break;
+                    case 'audio-capture':
+                        errorMessage = 'No microphone found';
+                        break;
+                    case 'not-allowed':
+                        errorMessage = 'Microphone permission denied';
+                        break;
+                }
+                
+                this.showNotification(errorMessage, 'error');
+            }
+            
+            toggleListening() {
+                if (this.stateManager.getState('isListening')) {
+                    this.recognition?.stop();
+                } else {
+                    this.recognition?.start();
+                }
+            }
+            
+            sendTextMessage() {
+                const input = document.getElementById('textInput');
+                const text = input.value.trim();
+                
+                if (text) {
+                    this.processCommand(text);
+                    input.value = '';
+                    document.getElementById('sendButton').disabled = true;
+                }
+            }
+            
+            processCommand(command) {
+                // Add user message
+                const userMessage = {
+                    id: utils.generateId(),
+                    type: 'user',
+                    content: command,
+                    timestamp: new Date()
+                };
+                
+                const messages = [...this.stateManager.getState('messages'), userMessage];
+                this.stateManager.setState('messages', messages);
+                
+                // Show typing indicator
+                document.getElementById('typingIndicator').classList.add('active');
+                
+                // Send to WebSocket if connected
+                if (this.wsManager.ws?.readyState === WebSocket.OPEN) {
+                    this.wsManager.send({
+                        type: 'text_command',
+                        request_id: userMessage.id,
+                        text: command,
+                        context: {
+                            enable_emotions: this.stateManager.getState('settings').enableEmotions,
+                            voice_type: this.stateManager.getState('settings').voiceType,
+                            language: this.stateManager.getState('settings').language
+                        }
+                    });
+                } else {
+                    // Fallback to local processing
+                    this.processCommandLocally(command);
+                }
+            }
+            
+            async processCommandLocally(command) {
+                // Simulate processing delay
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                // Hide typing indicator
+                document.getElementById('typingIndicator').classList.remove('active');
+                
+                // Generate response
+                let response = '';
+                let emotion = 'neutral';
+                
+                const lowerCommand = command.toLowerCase();
+                
+                // Command processing logic
+                const responses = {
+                    weather: {
+                        text: "I'd need to connect to the weather service to get current conditions. Please add your API key in settings to enable this feature.",
+                        emotion: 'helpful'
+                    },
+                    time: {
+                        text: `The current time is ${new Date().toLocaleTimeString()}.`,
+                        emotion: 'friendly'
+                    },
+                    date: {
+                        text: `Today is ${new Date().toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}.`,
+                        emotion: 'friendly'
+                    },
+                    joke: {
+                        text: ["Why don't scientists trust atoms? Because they make up everything!",
+                               "Why did the scarecrow win an award? He was outstanding in his field!",
+                               "Why don't eggs tell jokes? They'd crack up!"][Math.floor(Math.random() * 3)],
+                        emotion: 'happy'
+                    },
+                    help: {
+                        text: "I'm LUNA, your AI assistant. I can help with information queries, set reminders, tell jokes, check the time, and much more. Try asking me anything!",
+                        emotion: 'helpful'
+                    },
+                    hello: {
+                        text: "Hello! How can I assist you today?",
+                        emotion: 'friendly'
+                    },
+                    thanks: {
+                        text: "You're welcome! Is there anything else I can help you with?",
+                        emotion: 'happy'
+                    }
+                };
+                
+                // Find matching response
+                for (const [key, value] of Object.entries(responses)) {
+                    if (lowerCommand.includes(key)) {
+                        response = value.text;
+                        emotion = value.emotion;
+                        break;
+                    }
+                }
+                
+                // Battery level check
+                if (lowerCommand.includes('battery')) {
+                    if (navigator.getBattery) {
+                        try {
+                            const battery = await navigator.getBattery();
+                            const level = Math.round(battery.level * 100);
+                            const charging = battery.charging ? 'charging' : 'not charging';
+                            response = `Your battery is at ${level}% and is ${charging}.`;
+                            emotion = 'helpful';
+                        } catch (error) {
+                            response = "I couldn't access battery information on this device.";
+                            emotion = 'concerned';
+                        }
+                    } else {
+                        response = "Battery information is not available on this device.";
+                        emotion = 'concerned';
+                    }
+                }
+                
+                // Default response
+                if (!response) {
+                    response = "I'm currently running in offline mode. Connect to LUNA servers for full functionality. You can add your API key in the settings.";
+                    emotion = 'helpful';
+                }
+                
+                // Add assistant message
+                const assistantMessage = {
+                    id: utils.generateId(),
+                    type: 'assistant',
+                    content: response,
+                    timestamp: new Date(),
+                    emotion: emotion,
+                    confidence: 0.95
+                };
+                
+                const messages = [...this.stateManager.getState('messages'), assistantMessage];
+                this.stateManager.setState('messages', messages);
+                
+                // Speak response
+                this.speak(response);
+            }
+            
+            speak(text) {
+                if (this.synthesis) {
+                    this.synthesis.cancel();
+                    
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    const settings = this.stateManager.getState('settings');
+                    utterance.rate = settings.speechRate;
+                    utterance.lang = settings.language;
+                    
+                    const voices = this.synthesis.getVoices();
+                    const preferredVoice = voices.find(voice => {
+                        return voice.lang.startsWith(settings.language.split('-')[0]) &&
+                               voice.name.toLowerCase().includes(settings.voiceType);
+                    });
+                    
+                    if (preferredVoice) {
+                        utterance.voice = preferredVoice;
+                    }
+                    
+                    this.synthesis.speak(utterance);
+                }
+            }
+            
+            updateMessagesView() {
+                const messages = this.stateManager.getState('messages');
+                const container = document.getElementById('chatMessages');
+                
+                // Clear existing messages
+                container.innerHTML = '';
+                
+                // Add messages
+                messages.forEach(message => {
+                    const messageEl = UIComponents.createMessage(message);
+                    container.appendChild(messageEl);
+                });
+                
+                // Hide typing indicator
+                document.getElementById('typingIndicator').classList.remove('active');
+                
+                // Scroll to bottom
+                requestAnimationFrame(() => {
+                    container.scrollTop = container.scrollHeight;
+                });
+                
+                // Update times periodically
+                if (this.messageTimeUpdateInterval) {
+                    clearInterval(this.messageTimeUpdateInterval);
+                }
+                
+                this.messageTimeUpdateInterval = setInterval(() => {
+                    container.querySelectorAll('.message-time').forEach((timeEl, index) => {
+                        if (messages[index]) {
+                            timeEl.textContent = utils.formatTime(messages[index].timestamp);
+                        }
+                    });
+                }, 60000);
+            }
+            
+            showNotification(message, type = 'info') {
+                const notification = {
+                    id: utils.generateId(),
+                    message: message,
+                    type: type,
+                    timestamp: new Date()
+                };
+                
+                const notifications = [...this.stateManager.getState('notifications'), notification];
+                this.stateManager.setState('notifications', notifications);
+                
+                // Create notification element
+                const container = document.getElementById('notificationsContainer');
+                const notificationEl = UIComponents.createNotification(message, type);
+                
+                container.appendChild(notificationEl);
+                
+                // Auto-remove after 5 seconds
+                setTimeout(() => {
+                    notificationEl.style.opacity = '0';
+                    setTimeout(() => {
+                        notificationEl.remove();
+                        const updatedNotifications = this.stateManager.getState('notifications')
+                            .filter(n => n.id !== notification.id);
+                        this.stateManager.setState('notifications', updatedNotifications);
+                    }, 300);
+                }, 5000);
+                
+                // Click to dismiss
+                notificationEl.addEventListener('click', () => {
+                    notificationEl.remove();
+                    const updatedNotifications = this.stateManager.getState('notifications')
+                        .filter(n => n.id !== notification.id);
+                    this.stateManager.setState('notifications', updatedNotifications);
                 });
             }
             
-            connectWebSocket() {
-                // Simulate WebSocket connection for real-time data
-                // In production, this would connect to actual analytics stream
-                console.log('Connecting to analytics WebSocket...');
+            updateNotificationBadge() {
+                const badge = document.getElementById('notificationBadge');
+                const count = this.stateManager.getState('notifications').length;
                 
-                // Simulate connection status
-                setTimeout(() => {
-                    console.log('Connected to analytics stream');
-                }, 1000);
+                if (count > 0) {
+                    badge.textContent = count > 9 ? '9+' : count;
+                    badge.style.display = 'flex';
+                } else {
+                    badge.style.display = 'none';
+                }
+            }
+            
+            switchTab(tabName) {
+                // Update active tab
+                document.querySelectorAll('.nav-tab').forEach(tab => {
+                    const isActive = tab.dataset.tab === tabName;
+                    tab.classList.toggle('active', isActive);
+                    tab.setAttribute('aria-selected', isActive);
+                });
+                
+                // Show active content
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.toggle('active', content.dataset.tab === tabName);
+                });
+                
+                this.stateManager.setState('currentTab', tabName);
+                
+                // Update history view if switching to history
+                if (tabName === 'history') {
+                    this.updateHistoryView();
+                }
+            }
+            
+            updateHistoryView() {
+                const historyList = document.getElementById('historyList');
+                historyList.innerHTML = '';
+                
+                const messages = this.stateManager.getState('messages');
+                
+                // Group messages by conversation
+                const conversations = [];
+                let currentConversation = [];
+                
+                messages.forEach((message, index) => {
+                    if (message.type === 'user') {
+                        currentConversation = [message];
+                    } else if (message.type === 'assistant' && currentConversation.length > 0) {
+                        currentConversation.push(message);
+                        conversations.push([...currentConversation]);
+                        currentConversation = [];
+                    }
+                });
+                
+                // Display conversations
+                conversations.reverse().forEach(conversation => {
+                    const historyItem = UIComponents.createHistoryItem(conversation);
+                    
+                    historyItem.addEventListener('click', () => {
+                        const userMessage = conversation.find(m => m.type === 'user');
+                        const assistantMessage = conversation.find(m => m.type === 'assistant');
+                        
+                        if (userMessage && assistantMessage) {
+                            const text = `You: ${userMessage.content}\nLUNA: ${assistantMessage.content}`;
+                            navigator.clipboard.writeText(text);
+                            this.showNotification('Conversation copied to clipboard', 'success');
+                        }
+                    });
+                    
+                    historyList.appendChild(historyItem);
+                });
+                
+                if (conversations.length === 0) {
+                    historyList.innerHTML = '<p style="text-align: center; color: var(--text-tertiary);">No conversation history yet</p>';
+                }
+            }
+            
+            executeCommand(action) {
+                switch (action) {
+                    case 'clear-conversation':
+                        if (confirm('Clear all messages in the current conversation?')) {
+                            this.clearConversation();
+                        }
+                        break;
+                        
+                    case 'export-data':
+                        this.exportConversation();
+                        break;
+                        
+                    case 'toggle-theme':
+                        this.toggleTheme();
+                        break;
+                        
+                    case 'disconnect':
+                        this.wsManager.disconnect();
+                        this.showNotification('Disconnected from server', 'info');
+                        break;
+                        
+                    case 'help':
+                        window.open('https://docs.lunaassistant.com', '_blank');
+                        break;
+                }
+            }
+            
+            clearConversation() {
+                const messages = this.stateManager.getState('messages');
+                this.stateManager.setState('messages', [messages[0]]);
+                this.showNotification('Conversation cleared', 'success');
+            }
+            
+            clearHistory() {
+                const messages = this.stateManager.getState('messages');
+                this.stateManager.setState('messages', [messages[0]]);
+                this.saveHistory();
+                this.updateHistoryView();
+                this.showNotification('All history cleared', 'success');
+            }
+            
+            exportConversation() {
+                const messages = this.stateManager.getState('messages');
+                const settings = this.stateManager.getState('settings');
+                
+                const data = {
+                    assistant: 'LUNA Personal Assistant',
+                    version: '3.0.0',
+                    exportDate: new Date().toISOString(),
+                    settings: {
+                        language: settings.language,
+                        voiceType: settings.voiceType
+                    },
+                    messages: messages.map(msg => ({
+                        type: msg.type,
+                        content: msg.content,
+                        timestamp: msg.timestamp,
+                        emotion: msg.emotion,
+                        confidence: msg.confidence
+                    }))
+                };
+                
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `luna-conversation-${new Date().toISOString().split('T')[0]}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+                
+                this.showNotification('Conversation exported', 'success');
+            }
+            
+            toggleTheme() {
+                document.body.classList.toggle('light-mode');
+                const settings = this.stateManager.getState('settings');
+                settings.darkMode = !document.body.classList.contains('light-mode');
+                this.stateManager.setState('settings', settings);
+                this.stateManager.saveSettings();
+                
+                const themeIcon = document.getElementById('themeToggle').querySelector('svg');
+                if (settings.darkMode) {
+                    themeIcon.innerHTML = '<circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>';
+                } else {
+                    themeIcon.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>';
+                }
+            }
+            
+            saveHistory() {
+                if (this.stateManager.getState('settings').saveHistory) {
+                    try {
+                        const messages = this.stateManager.getState('messages');
+                        const maxHistory = this.stateManager.getState('settings').maxHistory || 100;
+                        
+                        // Limit history size
+                        const limitedMessages = messages.slice(-maxHistory);
+                        
+                        localStorage.setItem('lunaHistory', JSON.stringify(limitedMessages));
+                    } catch (error) {
+                        console.error('Failed to save history:', error);
+                    }
+                }
+            }
+            
+            loadHistory() {
+                try {
+                    const saved = localStorage.getItem('lunaHistory');
+                    if (saved && this.stateManager.getState('settings').saveHistory) {
+                        const messages = JSON.parse(saved);
+                        
+                        // Convert timestamp strings back to Date objects
+                        messages.forEach(message => {
+                            message.timestamp = new Date(message.timestamp);
+                        });
+                        
+                        this.stateManager.setState('messages', messages);
+                    }
+                } catch (error) {
+                    console.error('Failed to load history:', error);
+                }
+            }
+            
+            async registerServiceWorker() {
+                if ('serviceWorker' in navigator) {
+                    try {
+                        await navigator.serviceWorker.register('/sw.js');
+                        console.log('Service Worker registered');
+                    } catch (error) {
+                        console.error('Service Worker registration failed:', error);
+                    }
+                }
             }
         }
         
-        // Initialize dashboard when DOM is ready
+        // Initialize the assistant
+        let assistant;
         document.addEventListener('DOMContentLoaded', () => {
-            const dashboard = new AnalyticsDashboard();
+            assistant = new LunaAssistant();
             
-            // Make dashboard globally accessible for debugging
-            window.dashboard = dashboard;
+            // Expose to window for debugging
+            if (process.env.NODE_ENV === 'development') {
+                window.luna = assistant;
+            }
         });
         
-        // Handle window resize for responsive charts
-        window.addEventListener('resize', () => {
-            if (window.dashboard && window.dashboard.charts) {
-                // Redraw charts on resize
-                Object.values(window.dashboard.charts).forEach(chart => {
-                    if (chart.ctx) {
-                        const canvas = chart.ctx.canvas;
-                        const parent = canvas.parentElement;
-                        canvas.width = parent.offsetWidth;
-                        canvas.height = parent.offsetHeight;
+        // Handle PWA installation
+        let deferredPrompt;
+        window.addEventListener('beforeinstallprompt', (e) => {
+            e.preventDefault();
+            deferredPrompt = e;
+            
+            // Show install button
+            const installButton = document.createElement('button');
+            installButton.textContent = 'Install LUNA';
+            installButton.className = 'action-button primary';
+            installButton.addEventListener('click', async () => {
+                if (deferredPrompt) {
+                    deferredPrompt.prompt();
+                    const { outcome } = await deferredPrompt.userChoice;
+                    if (outcome === 'accepted') {
+                        assistant?.showNotification('LUNA installed successfully!', 'success');
                     }
-                });
-                window.dashboard.updateCharts();
-            }
+                    deferredPrompt = null;
+                }
+            });
         });
     </script>
 </body>
