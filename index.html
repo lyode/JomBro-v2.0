@@ -1,2842 +1,881 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <meta name="theme-color" content="#6366f1">
-    <meta name="description" content="Advanced AI Voice Assistant">
-    <link rel="manifest" href="data:application/json,{%22name%22:%22Voice%20Assistant%22,%22short_name%22:%22Assistant%22,%22start_url%22:%22/%22,%22display%22:%22standalone%22,%22theme_color%22:%22%236366f1%22,%22background_color%22:%22%23ffffff%22}">
+import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { Mic, MicOff, Send, Settings, History, Command, Home, Volume2, Loader, AlertCircle, CheckCircle, XCircle, Zap, Brain, Globe, Shield, Activity, Sparkles, ChevronRight, X, Menu, Bell, User, LogOut, Download, Upload, Trash2, Moon, Sun } from 'lucide-react';
+
+const VoiceAssistant = () => {
+  // State management
+  const [isListening, setIsListening] = useState(false);
+  const [messages, setMessages] = useState([
+    {
+      id: 1,
+      type: 'assistant',
+      content: "Hello! I'm LUNA, your advanced AI assistant. How can I help you today?",
+      timestamp: new Date(),
+      emotion: 'friendly',
+      confidence: 1.0
+    }
+  ]);
+  const [inputText, setInputText] = useState('');
+  const [activeTab, setActiveTab] = useState('chat');
+  const [isConnected, setIsConnected] = useState(false);
+  const [isProcessing, setIsProcessing] = useState(false);
+  const [settings, setSettings] = useState({
+    apiKey: '',
+    voiceType: 'female',
+    language: 'en-US',
+    speechRate: 1.0,
+    enableEmotions: true,
+    enableDiarization: false,
+    darkMode: true,
+    autoListen: false
+  });
+  const [transcript, setTranscript] = useState('');
+  const [audioLevel, setAudioLevel] = useState(0);
+  const [wsConnection, setWsConnection] = useState(null);
+  const [notifications, setNotifications] = useState([]);
+  const [commandPalette, setCommandPalette] = useState(false);
+
+  // Refs
+  const recognitionRef = useRef(null);
+  const synthRef = useRef(window.speechSynthesis);
+  const messagesEndRef = useRef(null);
+  const audioContextRef = useRef(null);
+  const analyserRef = useRef(null);
+  const animationFrameRef = useRef(null);
+
+  // Audio visualization
+  const setupAudioVisualization = useCallback(async () => {
+    try {
+      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+      audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
+      analyserRef.current = audioContextRef.current.createAnalyser();
+      const source = audioContextRef.current.createMediaStreamSource(stream);
+      source.connect(analyserRef.current);
+      analyserRef.current.fftSize = 256;
+      
+      const updateLevel = () => {
+        if (analyserRef.current && isListening) {
+          const dataArray = new Uint8Array(analyserRef.current.frequencyBinCount);
+          analyserRef.current.getByteFrequencyData(dataArray);
+          const average = dataArray.reduce((a, b) => a + b) / dataArray.length;
+          setAudioLevel(average / 255);
+          animationFrameRef.current = requestAnimationFrame(updateLevel);
+        }
+      };
+      updateLevel();
+    } catch (error) {
+      console.error('Audio setup failed:', error);
+    }
+  }, [isListening]);
+
+  // Initialize speech recognition
+  useEffect(() => {
+    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+      recognitionRef.current = new SpeechRecognition();
+      recognitionRef.current.continuous = true;
+      recognitionRef.current.interimResults = true;
+      recognitionRef.current.lang = settings.language;
+
+      recognitionRef.current.onresult = (event) => {
+        let finalTranscript = '';
+        let interimTranscript = '';
+
+        for (let i = event.resultIndex; i < event.results.length; i++) {
+          const transcript = event.results[i][0].transcript;
+          if (event.results[i].isFinal) {
+            finalTranscript += transcript;
+          } else {
+            interimTranscript += transcript;
+          }
+        }
+
+        setTranscript(interimTranscript || finalTranscript);
+
+        if (finalTranscript) {
+          handleVoiceInput(finalTranscript);
+        }
+      };
+
+      recognitionRef.current.onerror = (event) => {
+        console.error('Speech recognition error:', event.error);
+        setIsListening(false);
+        showNotification('Speech recognition error', 'error');
+      };
+
+      recognitionRef.current.onend = () => {
+        setIsListening(false);
+        if (animationFrameRef.current) {
+          cancelAnimationFrame(animationFrameRef.current);
+        }
+      };
+    }
+  }, [settings.language]);
+
+  // WebSocket connection
+  useEffect(() => {
+    if (settings.apiKey) {
+      connectWebSocket();
+    }
+    return () => {
+      if (wsConnection) {
+        wsConnection.close();
+      }
+    };
+  }, [settings.apiKey]);
+
+  const connectWebSocket = () => {
+    const ws = new WebSocket('wss://api.voiceassistant.com/ws/v1/assistant');
     
-    <title>LUNA - Advanced Voice Assistant</title>
+    ws.onopen = () => {
+      setIsConnected(true);
+      showNotification('Connected to LUNA servers', 'success');
+      ws.send(JSON.stringify({
+        type: 'auth',
+        apiKey: settings.apiKey
+      }));
+    };
+
+    ws.onmessage = (event) => {
+      const data = JSON.parse(event.data);
+      handleWebSocketMessage(data);
+    };
+
+    ws.onerror = () => {
+      setIsConnected(false);
+      showNotification('Connection error', 'error');
+    };
+
+    ws.onclose = () => {
+      setIsConnected(false);
+      setTimeout(connectWebSocket, 5000);
+    };
+
+    setWsConnection(ws);
+  };
+
+  const handleWebSocketMessage = (data) => {
+    switch (data.type) {
+      case 'assistant_response':
+        addMessage(data.response.text, 'assistant', {
+          emotion: data.response.emotion,
+          confidence: data.response.confidence,
+          audioUrl: data.response.audio_url
+        });
+        if (data.response.audio_url) {
+          playAudioResponse(data.response.audio_url);
+        }
+        break;
+      case 'interim_transcript':
+        setTranscript(data.transcript);
+        break;
+      case 'error':
+        showNotification(data.error.message, 'error');
+        break;
+    }
+  };
+
+  const handleVoiceInput = (text) => {
+    addMessage(text, 'user');
+    processCommand(text);
+  };
+
+  const processCommand = async (text) => {
+    setIsProcessing(true);
     
-    <style>
-        :root {
-            --primary: #6366f1;
-            --primary-dark: #4f46e5;
-            --primary-light: #818cf8;
-            --secondary: #ec4899;
-            --accent: #f59e0b;
-            --success: #10b981;
-            --error: #ef4444;
-            --warning: #f59e0b;
-            --bg-primary: #0f172a;
-            --bg-secondary: #1e293b;
-            --bg-tertiary: #334155;
-            --text-primary: #f1f5f9;
-            --text-secondary: #cbd5e1;
-            --text-tertiary: #94a3b8;
-            --glass: rgba(255, 255, 255, 0.05);
-            --glass-border: rgba(255, 255, 255, 0.1);
-            --shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-            --animation-duration: 0.3s;
-        }
-        
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-            -webkit-tap-highlight-color: transparent;
-        }
-        
-        body {
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
-            background: var(--bg-primary);
-            color: var(--text-primary);
-            overflow: hidden;
-            position: fixed;
-            width: 100%;
-            height: 100%;
-            -webkit-font-smoothing: antialiased;
-        }
-        
-        /* App Container */
-        .app {
-            display: flex;
-            flex-direction: column;
-            height: 100vh;
-            position: relative;
-            background: linear-gradient(135deg, var(--bg-primary) 0%, var(--bg-secondary) 100%);
-        }
-        
-        /* Header */
-        .header {
-            background: var(--glass);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-bottom: 1px solid var(--glass-border);
-            padding: 20px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            z-index: 100;
-        }
-        
-        .header-title {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        
-        .header-title h1 {
-            font-size: 1.5rem;
-            font-weight: 600;
-            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-        
-        .status-indicator {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--success);
-            animation: pulse 2s infinite;
-        }
-        
-        .header-actions {
-            display: flex;
-            gap: 12px;
-        }
-        
-        .icon-button {
-            width: 40px;
-            height: 40px;
-            border-radius: 12px;
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
-            color: var(--text-primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all var(--animation-duration);
-            position: relative;
-        }
-        
-        .icon-button:active {
-            transform: scale(0.95);
-            background: var(--glass-border);
-        }
-        
-        .icon-button svg {
-            width: 20px;
-            height: 20px;
-        }
-        
-        .badge {
-            position: absolute;
-            top: -5px;
-            right: -5px;
-            background: var(--error);
-            color: white;
-            font-size: 10px;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-        }
-        
-        /* Navigation */
-        .nav-tabs {
-            display: flex;
-            background: var(--glass);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            padding: 5px;
-            margin: 10px;
-            border-radius: 16px;
-            gap: 5px;
-        }
-        
-        .nav-tab {
-            flex: 1;
-            padding: 12px;
-            background: transparent;
-            border: none;
-            color: var(--text-tertiary);
-            font-size: 0.9rem;
-            font-weight: 500;
-            border-radius: 12px;
-            cursor: pointer;
-            transition: all var(--animation-duration);
-            position: relative;
-            overflow: hidden;
-        }
-        
-        .nav-tab.active {
-            background: var(--primary);
-            color: white;
-            box-shadow: 0 4px 15px rgba(99, 102, 241, 0.3);
-        }
-        
-        .nav-tab:not(.active):active {
-            background: var(--glass-border);
-        }
-        
-        /* Content Area */
-        .content {
-            flex: 1;
-            overflow-y: auto;
-            position: relative;
-            -webkit-overflow-scrolling: touch;
-        }
-        
-        .screen {
-            display: none;
-            padding: 20px;
-            animation: fadeIn var(--animation-duration) ease-out;
-            min-height: 100%;
-        }
-        
-        .screen.active {
-            display: block;
-        }
-        
-        /* Chat Screen */
-        .chat-messages {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-            padding-bottom: 100px;
-        }
-        
-        .message {
-            display: flex;
-            gap: 12px;
-            animation: slideIn var(--animation-duration) ease-out;
-        }
-        
-        .message.user {
-            flex-direction: row-reverse;
-        }
-        
-        .message-avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background: var(--glass);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-            border: 2px solid var(--glass-border);
-        }
-        
-        .message.user .message-avatar {
-            background: var(--primary);
-            border-color: var(--primary);
-        }
-        
-        .message-content {
-            max-width: 80%;
-        }
-        
-        .message-bubble {
-            background: var(--glass);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            padding: 12px 16px;
-            border-radius: 18px;
-            border: 1px solid var(--glass-border);
-            position: relative;
-        }
-        
-        .message.user .message-bubble {
-            background: var(--primary);
-            border-color: var(--primary);
-            color: white;
-        }
-        
-        .message-time {
-            font-size: 0.75rem;
-            color: var(--text-tertiary);
-            margin-top: 4px;
-            display: flex;
-            align-items: center;
-            gap: 4px;
-        }
-        
-        .message.user .message-time {
-            justify-content: flex-end;
-        }
-        
-        .typing-indicator {
-            display: none;
-            align-items: center;
-            gap: 4px;
-            padding: 12px 16px;
-        }
-        
-        .typing-indicator.active {
-            display: flex;
-        }
-        
-        .typing-dot {
-            width: 8px;
-            height: 8px;
-            border-radius: 50%;
-            background: var(--text-tertiary);
-            animation: typing 1.4s infinite;
-        }
-        
-        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
-        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
-        
-        /* Voice Button */
-        .voice-button-container {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            z-index: 50;
-        }
-        
-        .voice-button {
-            width: 80px;
-            height: 80px;
-            border-radius: 50%;
-            background: var(--primary);
-            border: none;
-            cursor: pointer;
-            position: relative;
-            box-shadow: var(--shadow);
-            transition: all var(--animation-duration);
-            overflow: hidden;
-        }
-        
-        .voice-button::before {
-            content: '';
-            position: absolute;
-            inset: -2px;
-            border-radius: 50%;
-            background: linear-gradient(45deg, var(--primary), var(--secondary));
-            opacity: 0;
-            transition: opacity var(--animation-duration);
-        }
-        
-        .voice-button.listening::before {
-            opacity: 1;
-            animation: rotate 2s linear infinite;
-        }
-        
-        .voice-button.listening {
-            animation: pulse 1.5s infinite;
-        }
-        
-        .voice-button svg {
-            width: 32px;
-            height: 32px;
-            fill: white;
-            position: relative;
-            z-index: 1;
-        }
-        
-        .voice-visualizer {
-            position: absolute;
-            bottom: 110px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: none;
-            gap: 3px;
-            padding: 10px 20px;
-            background: var(--glass);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-radius: 20px;
-            border: 1px solid var(--glass-border);
-        }
-        
-        .voice-visualizer.active {
-            display: flex;
-        }
-        
-        .voice-bar {
-            width: 3px;
-            height: 20px;
-            background: var(--primary);
-            border-radius: 3px;
-            animation: wave 0.6s ease-in-out infinite;
-        }
-        
-        .voice-bar:nth-child(2) { animation-delay: 0.1s; }
-        .voice-bar:nth-child(3) { animation-delay: 0.2s; }
-        .voice-bar:nth-child(4) { animation-delay: 0.3s; }
-        .voice-bar:nth-child(5) { animation-delay: 0.4s; }
-        
-        /* Commands Screen */
-        .commands-grid {
-            display: grid;
-            gap: 15px;
-        }
-        
-        .command-category {
-            background: var(--glass);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 16px;
-            padding: 20px;
-            transition: all var(--animation-duration);
-        }
-        
-        .command-category:active {
-            transform: scale(0.98);
-            background: var(--glass-border);
-        }
-        
-        .category-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 15px;
-        }
-        
-        .category-icon {
-            width: 40px;
-            height: 40px;
-            border-radius: 12px;
-            background: var(--primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-        
-        .category-icon svg {
-            width: 20px;
-            height: 20px;
-            fill: white;
-        }
-        
-        .category-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-        }
-        
-        .command-list {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        
-        .command-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            padding: 8px 12px;
-            background: var(--glass);
-            border-radius: 8px;
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            cursor: pointer;
-            transition: all var(--animation-duration);
-        }
-        
-        .command-item:active {
-            background: var(--primary);
-            color: white;
-            transform: scale(0.98);
-        }
-        
-        .command-item svg {
-            width: 16px;
-            height: 16px;
-            fill: currentColor;
-        }
-        
-        /* Settings Screen */
-        .settings-sections {
-            display: flex;
-            flex-direction: column;
-            gap: 20px;
-        }
-        
-        .settings-section {
-            background: var(--glass);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 16px;
-            padding: 20px;
-        }
-        
-        .settings-title {
-            font-size: 1.1rem;
-            font-weight: 600;
-            margin-bottom: 15px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-        }
-        
-        .settings-item {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 15px 0;
-            border-bottom: 1px solid var(--glass-border);
-        }
-        
-        .settings-item:last-child {
-            border-bottom: none;
-            padding-bottom: 0;
-        }
-        
-        .settings-label {
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-        }
-        
-        .settings-label-main {
-            font-weight: 500;
-        }
-        
-        .settings-label-sub {
-            font-size: 0.85rem;
-            color: var(--text-tertiary);
-        }
-        
-        /* Switch */
-        .switch {
-            position: relative;
-            width: 50px;
-            height: 28px;
-            background: var(--bg-tertiary);
-            border-radius: 20px;
-            cursor: pointer;
-            transition: background var(--animation-duration);
-        }
-        
-        .switch.active {
-            background: var(--primary);
-        }
-        
-        .switch-slider {
-            position: absolute;
-            top: 3px;
-            left: 3px;
-            width: 22px;
-            height: 22px;
-            background: white;
-            border-radius: 50%;
-            transition: transform var(--animation-duration);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        }
-        
-        .switch.active .switch-slider {
-            transform: translateX(22px);
-        }
-        
-        /* Select */
-        .select-wrapper {
-            position: relative;
-        }
-        
-        .select {
-            appearance: none;
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
-            color: var(--text-primary);
-            padding: 8px 32px 8px 12px;
-            border-radius: 8px;
-            font-size: 0.9rem;
-            cursor: pointer;
-            min-width: 120px;
-        }
-        
-        .select-arrow {
-            position: absolute;
-            right: 12px;
-            top: 50%;
-            transform: translateY(-50%);
-            pointer-events: none;
-        }
-        
-        .select-arrow svg {
-            width: 12px;
-            height: 12px;
-            fill: var(--text-tertiary);
-        }
-        
-        /* Slider */
-        .slider-container {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-        }
-        
-        .slider {
-            appearance: none;
-            height: 6px;
-            background: var(--glass-border);
-            border-radius: 3px;
-            outline: none;
-            flex: 1;
-        }
-        
-        .slider::-webkit-slider-thumb {
-            appearance: none;
-            width: 20px;
-            height: 20px;
-            background: var(--primary);
-            border-radius: 50%;
-            cursor: pointer;
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
-        }
-        
-        .slider-value {
-            min-width: 40px;
-            text-align: right;
-            font-weight: 500;
-        }
-        
-        /* History Screen */
-        .history-filter {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 20px;
-            overflow-x: auto;
-            -webkit-overflow-scrolling: touch;
-            padding-bottom: 10px;
-        }
-        
-        .filter-chip {
-            padding: 8px 16px;
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            cursor: pointer;
-            white-space: nowrap;
-            transition: all var(--animation-duration);
-        }
-        
-        .filter-chip.active {
-            background: var(--primary);
-            border-color: var(--primary);
-            color: white;
-        }
-        
-        .history-list {
-            display: flex;
-            flex-direction: column;
-            gap: 15px;
-        }
-        
-        .history-item {
-            background: var(--glass);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 16px;
-            padding: 15px;
-            cursor: pointer;
-            transition: all var(--animation-duration);
-        }
-        
-        .history-item:active {
-            transform: scale(0.98);
-            background: var(--glass-border);
-        }
-        
-        .history-date {
-            font-size: 0.85rem;
-            color: var(--text-tertiary);
-            margin-bottom: 8px;
-        }
-        
-        .history-content {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-        
-        .history-query {
-            font-weight: 500;
-            color: var(--text-primary);
-        }
-        
-        .history-response {
-            font-size: 0.9rem;
-            color: var(--text-secondary);
-            display: -webkit-box;
-            -webkit-line-clamp: 2;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-        
-        /* Quick Actions */
-        .quick-actions {
-            position: fixed;
-            bottom: 120px;
-            left: 20px;
-            right: 20px;
-            display: flex;
-            gap: 10px;
-            justify-content: center;
-            flex-wrap: wrap;
-            opacity: 0;
-            pointer-events: none;
-            transition: all var(--animation-duration);
-        }
-        
-        .quick-actions.visible {
-            opacity: 1;
-            pointer-events: auto;
-        }
-        
-        .quick-action {
-            padding: 8px 16px;
-            background: var(--glass);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 20px;
-            font-size: 0.85rem;
-            color: var(--text-primary);
-            cursor: pointer;
-            transition: all var(--animation-duration);
-        }
-        
-        .quick-action:active {
-            background: var(--primary);
-            border-color: var(--primary);
-            color: white;
-            transform: scale(0.95);
-        }
-        
-        /* Modal */
-        .modal {
-            position: fixed;
-            inset: 0;
-            background: rgba(0, 0, 0, 0.8);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 200;
-            padding: 20px;
-        }
-        
-        .modal.active {
-            display: flex;
-        }
-        
-        .modal-content {
-            background: var(--bg-secondary);
-            border-radius: 20px;
-            padding: 24px;
-            max-width: 400px;
-            width: 100%;
-            max-height: 80vh;
-            overflow-y: auto;
-            animation: modalIn var(--animation-duration) ease-out;
-        }
-        
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-        
-        .modal-title {
-            font-size: 1.2rem;
-            font-weight: 600;
-        }
-        
-        .modal-close {
-            width: 32px;
-            height: 32px;
-            border-radius: 50%;
-            background: var(--glass);
-            border: 1px solid var(--glass-border);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            cursor: pointer;
-            transition: all var(--animation-duration);
-        }
-        
-        .modal-close:active {
-            transform: scale(0.9);
-            background: var(--glass-border);
-        }
-        
-        .modal-close svg {
-            width: 16px;
-            height: 16px;
-            fill: var(--text-primary);
-        }
-        
-        /* Animations */
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-        
-        @keyframes slideIn {
-            from {
-                opacity: 0;
-                transform: translateY(10px);
+    if (wsConnection && wsConnection.readyState === WebSocket.OPEN) {
+      wsConnection.send(JSON.stringify({
+        type: 'text_command',
+        request_id: Date.now().toString(),
+        text: text,
+        context: {
+          enable_emotions: settings.enableEmotions,
+          voice_type: settings.voiceType
+        }
+      }));
+    } else {
+      // Fallback to REST API
+      try {
+        const response = await fetch('/api/v1/nlp/process', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${settings.apiKey}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            text: text,
+            options: {
+              extract_entities: true,
+              suggest_actions: true,
+              personalize: true
             }
-            to {
-                opacity: 1;
-                transform: translateY(0);
-            }
-        }
+          })
+        });
         
-        @keyframes pulse {
-            0% {
-                box-shadow: 0 0 0 0 var(--primary);
-            }
-            70% {
-                box-shadow: 0 0 0 20px transparent;
-            }
-            100% {
-                box-shadow: 0 0 0 0 transparent;
-            }
-        }
+        const data = await response.json();
+        addMessage(data.response.text, 'assistant', {
+          emotion: data.response.emotion,
+          confidence: data.confidence_score
+        });
         
-        @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-        
-        @keyframes typing {
-            0%, 60%, 100% {
-                transform: translateY(0);
-                opacity: 0.7;
-            }
-            30% {
-                transform: translateY(-10px);
-                opacity: 1;
-            }
-        }
-        
-        @keyframes wave {
-            0%, 100% {
-                height: 20px;
-            }
-            50% {
-                height: 35px;
-            }
-        }
-        
-        @keyframes modalIn {
-            from {
-                opacity: 0;
-                transform: scale(0.9);
-            }
-            to {
-                opacity: 1;
-                transform: scale(1);
-            }
-        }
-        
-        /* Loading Screen */
-        .loading-screen {
-            position: fixed;
-            inset: 0;
-            background: var(--bg-primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            z-index: 300;
-            transition: opacity 0.5s;
-        }
-        
-        .loading-screen.hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
-        
-        .loading-content {
-            text-align: center;
-        }
-        
-        .loading-logo {
-            width: 80px;
-            height: 80px;
-            margin: 0 auto 20px;
-            background: var(--primary);
-            border-radius: 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            animation: pulse 2s infinite;
-        }
-        
-        .loading-logo svg {
-            width: 40px;
-            height: 40px;
-            fill: white;
-        }
-        
-        .loading-text {
-            font-size: 1.2rem;
-            margin-bottom: 10px;
-        }
-        
-        .loading-progress {
-            width: 200px;
-            height: 4px;
-            background: var(--glass-border);
-            border-radius: 2px;
-            overflow: hidden;
-            margin: 0 auto;
-        }
-        
-        .loading-progress-bar {
-            height: 100%;
-            background: var(--primary);
-            width: 0%;
-            transition: width 0.3s;
-            border-radius: 2px;
-        }
-        
-        /* Toast Notifications */
-        .toast-container {
-            position: fixed;
-            top: 20px;
-            right: 20px;
-            left: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            z-index: 250;
-            pointer-events: none;
-        }
-        
-        .toast {
-            background: var(--glass);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 12px;
-            padding: 16px;
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            animation: slideIn var(--animation-duration) ease-out;
-            pointer-events: auto;
-            cursor: pointer;
-            margin-left: auto;
-            max-width: 350px;
-        }
-        
-        .toast-icon {
-            width: 20px;
-            height: 20px;
-            flex-shrink: 0;
-        }
-        
-        .toast.success .toast-icon { fill: var(--success); }
-        .toast.error .toast-icon { fill: var(--error); }
-        .toast.warning .toast-icon { fill: var(--warning); }
-        
-        .toast-message {
-            flex: 1;
-            font-size: 0.9rem;
-        }
-        
-        /* Responsive */
-        @media (min-width: 768px) {
-            .app {
-                max-width: 500px;
-                margin: 0 auto;
-                box-shadow: 0 0 50px rgba(0, 0, 0, 0.5);
-            }
-        }
-        
-        @media (prefers-reduced-motion: reduce) {
-            * {
-                animation-duration: 0.01ms !important;
-                animation-iteration-count: 1 !important;
-                transition-duration: 0.01ms !important;
-            }
-        }
-        
-        /* PWA Install Prompt */
-        .install-prompt {
-            position: fixed;
-            bottom: 20px;
-            left: 20px;
-            right: 20px;
-            background: var(--glass);
-            backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border: 1px solid var(--glass-border);
-            border-radius: 16px;
-            padding: 20px;
-            display: none;
-            z-index: 150;
-            animation: slideIn var(--animation-duration) ease-out;
-        }
-        
-        .install-prompt.show {
-            display: block;
-        }
-        
-        .install-prompt-content {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-        
-        .install-prompt-icon {
-            width: 48px;
-            height: 48px;
-            background: var(--primary);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-        
-        .install-prompt-icon svg {
-            width: 24px;
-            height: 24px;
-            fill: white;
-        }
-        
-        .install-prompt-text {
-            flex: 1;
-        }
-        
-        .install-prompt-title {
-            font-weight: 600;
-            margin-bottom: 4px;
-        }
-        
-        .install-prompt-subtitle {
-            font-size: 0.85rem;
-            color: var(--text-tertiary);
-        }
-        
-        .install-prompt-actions {
-            display: flex;
-            gap: 10px;
-            margin-top: 15px;
-        }
-        
-        .install-prompt-button {
-            flex: 1;
-            padding: 12px;
-            border-radius: 12px;
-            border: none;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all var(--animation-duration);
-        }
-        
-        .install-prompt-button.primary {
-            background: var(--primary);
-            color: white;
-        }
-        
-        .install-prompt-button.secondary {
-            background: var(--glass);
-            color: var(--text-primary);
-            border: 1px solid var(--glass-border);
-        }
-        
-        .install-prompt-button:active {
-            transform: scale(0.98);
-        }
-    </style>
-</head>
-<body>
-    <!-- Loading Screen -->
-    <div class="loading-screen" id="loadingScreen">
-        <div class="loading-content">
-            <div class="loading-logo">
-                <svg viewBox="0 0 24 24">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                </svg>
-            </div>
-            <div class="loading-text">Initializing Luna...</div>
-            <div class="loading-progress">
-                <div class="loading-progress-bar" id="loadingProgress"></div>
-            </div>
+        // Use speech synthesis as fallback
+        speak(data.response.text);
+      } catch (error) {
+        console.error('API error:', error);
+        addMessage("I'm having trouble connecting. Please check your connection.", 'assistant', {
+          emotion: 'concerned'
+        });
+      }
+    }
+    
+    setIsProcessing(false);
+  };
+
+  const speak = (text) => {
+    if (synthRef.current) {
+      const utterance = new SpeechSynthesisUtterance(text);
+      utterance.rate = settings.speechRate;
+      utterance.lang = settings.language;
+      synthRef.current.speak(utterance);
+    }
+  };
+
+  const playAudioResponse = (audioUrl) => {
+    const audio = new Audio(audioUrl);
+    audio.play();
+  };
+
+  const toggleListening = () => {
+    if (isListening) {
+      recognitionRef.current?.stop();
+      setIsListening(false);
+    } else {
+      recognitionRef.current?.start();
+      setIsListening(true);
+      setupAudioVisualization();
+    }
+  };
+
+  const addMessage = (content, type, metadata = {}) => {
+    const newMessage = {
+      id: Date.now(),
+      type,
+      content,
+      timestamp: new Date(),
+      ...metadata
+    };
+    setMessages(prev => [...prev, newMessage]);
+    setTranscript('');
+  };
+
+  const showNotification = (message, type) => {
+    const notification = {
+      id: Date.now(),
+      message,
+      type
+    };
+    setNotifications(prev => [...prev, notification]);
+    setTimeout(() => {
+      setNotifications(prev => prev.filter(n => n.id !== notification.id));
+    }, 3000);
+  };
+
+  const sendTextMessage = () => {
+    if (inputText.trim()) {
+      handleVoiceInput(inputText);
+      setInputText('');
+    }
+  };
+
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+  }, [messages]);
+
+  // Command palette handler
+  const handleCommand = (command) => {
+    setCommandPalette(false);
+    switch (command) {
+      case 'clear':
+        setMessages([messages[0]]);
+        showNotification('Conversation cleared', 'success');
+        break;
+      case 'export':
+        exportConversation();
+        break;
+      case 'settings':
+        setActiveTab('settings');
+        break;
+      case 'disconnect':
+        wsConnection?.close();
+        break;
+    }
+  };
+
+  const exportConversation = () => {
+    const data = {
+      messages,
+      exportDate: new Date().toISOString(),
+      settings: { language: settings.language, voiceType: settings.voiceType }
+    };
+    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `luna-conversation-${new Date().toISOString().split('T')[0]}.json`;
+    a.click();
+    showNotification('Conversation exported', 'success');
+  };
+
+  // UI Components
+  const MessageBubble = ({ message }) => {
+    const isUser = message.type === 'user';
+    const emotionColors = {
+      happy: 'border-green-500',
+      sad: 'border-blue-500',
+      neutral: 'border-gray-500',
+      excited: 'border-yellow-500',
+      concerned: 'border-red-500',
+      friendly: 'border-purple-500'
+    };
+
+    return (
+      <div className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4`}>
+        <div className={`max-w-[80%] ${isUser ? 'order-2' : 'order-1'}`}>
+          <div className={`
+            ${isUser ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-100'}
+            rounded-2xl px-4 py-3 shadow-lg
+            ${!isUser && message.emotion ? `border-l-4 ${emotionColors[message.emotion] || 'border-gray-500'}` : ''}
+          `}>
+            <p className="text-sm">{message.content}</p>
+            {message.confidence && !isUser && (
+              <p className="text-xs mt-1 opacity-60">
+                Confidence: {Math.round(message.confidence * 100)}%
+              </p>
+            )}
+          </div>
+          <p className="text-xs text-gray-500 mt-1 px-2">
+            {message.timestamp.toLocaleTimeString()}
+          </p>
         </div>
-    </div>
-    
-    <!-- Main App -->
-    <div class="app" id="app">
-        <!-- Header -->
-        <header class="header">
-            <div class="header-title">
-                <div class="status-indicator"></div>
-                <h1>LUNA</h1>
+        <div className={`w-8 h-8 rounded-full flex items-center justify-center
+          ${isUser ? 'bg-blue-600 order-1 mr-2' : 'bg-purple-600 order-2 ml-2'}
+        `}>
+          {isUser ? <User size={16} /> : <Sparkles size={16} />}
+        </div>
+      </div>
+    );
+  };
+
+  const AudioVisualizer = () => {
+    return (
+      <div className="flex items-center justify-center space-x-1 h-8">
+        {[...Array(5)].map((_, i) => (
+          <div
+            key={i}
+            className="w-1 bg-blue-500 rounded-full transition-all duration-150"
+            style={{
+              height: `${Math.max(8, audioLevel * 100 * (1 + Math.sin(Date.now() / 100 + i) * 0.3))}px`
+            }}
+          />
+        ))}
+      </div>
+    );
+  };
+
+  return (
+    <div className={`min-h-screen ${settings.darkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
+      {/* Header */}
+      <header className="bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-xl">
+        <div className="container mx-auto px-4 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <Brain className="w-8 h-8" />
+              <div>
+                <h1 className="text-2xl font-bold">LUNA</h1>
+                <p className="text-xs opacity-80">Advanced Voice Assistant</p>
+              </div>
             </div>
-            <div class="header-actions">
-                <button class="icon-button" id="notificationBtn">
-                    <span class="badge" id="notificationBadge" style="display: none;">0</span>
-                    <svg viewBox="0 0 24 24">
-                        <path d="M12 22c1.1 0 2-.9 2-2h-4c0 1.1.9 2 2 2zm6-6v-5c0-3.07-1.64-5.64-4.5-6.32V4c0-.83-.67-1.5-1.5-1.5s-1.5.67-1.5 1.5v.68C7.63 5.36 6 7.92 6 11v5l-2 2v1h16v-1l-2-2z"/>
-                    </svg>
-                </button>
-                <button class="icon-button" id="menuBtn">
-                    <svg viewBox="0 0 24 24">
-                        <path d="M3 18h18v-2H3v2zm0-5h18v-2H3v2zm0-7v2h18V6H3z"/>
-                    </svg>
-                </button>
+            
+            <div className="flex items-center space-x-4">
+              <div className="flex items-center space-x-2">
+                <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-400' : 'bg-red-400'} animate-pulse`} />
+                <span className="text-sm">{isConnected ? 'Connected' : 'Offline'}</span>
+              </div>
+              
+              <button
+                onClick={() => setCommandPalette(true)}
+                className="p-2 hover:bg-white/20 rounded-lg transition-colors"
+              >
+                <Command size={20} />
+              </button>
+              
+              <button className="relative p-2 hover:bg-white/20 rounded-lg transition-colors">
+                <Bell size={20} />
+                {notifications.length > 0 && (
+                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-xs flex items-center justify-center">
+                    {notifications.length}
+                  </span>
+                )}
+              </button>
             </div>
-        </header>
-        
-        <!-- Navigation Tabs -->
-        <nav class="nav-tabs">
-            <button class="nav-tab active" data-screen="chat">Chat</button>
-            <button class="nav-tab" data-screen="commands">Commands</button>
-            <button class="nav-tab" data-screen="history">History</button>
-            <button class="nav-tab" data-screen="settings">Settings</button>
-        </nav>
-        
-        <!-- Content Area -->
-        <div class="content">
-            <!-- Chat Screen -->
-            <div class="screen active" id="chatScreen">
-                <div class="chat-messages" id="chatMessages">
-                    <div class="message assistant">
-                        <div class="message-avatar">🤖</div>
-                        <div class="message-content">
-                            <div class="message-bubble">
-                                Hello! I'm Luna, your advanced AI assistant. How can I help you today?
-                            </div>
-                            <div class="message-time">
-                                <span id="currentTime"></span>
-                                <svg width="12" height="12" viewBox="0 0 24 24" fill="var(--text-tertiary)">
-                                    <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
-                                </svg>
-                            </div>
-                        </div>
-                    </div>
+          </div>
+        </div>
+      </header>
+
+      {/* Navigation */}
+      <nav className="bg-gray-800 border-b border-gray-700">
+        <div className="container mx-auto px-4">
+          <div className="flex space-x-1">
+            {[
+              { id: 'chat', label: 'Chat', icon: Home },
+              { id: 'commands', label: 'Commands', icon: Command },
+              { id: 'history', label: 'History', icon: History },
+              { id: 'settings', label: 'Settings', icon: Settings }
+            ].map(tab => (
+              <button
+                key={tab.id}
+                onClick={() => setActiveTab(tab.id)}
+                className={`
+                  flex items-center space-x-2 px-4 py-3 transition-all
+                  ${activeTab === tab.id 
+                    ? 'bg-gray-700 text-white border-b-2 border-blue-500' 
+                    : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
+                  }
+                `}
+              >
+                <tab.icon size={18} />
+                <span>{tab.label}</span>
+              </button>
+            ))}
+          </div>
+        </div>
+      </nav>
+
+      {/* Main Content */}
+      <main className="container mx-auto px-4 py-6">
+        {/* Chat Tab */}
+        {activeTab === 'chat' && (
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-gray-800 rounded-xl shadow-2xl overflow-hidden">
+              {/* Messages */}
+              <div className="h-[500px] overflow-y-auto p-6 space-y-4">
+                {messages.map(message => (
+                  <MessageBubble key={message.id} message={message} />
+                ))}
+                {isProcessing && (
+                  <div className="flex items-center space-x-2 text-gray-400">
+                    <Loader className="animate-spin" size={16} />
+                    <span className="text-sm">LUNA is thinking...</span>
+                  </div>
+                )}
+                <div ref={messagesEndRef} />
+              </div>
+
+              {/* Audio Visualizer */}
+              {isListening && (
+                <div className="px-6 py-3 bg-gray-700/50">
+                  <AudioVisualizer />
+                  <p className="text-center text-sm text-gray-400 mt-2">
+                    {transcript || 'Listening...'}
+                  </p>
                 </div>
-                
-                <div class="typing-indicator" id="typingIndicator">
-                    <div class="typing-dot"></div>
-                    <div class="typing-dot"></div>
-                    <div class="typing-dot"></div>
+              )}
+
+              {/* Input Area */}
+              <div className="border-t border-gray-700 p-4">
+                <div className="flex items-center space-x-3">
+                  <button
+                    onClick={toggleListening}
+                    className={`
+                      p-4 rounded-full transition-all transform
+                      ${isListening 
+                        ? 'bg-red-600 hover:bg-red-700 scale-110 animate-pulse' 
+                        : 'bg-blue-600 hover:bg-blue-700'
+                      }
+                    `}
+                  >
+                    {isListening ? <MicOff size={24} /> : <Mic size={24} />}
+                  </button>
+                  
+                  <input
+                    type="text"
+                    value={inputText}
+                    onChange={(e) => setInputText(e.target.value)}
+                    onKeyPress={(e) => e.key === 'Enter' && sendTextMessage()}
+                    placeholder="Type a message or use voice..."
+                    className="flex-1 bg-gray-700 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  
+                  <button
+                    onClick={sendTextMessage}
+                    disabled={!inputText.trim()}
+                    className="p-3 bg-blue-600 hover:bg-blue-700 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+                  >
+                    <Send size={20} />
+                  </button>
                 </div>
-            </div>
-            
-            <!-- Commands Screen -->
-            <div class="screen" id="commandsScreen">
-                <div class="commands-grid">
-                    <div class="command-category">
-                        <div class="category-header">
-                            <div class="category-icon">
-                                <svg viewBox="0 0 24 24">
-                                    <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm.5-13H11v6l5.25 3.15.75-1.23-4.5-2.67z"/>
-                                </svg>
-                            </div>
-                            <div>
-                                <div class="category-title">Time & Date</div>
-                            </div>
-                        </div>
-                        <div class="command-list">
-                            <div class="command-item" data-command="what time is it">
-                                <svg viewBox="0 0 24 24"><path d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/></svg>
-                                "What time is it?"
-                            </div>
-                            <div class="command-item" data-command="what's the date">
-                                <svg viewBox="0 0 24 24"><path d="M9 11H7v2h2v-2zm4 0h-2v2h2v-2zm4 0h-2v2h2v-2zm2-7h-1V2h-2v2H8V2H6v2H5c-1.11 0-1.99.9-1.99 2L3 20c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V6c0-1.1-.9-2-2-2zm0 16H5V9h14v11z"/></svg>
-                                "What's today's date?"
-                            </div>
-                            <div class="command-item" data-command="set a timer for 5 minutes">
-                                <svg viewBox="0 0 24 24"><path d="M15 1H9v2h6V1zm-4 13h2V8h-2v6zm8.03-6.61l1.42-1.42c-.43-.51-.9-.99-1.41-1.41l-1.42 1.42C16.07 4.74 14.12 4 12 4c-4.97 0-9 4.03-9 9s4.02 9 9 9 9-4.03 9-9c0-2.12-.74-4.07-1.97-5.61zM12 20c-3.87 0-7-3.13-7-7s3.13-7 7-7 7 3.13 7 7-3.13 7-7 7z"/></svg>
-                                "Set a timer"
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="command-category">
-                        <div class="category-header">
-                            <div class="category-icon">
-                                <svg viewBox="0 0 24 24">
-                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
-                                </svg>
-                            </div>
-                            <div>
-                                <div class="category-title">Smart Features</div>
-                            </div>
-                        </div>
-                        <div class="command-list">
-                            <div class="command-item" data-command="what's the weather">
-                                <svg viewBox="0 0 24 24"><path d="M6.76 4.84l-1.8-1.79-1.41 1.41 1.79 1.79 1.42-1.41zM4 10.5H1v2h3v-2zm9-9.95h-2V3.5h2V.55zm7.45 3.91l-1.41-1.41-1.79 1.79 1.41 1.41 1.79-1.79zm-3.21 13.7l1.79 1.8 1.41-1.41-1.8-1.79-1.4 1.4zM20 10.5v2h3v-2h-3zm-8-5c-3.31 0-6 2.69-6 6s2.69 6 6 6 6-2.69 6-6-2.69-6-6-6zm-1 16.95h2V19.5h-2v2.95zm-7.45-3.91l1.41 1.41 1.79-1.8-1.41-1.41-1.79 1.8z"/></svg>
-                                "Weather forecast"
-                            </div>
-                            <div class="command-item" data-command="tell me a joke">
-                                <svg viewBox="0 0 24 24"><path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zM12 20c-4.42 0-8-3.58-8-8s3.58-8 8-8 8 3.58 8 8-3.58 8-8 8zm3.5-9c.83 0 1.5-.67 1.5-1.5S16.33 8 15.5 8 14 8.67 14 9.5s.67 1.5 1.5 1.5zm-7 0c.83 0 1.5-.67 1.5-1.5S9.33 8 8.5 8 7 8.67 7 9.5 7.67 11 8.5 11zm3.5 6.5c2.33 0 4.31-1.46 5.11-3.5H6.89c.8 2.04 2.78 3.5 5.11 3.5z"/></svg>
-                                "Tell me a joke"
-                            </div>
-                            <div class="command-item" data-command="calculate 25 times 4">
-                                <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zM9 17H7v-7h2v7zm4 0h-2V7h2v10zm4 0h-2v-4h2v4z"/></svg>
-                                "Calculator"
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <div class="command-category">
-                        <div class="category-header">
-                            <div class="category-icon">
-                                <svg viewBox="0 0 24 24">
-                                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                                </svg>
-                            </div>
-                            <div>
-                                <div class="category-title">Actions</div>
-                            </div>
-                        </div>
-                        <div class="command-list">
-                            <div class="command-item" data-command="open youtube">
-                                <svg viewBox="0 0 24 24"><path d="M19.35 10.04C18.67 6.59 15.64 4 12 4 9.11 4 6.6 5.64 5.35 8.04 2.34 8.36 0 10.91 0 14c0 3.31 2.69 6 6 6h13c2.76 0 5-2.24 5-5 0-2.64-2.05-4.78-4.65-4.96z"/></svg>
-                                "Open YouTube"
-                            </div>
-                            <div class="command-item" data-command="search for recipes">
-                                <svg viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27C15.41 12.59 16 11.11 16 9.5 16 5.91 13.09 3 9.5 3S3 5.91 3 9.5 5.91 16 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19l-4.99-5zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></svg>
-                                "Web search"
-                            </div>
-                            <div class="command-item" data-command="take a note">
-                                <svg viewBox="0 0 24 24"><path d="M19 3H5c-1.11 0-2 .9-2 2v14c0 1.1.89 2 2 2h14c1.1 0 2-.9 2-2V5c0-1.1-.9-2-2-2zm-5 14H7v-2h7v2zm3-4H7v-2h10v2zm0-4H7V7h10v2z"/></svg>
-                                "Take a note"
-                            </div>
-                        </div>
-                    </div>
+
+                {/* Quick Actions */}
+                <div className="flex flex-wrap gap-2 mt-3">
+                  {['What\'s the weather?', 'Set a timer', 'Tell me a joke', 'Search the web'].map(action => (
+                    <button
+                      key={action}
+                      onClick={() => handleVoiceInput(action)}
+                      className="px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded-full text-sm transition-colors"
+                    >
+                      {action}
+                    </button>
+                  ))}
                 </div>
+              </div>
             </div>
-            
-            <!-- History Screen -->
-            <div class="screen" id="historyScreen">
-                <div class="history-filter">
-                    <button class="filter-chip active" data-filter="all">All</button>
-                    <button class="filter-chip" data-filter="today">Today</button>
-                    <button class="filter-chip" data-filter="week">This Week</button>
-                    <button class="filter-chip" data-filter="commands">Commands</button>
-                    <button class="filter-chip" data-filter="queries">Queries</button>
+          </div>
+        )}
+
+        {/* Commands Tab */}
+        {activeTab === 'commands' && (
+          <div className="max-w-4xl mx-auto">
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {[
+                {
+                  category: 'Productivity',
+                  icon: Zap,
+                  color: 'from-yellow-500 to-orange-500',
+                  commands: [
+                    'Set a reminder for...',
+                    'Create a todo list',
+                    'Schedule a meeting',
+                    'Take a note'
+                  ]
+                },
+                {
+                  category: 'Information',
+                  icon: Globe,
+                  color: 'from-blue-500 to-cyan-500',
+                  commands: [
+                    'What\'s the weather?',
+                    'Search for...',
+                    'Latest news',
+                    'Define...'
+                  ]
+                },
+                {
+                  category: 'Entertainment',
+                  icon: Sparkles,
+                  color: 'from-purple-500 to-pink-500',
+                  commands: [
+                    'Play music',
+                    'Tell me a joke',
+                    'Fun fact',
+                    'Movie recommendations'
+                  ]
+                },
+                {
+                  category: 'System',
+                  icon: Shield,
+                  color: 'from-green-500 to-emerald-500',
+                  commands: [
+                    'System status',
+                    'Battery level',
+                    'Network info',
+                    'Device settings'
+                  ]
+                }
+              ].map(category => (
+                <div key={category.category} className="bg-gray-800 rounded-xl p-6 hover:shadow-xl transition-shadow">
+                  <div className={`inline-flex p-3 rounded-lg bg-gradient-to-r ${category.color} mb-4`}>
+                    <category.icon size={24} className="text-white" />
+                  </div>
+                  <h3 className="text-xl font-semibold mb-3">{category.category}</h3>
+                  <ul className="space-y-2">
+                    {category.commands.map(command => (
+                      <li key={command}>
+                        <button
+                          onClick={() => handleVoiceInput(command)}
+                          className="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-700 transition-colors flex items-center justify-between group"
+                        >
+                          <span className="text-gray-300">{command}</span>
+                          <ChevronRight size={16} className="opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </button>
+                      </li>
+                    ))}
+                  </ul>
                 </div>
-                <div class="history-list" id="historyList">
-                    <!-- History items will be added here -->
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* History Tab */}
+        {activeTab === 'history' && (
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-gray-800 rounded-xl p-6">
+              <div className="flex items-center justify-between mb-6">
+                <h2 className="text-2xl font-semibold">Conversation History</h2>
+                <div className="flex space-x-2">
+                  <button
+                    onClick={exportConversation}
+                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg flex items-center space-x-2 transition-colors"
+                  >
+                    <Download size={16} />
+                    <span>Export</span>
+                  </button>
+                  <button
+                    onClick={() => {
+                      setMessages([messages[0]]);
+                      showNotification('History cleared', 'success');
+                    }}
+                    className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg flex items-center space-x-2 transition-colors"
+                  >
+                    <Trash2 size={16} />
+                    <span>Clear</span>
+                  </button>
                 </div>
-            </div>
-            
-            <!-- Settings Screen -->
-            <div class="screen" id="settingsScreen">
-                <div class="settings-sections">
-                    <!-- Voice Settings -->
-                    <div class="settings-section">
-                        <h2 class="settings-title">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="var(--primary)">
-                                <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
-                                <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
-                            </svg>
-                            Voice Settings
-                        </h2>
-                        
-                        <div class="settings-item">
-                            <div class="settings-label">
-                                <div class="settings-label-main">Voice Type</div>
-                                <div class="settings-label-sub">Choose assistant voice</div>
-                            </div>
-                            <div class="select-wrapper">
-                                <select class="select" id="voiceSelect">
-                                    <option value="female">Female</option>
-                                    <option value="male">Male</option>
-                                    <option value="neutral">Neutral</option>
-                                </select>
-                                <div class="select-arrow">
-                                    <svg viewBox="0 0 24 24">
-                                        <path d="M7 10l5 5 5-5z"/>
-                                    </svg>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="settings-item">
-                            <div class="settings-label">
-                                <div class="settings-label-main">Speech Rate</div>
-                                <div class="settings-label-sub">Adjust speaking speed</div>
-                            </div>
-                            <div class="slider-container">
-                                <input type="range" class="slider" id="speechRate" min="0.5" max="2" step="0.1" value="1">
-                                <span class="slider-value" id="speechRateValue">1.0</span>
-                            </div>
-                        </div>
-                        
-                        <div class="settings-item">
-                            <div class="settings-label">
-                                <div class="settings-label-main">Voice Feedback</div>
-                                <div class="settings-label-sub">Haptic vibration on speech</div>
-                            </div>
-                            <div class="switch" id="hapticSwitch">
-                                <div class="switch-slider"></div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Language & Region -->
-                    <div class="settings-section">
-                        <h2 class="settings-title">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="var(--primary)">
-                                <path d="M11.99 2C6.47 2 2 6.48 2 12s4.47 10 9.99 10C17.52 22 22 17.52 22 12S17.52 2 11.99 2zm6.93 6h-2.95c-.32-1.25-.78-2.45-1.38-3.56 1.84.63 3.37 1.91 4.33 3.56zM12 4.04c.83 1.2 1.48 2.53 1.91 3.96h-3.82c.43-1.43 1.08-2.76 1.91-3.96zM4.26 14C4.1 13.36 4 12.69 4 12s.1-1.36.26-2h3.38c-.08.66-.14 1.32-.14 2 0 .68.06 1.34.14 2H4.26zm.82 2h2.95c.32 1.25.78 2.45 1.38 3.56-1.84-.63-3.37-1.9-4.33-3.56zm2.95-8H5.08c.96-1.66 2.49-2.93 4.33-3.56C8.81 5.55 8.35 6.75 8.03 8zM12 19.96c-.83-1.2-1.48-2.53-1.91-3.96h3.82c-.43 1.43-1.08 2.76-1.91 3.96zM14.34 16H9.66c-.09-.66-.16-1.32-.16-2 0-.68.07-1.35.16-2h4.68c.09.65.16 1.32.16 2 0 .68-.07 1.34-.16 2zm.25 3.56c.6-1.11 1.06-2.31 1.38-3.56h2.95c-.96 1.65-2.49 2.93-4.33 3.56zM16.36 14c.08-.66.14-1.32.14-2 0-.68-.06-1.34-.14-2h3.38c.16.64.26 1.31.26 2s-.1 1.36-.26 2h-3.38z"/>
-                            </svg>
-                            Language & Region
-                        </h2>
-                        
-                        <div class="settings-item">
-                            <div class="settings-label">
-                                <div class="settings-label-main">Language</div>
-                                <div class="settings-label-sub">Recognition and response language</div>
-                            </div>
-                            <div class="select-wrapper">
-                                <select class="select" id="languageSelect">
-                                    <option value="en-US">English (US)</option>
-                                    <option value="en-GB">English (UK)</option>
-                                    <option value="es-ES">Spanish</option>
-                                    <option value="fr-FR">French</option>
-                                    <option value="de-DE">German</option>
-                                    <option value="zh-CN">Chinese</option>
-                                    <option value="ja-JP">Japanese</option>
-                                </select>
-                                <div class="select-arrow">
-                                    <svg viewBox="0 0 24 24">
-                                        <path d="M7 10l5 5 5-5z"/>
-                                    </svg>
-                                </div>
-                            </div>
-                        </div>
-                        
-                        <div class="settings-item">
-                            <div class="settings-label">
-                                <div class="settings-label-main">Time Format</div>
-                                <div class="settings-label-sub">12-hour or 24-hour</div>
-                            </div>
-                            <div class="select-wrapper">
-                                <select class="select" id="timeFormatSelect">
-                                    <option value="12">12-hour</option>
-                                    <option value="24">24-hour</option>
-                                </select>
-                                <div class="select-arrow">
-                                    <svg viewBox="0 0 24 24">
-                                        <path d="M7 10l5 5 5-5z"/>
-                                    </svg>
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                    
-                    <!-- Privacy & Data -->
-                    <div class="settings-section">
-                        <h2 class="settings-title">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="var(--primary)">
-                                <path d="M12 1L3 5v6c0 5.55 3.84 10.74 9 12 5.16-1.26 9-6.45 9-12V5l-9-4z"/>
-                            </svg>
-                            Privacy & Data
-                        </h2>
-                        
-                        <div class="settings-item">
-                            <div class="settings-label">
-                                <div class="settings-label-main">Save History</div>
-                                <div class="settings-label-sub">Store conversation history locally</div>
-                            </div>
-                            <div class="switch active" id="saveHistorySwitch">
-                                <div class="switch-slider"></div>
-                            </div>
-                        </div>
-                        
-                        <div class="settings-item">
-                            <div class="settings-label">
-                                <div class="settings-label-main">Analytics</div>
-                                <div class="settings-label-sub">Help improve with usage data</div>
-                            </div>
-                            <div class="switch" id="analyticsSwitch">
-                                <div class="switch-slider"></div>
-                            </div>
-                        </div>
-                        
-                        <div class="settings-item">
-                            <div class="settings-label">
-                                <div class="settings-label-main">Clear Data</div>
-                                <div class="settings-label-sub">Delete all history and settings</div>
-                            </div>
-                            <button class="icon-button" id="clearDataBtn">
-                                <svg viewBox="0 0 24 24">
-                                    <path d="M6 19c0 1.1.9 2 2 2h8c1.1 0 2-.9 2-2V7H6v12zM19 4h-3.5l-1-1h-5l-1 1H5v2h14V4z"/>
-                                </svg>
-                            </button>
-                        </div>
-                    </div>
-                    
-                    <!-- About -->
-                    <div class="settings-section">
-                        <h2 class="settings-title">
-                            <svg width="20" height="20" viewBox="0 0 24 24" fill="var(--primary)">
-                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>
-                            </svg>
-                            About
-                        </h2>
-                        
-                        <div class="settings-item">
-                            <div class="settings-label">
-                                <div class="settings-label-main">Version</div>
-                                <div class="settings-label-sub">Luna Voice Assistant</div>
-                            </div>
-                            <span style="color: var(--text-tertiary);">2.0.0</span>
-                        </div>
-                        
-                        <div class="settings-item">
-                            <div class="settings-label">
-                                <div class="settings-label-main">Developer</div>
-                                <div class="settings-label-sub">Advanced AI Systems</div>
-                            </div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <!-- Voice Button -->
-        <div class="voice-button-container">
-            <button class="voice-button" id="voiceButton">
-                <svg viewBox="0 0 24 24">
-                    <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
-                    <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
-                </svg>
-            </button>
-            
-            <div class="voice-visualizer" id="voiceVisualizer">
-                <div class="voice-bar"></div>
-                <div class="voice-bar"></div>
-                <div class="voice-bar"></div>
-                <div class="voice-bar"></div>
-                <div class="voice-bar"></div>
-            </div>
-        </div>
-        
-        <!-- Quick Actions -->
-        <div class="quick-actions" id="quickActions">
-            <button class="quick-action" data-action="time">Time</button>
-            <button class="quick-action" data-action="weather">Weather</button>
-            <button class="quick-action" data-action="joke">Joke</button>
-            <button class="quick-action" data-action="calculate">Calculate</button>
-        </div>
-    </div>
-    
-    <!-- Toast Container -->
-    <div class="toast-container" id="toastContainer"></div>
-    
-    <!-- Modal -->
-    <div class="modal" id="modal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 class="modal-title" id="modalTitle">Title</h3>
-                <button class="modal-close" id="modalClose">
-                    <svg viewBox="0 0 24 24">
-                        <path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>
-                    </svg>
-                </button>
-            </div>
-            <div class="modal-body" id="modalBody">
-                <!-- Modal content -->
-            </div>
-        </div>
-    </div>
-    
-    <!-- Install Prompt -->
-    <div class="install-prompt" id="installPrompt">
-        <div class="install-prompt-content">
-            <div class="install-prompt-icon">
-                <svg viewBox="0 0 24 24">
-                    <path d="M18 1.01L8 1c-1.1 0-2 .9-2 2v3h2V5h10v14H8v-1H6v3c0 1.1.9 2 2 2h10c1.1 0 2-.9 2-2V3c0-1.1-.9-1.99-2-1.99zM10 15h2V8H5v2h3.59L3 15.59 4.41 17 10 11.41z"/>
-                </svg>
-            </div>
-            <div class="install-prompt-text">
-                <div class="install-prompt-title">Install Luna</div>
-                <div class="install-prompt-subtitle">Add to your home screen for the best experience</div>
-            </div>
-        </div>
-        <div class="install-prompt-actions">
-            <button class="install-prompt-button secondary" id="installLater">Later</button>
-            <button class="install-prompt-button primary" id="installNow">Install</button>
-        </div>
-    </div>
-    
-    <script>
-        // Voice Assistant Core
-        class VoiceAssistant {
-            constructor() {
-                this.recognition = null;
-                this.synthesis = window.speechSynthesis;
-                this.isListening = false;
-                this.voices = [];
-                this.selectedVoice = null;
-                this.settings = this.loadSettings();
-                this.history = this.loadHistory();
-                this.commands = this.initializeCommands();
-                this.currentScreen = 'chat';
-                this.notificationCount = 0;
-                this.deferredPrompt = null;
-                
-                this.init();
-            }
-            
-            init() {
-                this.initializeRecognition();
-                this.loadVoices();
-                this.setupEventListeners();
-                this.updateUI();
-                this.checkInstallPrompt();
-                this.initializeLoading();
-                this.requestPermissions();
-            }
-            
-            initializeLoading() {
-                let progress = 0;
-                const progressBar = document.getElementById('loadingProgress');
-                const loadingScreen = document.getElementById('loadingScreen');
-                
-                const interval = setInterval(() => {
-                    progress += 10;
-                    progressBar.style.width = progress + '%';
-                    
-                    if (progress >= 100) {
-                        clearInterval(interval);
-                        setTimeout(() => {
-                            loadingScreen.classList.add('hidden');
-                        }, 500);
-                    }
-                }, 100);
-            }
-            
-            requestPermissions() {
-                // Request microphone permission
-                if (navigator.mediaDevices && navigator.mediaDevices.getUserMedia) {
-                    navigator.mediaDevices.getUserMedia({ audio: true })
-                        .then(() => {
-                            console.log('Microphone permission granted');
-                        })
-                        .catch(() => {
-                            this.showToast('Microphone permission is required for voice commands', 'warning');
-                        });
-                }
-                
-                // Request notification permission
-                if ('Notification' in window && Notification.permission === 'default') {
-                    Notification.requestPermission();
-                }
-            }
-            
-            initializeRecognition() {
-                if ('webkitSpeechRecognition' in window) {
-                    this.recognition = new webkitSpeechRecognition();
-                } else if ('SpeechRecognition' in window) {
-                    this.recognition = new SpeechRecognition();
-                } else {
-                    this.showToast('Speech recognition not supported', 'error');
-                    return;
-                }
-                
-                this.recognition.continuous = false;
-                this.recognition.interimResults = true;
-                this.recognition.maxAlternatives = 3;
-                this.recognition.lang = this.settings.language || 'en-US';
-                
-                this.recognition.onstart = () => this.onRecognitionStart();
-                this.recognition.onresult = (event) => this.onRecognitionResult(event);
-                this.recognition.onerror = (event) => this.onRecognitionError(event);
-                this.recognition.onend = () => this.onRecognitionEnd();
-            }
-            
-            loadVoices() {
-                const loadVoiceList = () => {
-                    this.voices = this.synthesis.getVoices();
-                    
-                    // Find preferred voice based on settings
-                    const voiceType = this.settings.voiceType || 'female';
-                    let preferredVoice = null;
-                    
-                    if (voiceType === 'female') {
-                        preferredVoice = this.voices.find(voice => 
-                            voice.name.toLowerCase().includes('female') || 
-                            voice.name.includes('Samantha') ||
-                            voice.name.includes('Victoria') ||
-                            voice.name.includes('Karen') ||
-                            voice.name.includes('Zira') ||
-                            voice.name.includes('Google US English Female')
-                        );
-                    } else if (voiceType === 'male') {
-                        preferredVoice = this.voices.find(voice => 
-                            voice.name.toLowerCase().includes('male') && 
-                            !voice.name.toLowerCase().includes('female')
-                        );
-                    }
-                    
-                    this.selectedVoice = preferredVoice || this.voices.find(voice => 
-                        voice.lang.startsWith(this.settings.language.split('-')[0])
-                    );
-                };
-                
-                loadVoiceList();
-                if (speechSynthesis.onvoiceschanged !== undefined) {
-                    speechSynthesis.onvoiceschanged = loadVoiceList;
-                }
-            }
-            
-            setupEventListeners() {
-                // Voice button
-                const voiceButton = document.getElementById('voiceButton');
-                voiceButton.addEventListener('click', () => this.toggleListening());
-                
-                // Long press for continuous listening
-                let pressTimer;
-                voiceButton.addEventListener('touchstart', (e) => {
-                    pressTimer = setTimeout(() => {
-                        this.startContinuousListening();
-                    }, 500);
-                });
-                
-                voiceButton.addEventListener('touchend', () => {
-                    clearTimeout(pressTimer);
-                });
-                
-                // Navigation tabs
-                document.querySelectorAll('.nav-tab').forEach(tab => {
-                    tab.addEventListener('click', () => {
-                        this.switchScreen(tab.dataset.screen);
-                    });
-                });
-                
-                // Quick actions
-                document.querySelectorAll('.quick-action').forEach(action => {
-                    action.addEventListener('click', () => {
-                        const command = this.getQuickActionCommand(action.dataset.action);
-                        this.processCommand(command);
-                    });
-                });
-                
-                // Command items
-                document.addEventListener('click', (e) => {
-                    if (e.target.closest('.command-item')) {
-                        const command = e.target.closest('.command-item').dataset.command;
-                        this.addMessage(command, 'user');
-                        this.processCommand(command);
-                    }
-                });
-                
-                // Settings
-                this.setupSettingsListeners();
-                
-                // History filters
-                document.querySelectorAll('.filter-chip').forEach(chip => {
-                    chip.addEventListener('click', () => {
-                        document.querySelectorAll('.filter-chip').forEach(c => c.classList.remove('active'));
-                        chip.classList.add('active');
-                        this.filterHistory(chip.dataset.filter);
-                    });
-                });
-                
-                // Modal
-                document.getElementById('modalClose').addEventListener('click', () => {
-                    this.closeModal();
-                });
-                
-                // Menu button
-                document.getElementById('menuBtn').addEventListener('click', () => {
-                    this.showMenu();
-                });
-                
-                // Notification button
-                document.getElementById('notificationBtn').addEventListener('click', () => {
-                    this.showNotifications();
-                });
-                
-                // Install prompt
-                document.getElementById('installNow').addEventListener('click', () => {
-                    this.installApp();
-                });
-                
-                document.getElementById('installLater').addEventListener('click', () => {
-                    document.getElementById('installPrompt').classList.remove('show');
-                });
-                
-                // Keyboard shortcuts
-                document.addEventListener('keydown', (e) => {
-                    if (e.code === 'Space' && e.target === document.body) {
-                        e.preventDefault();
-                        this.toggleListening();
-                    }
-                });
-                
-                // Swipe gestures
-                this.setupSwipeGestures();
-                
-                // Voice activation (always listening for wake word)
-                if (this.settings.voiceActivation) {
-                    this.startVoiceActivation();
-                }
-            }
-            
-            setupSettingsListeners() {
-                // Voice type
-                document.getElementById('voiceSelect').addEventListener('change', (e) => {
-                    this.settings.voiceType = e.target.value;
-                    this.saveSettings();
-                    this.loadVoices();
-                    this.showToast('Voice updated', 'success');
-                });
-                
-                // Speech rate
-                const speechRateSlider = document.getElementById('speechRate');
-                const speechRateValue = document.getElementById('speechRateValue');
-                speechRateSlider.addEventListener('input', (e) => {
-                    speechRateValue.textContent = e.target.value;
-                    this.settings.speechRate = parseFloat(e.target.value);
-                    this.saveSettings();
-                });
-                
-                // Haptic feedback
-                document.getElementById('hapticSwitch').addEventListener('click', () => {
-                    const isActive = document.getElementById('hapticSwitch').classList.toggle('active');
-                    this.settings.hapticFeedback = isActive;
-                    this.saveSettings();
-                });
-                
-                // Language
-                document.getElementById('languageSelect').addEventListener('change', (e) => {
-                    this.settings.language = e.target.value;
-                    this.saveSettings();
-                    this.recognition.lang = e.target.value;
-                    this.showToast('Language updated', 'success');
-                });
-                
-                // Time format
-                document.getElementById('timeFormatSelect').addEventListener('change', (e) => {
-                    this.settings.timeFormat = e.target.value;
-                    this.saveSettings();
-                });
-                
-                // Save history
-                document.getElementById('saveHistorySwitch').addEventListener('click', () => {
-                    const isActive = document.getElementById('saveHistorySwitch').classList.toggle('active');
-                    this.settings.saveHistory = isActive;
-                    this.saveSettings();
-                });
-                
-                // Analytics
-                document.getElementById('analyticsSwitch').addEventListener('click', () => {
-                    const isActive = document.getElementById('analyticsSwitch').classList.toggle('active');
-                    this.settings.analytics = isActive;
-                    this.saveSettings();
-                });
-                
-                // Clear data
-                document.getElementById('clearDataBtn').addEventListener('click', () => {
-                    this.showConfirmDialog('Clear all data?', 'This will delete all history and reset settings.', () => {
-                        this.clearAllData();
-                    });
-                });
-            }
-            
-            setupSwipeGestures() {
-                let touchStartX = 0;
-                let touchEndX = 0;
-                
-                document.addEventListener('touchstart', (e) => {
-                    touchStartX = e.changedTouches[0].screenX;
-                });
-                
-                document.addEventListener('touchend', (e) => {
-                    touchEndX = e.changedTouches[0].screenX;
-                    this.handleSwipe();
-                });
-                
-                const handleSwipe = () => {
-                    const swipeDistance = touchEndX - touchStartX;
-                    if (Math.abs(swipeDistance) > 50) {
-                        if (swipeDistance > 0) {
-                            // Swipe right
-                            this.navigateToPreviousScreen();
-                        } else {
-                            // Swipe left
-                            this.navigateToNextScreen();
-                        }
-                    }
-                };
-            }
-            
-            initializeCommands() {
-                return {
-                    time: {
-                        patterns: ['time', 'clock', 'what time'],
-                        action: () => {
-                            const now = new Date();
-                            const timeFormat = this.settings.timeFormat || '12';
-                            const time = timeFormat === '12' 
-                                ? now.toLocaleTimeString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })
-                                : now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false });
-                            return `The time is ${time}`;
-                        }
-                    },
-                    date: {
-                        patterns: ['date', 'day', 'today'],
-                        action: () => {
-                            const now = new Date();
-                            const date = now.toLocaleDateString('en-US', { 
-                                weekday: 'long', 
-                                year: 'numeric', 
-                                month: 'long', 
-                                day: 'numeric' 
-                            });
-                            return `Today is ${date}`;
-                        }
-                    },
-                    weather: {
-                        patterns: ['weather', 'temperature', 'forecast'],
-                        action: async () => {
-                            // Real implementation would use weather API
-                            const conditions = ['sunny', 'partly cloudy', 'cloudy', 'rainy'];
-                            const condition = conditions[Math.floor(Math.random() * conditions.length)];
-                            const temp = Math.floor(Math.random() * 30) + 60;
-                            return `The weather is ${condition} with a temperature of ${temp} degrees Fahrenheit`;
-                        }
-                    },
-                    joke: {
-                        patterns: ['joke', 'funny', 'laugh'],
-                        action: () => {
-                            const jokes = [
-                                "Why don't scientists trust atoms? Because they make up everything!",
-                                "Why did the scarecrow win an award? He was outstanding in his field!",
-                                "Why don't eggs tell jokes? They'd crack up!",
-                                "What do you call a fake noodle? An impasta!",
-                                "Why did the math book look so sad? It had too many problems!"
-                            ];
-                            return jokes[Math.floor(Math.random() * jokes.length)];
-                        }
-                    },
-                    calculate: {
-                        patterns: ['calculate', 'what is', 'math', 'plus', 'minus', 'times', 'divided'],
-                        action: (command) => {
-                            try {
-                                // Extract numbers and operation
-                                const numbers = command.match(/\d+/g);
-                                if (numbers && numbers.length >= 2) {
-                                    const a = parseInt(numbers[0]);
-                                    const b = parseInt(numbers[1]);
-                                    
-                                    if (command.includes('plus') || command.includes('+')) {
-                                        return `${a} plus ${b} equals ${a + b}`;
-                                    } else if (command.includes('minus') || command.includes('-')) {
-                                        return `${a} minus ${b} equals ${a - b}`;
-                                    } else if (command.includes('times') || command.includes('*')) {
-                                        return `${a} times ${b} equals ${a * b}`;
-                                    } else if (command.includes('divided') || command.includes('/')) {
-                                        return `${a} divided by ${b} equals ${(a / b).toFixed(2)}`;
-                                    }
-                                }
-                                return "I couldn't understand the calculation. Try saying 'calculate 5 plus 3'";
-                            } catch (e) {
-                                return "Sorry, I couldn't calculate that";
-                            }
-                        }
-                    },
-                    timer: {
-                        patterns: ['timer', 'alarm', 'remind me'],
-                        action: (command) => {
-                            const minutes = command.match(/\d+/);
-                            if (minutes) {
-                                const ms = parseInt(minutes[0]) * 60 * 1000;
-                                setTimeout(() => {
-                                    this.speak("Timer finished!");
-                                    this.showNotification("Timer Alert", "Your timer has finished!");
-                                    if (this.settings.hapticFeedback && 'vibrate' in navigator) {
-                                        navigator.vibrate([200, 100, 200, 100, 200]);
-                                    }
-                                }, ms);
-                                return `Setting a timer for ${minutes[0]} minutes`;
-                            }
-                            return "Please specify the number of minutes for the timer";
-                        }
-                    },
-                    open: {
-                        patterns: ['open', 'launch', 'go to'],
-                        action: (command) => {
-                            const apps = {
-                                'youtube': 'https://youtube.com',
-                                'google': 'https://google.com',
-                                'maps': 'https://maps.google.com',
-                                'gmail': 'https://gmail.com',
-                                'calendar': 'https://calendar.google.com',
-                                'twitter': 'https://twitter.com',
-                                'facebook': 'https://facebook.com',
-                                'instagram': 'https://instagram.com'
-                            };
-                            
-                            for (const [app, url] of Object.entries(apps)) {
-                                if (command.includes(app)) {
-                                    window.open(url, '_blank');
-                                    return `Opening ${app}`;
-                                }
-                            }
-                            return "I can open YouTube, Google, Maps, Gmail, and other popular apps";
-                        }
-                    },
-                    search: {
-                        patterns: ['search', 'google', 'find'],
-                        action: (command) => {
-                            const query = command.replace(/search|google|find|for/g, '').trim();
-                            if (query) {
-                                window.open(`https://google.com/search?q=${encodeURIComponent(query)}`, '_blank');
-                                return `Searching for ${query}`;
-                            }
-                            return "What would you like to search for?";
-                        }
-                    },
-                    note: {
-                        patterns: ['note', 'remember', 'save'],
-                        action: (command) => {
-                            const note = command.replace(/note|remember|save|that/g, '').trim();
-                            if (note) {
-                                this.saveNote(note);
-                                return `I've saved your note: ${note}`;
-                            }
-                            return "What would you like me to remember?";
-                        }
-                    },
-                    battery: {
-                        patterns: ['battery', 'charge', 'power'],
-                        action: async () => {
-                            if ('getBattery' in navigator) {
-                                const battery = await navigator.getBattery();
-                                const level = Math.round(battery.level * 100);
-                                const charging = battery.charging ? 'charging' : 'not charging';
-                                return `Battery is at ${level} percent and ${charging}`;
-                            }
-                            return "Battery information is not available";
-                        }
-                    },
-                    screenshot: {
-                        patterns: ['screenshot', 'capture', 'screen'],
-                        action: () => {
-                            if ('mediaDevices' in navigator && 'getDisplayMedia' in navigator.mediaDevices) {
-                                navigator.mediaDevices.getDisplayMedia({ video: true })
-                                    .then(stream => {
-                                        // Implementation for screenshot
-                                        stream.getTracks().forEach(track => track.stop());
-                                        return "Screenshot captured";
-                                    })
-                                    .catch(() => {
-                                        return "Screenshot permission denied";
-                                    });
-                            }
-                            return "Screenshot feature is not available";
-                        }
-                    },
-                    translate: {
-                        patterns: ['translate', 'say in', 'how do you say'],
-                        action: (command) => {
-                            // Basic translation simulation
-                            const translations = {
-                                'hello spanish': 'Hola',
-                                'hello french': 'Bonjour',
-                                'hello german': 'Hallo',
-                                'hello italian': 'Ciao',
-                                'hello japanese': 'Konnichiwa',
-                                'hello chinese': 'Ni hao'
-                            };
-                            
-                            for (const [key, value] of Object.entries(translations)) {
-                                if (command.includes(key)) {
-                                    return `"Hello" in ${key.split(' ')[1]} is "${value}"`;
-                                }
-                            }
-                            return "I can translate basic phrases. Try 'translate hello to Spanish'";
-                        }
-                    },
-                    news: {
-                        patterns: ['news', 'headlines', 'what\'s happening'],
-                        action: () => {
-                            window.open('https://news.google.com', '_blank');
-                            return "Opening Google News for the latest headlines";
-                        }
-                    },
-                    music: {
-                        patterns: ['play music', 'spotify', 'youtube music'],
-                        action: (command) => {
-                            if (command.includes('spotify')) {
-                                window.open('https://spotify.com', '_blank');
-                                return "Opening Spotify";
-                            } else if (command.includes('youtube music')) {
-                                window.open('https://music.youtube.com', '_blank');
-                                return "Opening YouTube Music";
-                            }
-                            return "I can open Spotify or YouTube Music. Which would you prefer?";
-                        }
-                    },
-                    call: {
-                        patterns: ['call', 'phone', 'dial'],
-                        action: (command) => {
-                            const phoneNumber = command.match(/\d+/g)?.join('');
-                            if (phoneNumber) {
-                                window.location.href = `tel:${phoneNumber}`;
-                                return `Calling ${phoneNumber}`;
-                            }
-                            return "Please provide a phone number to call";
-                        }
-                    },
-                    email: {
-                        patterns: ['email', 'send email', 'compose'],
-                        action: (command) => {
-                            const emailMatch = command.match(/[\w\.-]+@[\w\.-]+\.\w+/);
-                            if (emailMatch) {
-                                window.location.href = `mailto:${emailMatch[0]}`;
-                                return `Opening email to ${emailMatch[0]}`;
-                            }
-                            window.location.href = 'mailto:';
-                            return "Opening email composer";
-                        }
-                    },
-                    navigation: {
-                        patterns: ['directions', 'navigate', 'take me to'],
-                        action: (command) => {
-                            const destination = command.replace(/directions|navigate|take me to|to/g, '').trim();
-                            if (destination) {
-                                window.open(`https://maps.google.com/maps?q=${encodeURIComponent(destination)}`, '_blank');
-                                return `Getting directions to ${destination}`;
-                            }
-                            return "Where would you like to go?";
-                        }
-                    }
-                };
-            }
-            
-            toggleListening() {
-                if (this.isListening) {
-                    this.stopListening();
-                } else {
-                    this.startListening();
-                }
-            }
-            
-            startListening() {
-                if (!this.recognition) {
-                    this.showToast('Speech recognition not available', 'error');
-                    return;
-                }
-                
-                try {
-                    this.recognition.start();
-                    this.isListening = true;
-                    
-                    // Show quick actions
-                    document.getElementById('quickActions').classList.add('visible');
-                    
-                    // Haptic feedback
-                    if (this.settings.hapticFeedback && 'vibrate' in navigator) {
-                        navigator.vibrate(50);
-                    }
-                } catch (e) {
-                    this.showToast('Already listening', 'warning');
-                }
-            }
-            
-            stopListening() {
-                if (this.recognition) {
-                    this.recognition.stop();
-                }
-                this.isListening = false;
-                
-                // Hide quick actions
-                document.getElementById('quickActions').classList.remove('visible');
-            }
-            
-            startContinuousListening() {
-                this.recognition.continuous = true;
-                this.startListening();
-                this.showToast('Continuous listening mode', 'success');
-            }
-            
-            onRecognitionStart() {
-                document.getElementById('voiceButton').classList.add('listening');
-                document.getElementById('voiceVisualizer').classList.add('active');
-                this.showTypingIndicator();
-            }
-            
-            onRecognitionEnd() {
-                document.getElementById('voiceButton').classList.remove('listening');
-                document.getElementById('voiceVisualizer').classList.remove('active');
-                this.isListening = false;
-                this.recognition.continuous = false;
-            }
-            
-            onRecognitionResult(event) {
-                const current = event.resultIndex;
-                const transcript = event.results[current][0].transcript;
-                const isFinal = event.results[current].isFinal;
-                
-                if (isFinal) {
-                    this.hideTypingIndicator();
-                    this.addMessage(transcript, 'user');
-                    this.processCommand(transcript.toLowerCase());
-                    
-                    // Save to history if enabled
-                    if (this.settings.saveHistory) {
-                        this.addToHistory(transcript);
-                    }
-                    
-                    // Analytics
-                    if (this.settings.analytics) {
-                        this.trackCommand(transcript);
-                    }
-                }
-            }
-            
-            onRecognitionError(event) {
-                this.hideTypingIndicator();
-                let errorMessage = 'Sorry, I couldn\'t understand that.';
-                
-                switch(event.error) {
-                    case 'no-speech':
-                        errorMessage = 'No speech detected. Please try again.';
-                        break;
-                    case 'network':
-                        errorMessage = 'Network error. Please check your connection.';
-                        break;
-                    case 'not-allowed':
-                        errorMessage = 'Microphone access denied. Please enable it in settings.';
-                        break;
-                    case 'aborted':
-                        return; // User cancelled
-                }
-                
-                this.showToast(errorMessage, 'error');
-                this.speak(errorMessage);
-            }
-            
-            async processCommand(command) {
-                let response = null;
-                let commandFound = false;
-                
-                // Check each command category
-                for (const [key, cmd] of Object.entries(this.commands)) {
-                    for (const pattern of cmd.patterns) {
-                        if (command.includes(pattern)) {
-                            response = await cmd.action(command);
-                            commandFound = true;
-                            break;
-                        }
-                    }
-                    if (commandFound) break;
-                }
-                
-                // Fallback responses
-                if (!response) {
-                    if (command.includes('hello') || command.includes('hi')) {
-                        const greetings = [
-                            'Hello! How can I help you today?',
-                            'Hi there! What can I do for you?',
-                            'Hey! Ready to assist you!'
-                        ];
-                        response = greetings[Math.floor(Math.random() * greetings.length)];
-                    } else if (command.includes('how are you')) {
-                        response = "I'm functioning perfectly! Thanks for asking. How can I help you?";
-                    } else if (command.includes('your name')) {
-                        response = "I'm Luna, your personal AI assistant";
-                    } else if (command.includes('thank')) {
-                        response = "You're welcome! Is there anything else I can help with?";
-                    } else if (command.includes('bye') || command.includes('goodbye')) {
-                        response = "Goodbye! Have a great day!";
-                    } else if (command.includes('help')) {
-                        response = "I can help with time, weather, calculations, timers, opening apps, web searches, and much more. Just ask!";
-                    } else {
-                        // AI-powered response (simulate for demo)
-                        response = this.generateAIResponse(command);
-                    }
-                }
-                
-                if (response) {
-                    this.addMessage(response, 'assistant');
-                    this.speak(response);
-                }
-            }
-            
-            generateAIResponse(command) {
-                // In a real implementation, this would call an AI API
-                // For demo, we'll use pattern matching and contextual responses
-                
-                const responses = [
-                    "I understand you're asking about that. Let me help you explore this topic.",
-                    "That's an interesting question. Here's what I can tell you about it.",
-                    "I'm here to help with that. Could you provide more details?",
-                    "Let me assist you with that request."
-                ];
-                
-                // Contextual responses based on keywords
-                if (command.includes('help') || command.includes('how')) {
-                    return "I can help you with various tasks like checking time, weather, calculations, setting timers, and opening apps. What would you like to do?";
-                } else if (command.includes('what') || command.includes('when') || command.includes('where')) {
-                    return "That's a great question. Try asking me about the time, weather, or to search for specific information.";
-                } else if (command.includes('why')) {
-                    return "That's a thoughtful question. While I can help with many practical tasks, for complex 'why' questions, I can search the web for you.";
-                }
-                
-                return responses[Math.floor(Math.random() * responses.length)];
-            }
-            
-            speak(text) {
-                // Cancel any ongoing speech
-                this.synthesis.cancel();
-                
-                const utterance = new SpeechSynthesisUtterance(text);
-                utterance.voice = this.selectedVoice;
-                utterance.rate = this.settings.speechRate || 1;
-                utterance.pitch = 1.1;
-                utterance.volume = 1;
-                
-                utterance.onstart = () => {
-                    if (this.settings.hapticFeedback && 'vibrate' in navigator) {
-                        navigator.vibrate(25);
-                    }
-                };
-                
-                utterance.onend = () => {
-                    // Speech completed
-                };
-                
-                this.synthesis.speak(utterance);
-            }
-            
-            addMessage(text, sender) {
-                const chatMessages = document.getElementById('chatMessages');
-                const messageDiv = document.createElement('div');
-                messageDiv.className = `message ${sender}`;
-                
-                const avatar = document.createElement('div');
-                avatar.className = 'message-avatar';
-                avatar.textContent = sender === 'user' ? '👤' : '🤖';
-                
-                const content = document.createElement('div');
-                content.className = 'message-content';
-                
-                const bubble = document.createElement('div');
-                bubble.className = 'message-bubble';
-                bubble.textContent = text;
-                
-                const time = document.createElement('div');
-                time.className = 'message-time';
-                const now = new Date();
-                const timeStr = this.settings.timeFormat === '24' 
-                    ? now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })
-                    : now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
-                time.innerHTML = `
-                    <span>${timeStr}</span>
-                    <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
-                        <path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>
-                    </svg>
-                `;
-                
-                content.appendChild(bubble);
-                content.appendChild(time);
-                
-                messageDiv.appendChild(avatar);
-                messageDiv.appendChild(content);
-                
-                chatMessages.appendChild(messageDiv);
-                
-                // Scroll to bottom
-                chatMessages.scrollTop = chatMessages.scrollHeight;
-                
-                // Switch to chat screen if not already there
-                if (this.currentScreen !== 'chat') {
-                    this.switchScreen('chat');
-                }
-            }
-            
-            showTypingIndicator() {
-                document.getElementById('typingIndicator').classList.add('active');
-            }
-            
-            hideTypingIndicator() {
-                document.getElementById('typingIndicator').classList.remove('active');
-            }
-            
-            switchScreen(screenName) {
-                // Hide all screens
-                document.querySelectorAll('.screen').forEach(screen => {
-                    screen.classList.remove('active');
-                });
-                
-                // Show selected screen
-                document.getElementById(screenName + 'Screen').classList.add('active');
-                
-                // Update navigation
-                document.querySelectorAll('.nav-tab').forEach(tab => {
-                    tab.classList.remove('active');
-                });
-                document.querySelector(`[data-screen="${screenName}"]`).classList.add('active');
-                
-                this.currentScreen = screenName;
-                
-                // Load screen-specific content
-                if (screenName === 'history') {
-                    this.loadHistoryView();
-                }
-            }
-            
-            navigateToNextScreen() {
-                const screens = ['chat', 'commands', 'history', 'settings'];
-                const currentIndex = screens.indexOf(this.currentScreen);
-                const nextIndex = (currentIndex + 1) % screens.length;
-                this.switchScreen(screens[nextIndex]);
-            }
-            
-            navigateToPreviousScreen() {
-                const screens = ['chat', 'commands', 'history', 'settings'];
-                const currentIndex = screens.indexOf(this.currentScreen);
-                const prevIndex = (currentIndex - 1 + screens.length) % screens.length;
-                this.switchScreen(screens[prevIndex]);
-            }
-            
-            getQuickActionCommand(action) {
-                const commands = {
-                    'time': 'what time is it',
-                    'weather': 'what\'s the weather',
-                    'joke': 'tell me a joke',
-                    'calculate': 'calculate'
-                };
-                return commands[action] || '';
-            }
-            
-            showToast(message, type = 'info') {
-                const toastContainer = document.getElementById('toastContainer');
-                const toast = document.createElement('div');
-                toast.className = `toast ${type}`;
-                
-                const iconSvg = {
-                    'success': '<path d="M9 16.17L4.83 12l-1.42 1.41L9 19 21 7l-1.41-1.41z"/>',
-                    'error': '<path d="M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/>',
-                    'warning': '<path d="M1 21h22L12 2 1 21zm12-3h-2v-2h2v2zm0-4h-2v-4h2v4z"/>',
-                    'info': '<path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm1 15h-2v-6h2v6zm0-8h-2V7h2v2z"/>'
-                };
-                
-                toast.innerHTML = `
-                    <svg class="toast-icon" viewBox="0 0 24 24">
-                        ${iconSvg[type] || iconSvg['info']}
-                    </svg>
-                    <span class="toast-message">${message}</span>
-                `;
-                
-                toast.addEventListener('click', () => {
-                    toast.remove();
-                });
-                
-                toastContainer.appendChild(toast);
-                
-                setTimeout(() => {
-                    toast.remove();
-                }, 3000);
-            }
-            
-            showNotification(title, body) {
-                // Browser notification
-                if ('Notification' in window && Notification.permission === 'granted') {
-                    new Notification(title, {
-                        body: body,
-                        icon: '/icon-192.png',
-                        badge: '/icon-192.png',
-                        vibrate: [200, 100, 200]
-                    });
-                }
-                
-                // In-app notification
-                this.notificationCount++;
-                this.updateNotificationBadge();
-            }
-            
-            updateNotificationBadge() {
-                const badge = document.getElementById('notificationBadge');
-                if (this.notificationCount > 0) {
-                    badge.textContent = this.notificationCount > 9 ? '9+' : this.notificationCount;
-                    badge.style.display = 'flex';
-                } else {
-                    badge.style.display = 'none';
-                }
-            }
-            
-            showMenu() {
-                this.showModal('Menu', `
-                    <div class="menu-options">
-                        <button class="menu-item" onclick="assistant.exportData()">
-                            Export Data
-                        </button>
-                        <button class="menu-item" onclick="assistant.importData()">
-                            Import Data
-                        </button>
-                        <button class="menu-item" onclick="assistant.showAbout()">
-                            About
-                        </button>
-                        <button class="menu-item" onclick="assistant.showHelp()">
-                            Help & Support
-                        </button>
-                    </div>
-                `);
-            }
-            
-            showNotifications() {
-                // Reset notification count
-                this.notificationCount = 0;
-                this.updateNotificationBadge();
-                
-                this.showModal('Notifications', '<p>No new notifications</p>');
-            }
-            
-            showModal(title, content) {
-                document.getElementById('modalTitle').textContent = title;
-                document.getElementById('modalBody').innerHTML = content;
-                document.getElementById('modal').classList.add('active');
-            }
-            
-            closeModal() {
-                document.getElementById('modal').classList.remove('active');
-            }
-            
-            showConfirmDialog(title, message, onConfirm) {
-                this.showModal(title, `
-                    <p>${message}</p>
-                    <div style="display: flex; gap: 10px; margin-top: 20px;">
-                        <button class="install-prompt-button secondary" onclick="assistant.closeModal()">
-                            Cancel
-                        </button>
-                        <button class="install-prompt-button primary" onclick="assistant.closeModal(); (${onConfirm})()">
-                            Confirm
-                        </button>
-                    </div>
-                `);
-            }
-            
-            // Data Management
-            saveSettings() {
-                localStorage.setItem('voiceAssistantSettings', JSON.stringify(this.settings));
-            }
-            
-            loadSettings() {
-                const saved = localStorage.getItem('voiceAssistantSettings');
-                return saved ? JSON.parse(saved) : {
-                    voiceType: 'female',
-                    speechRate: 1,
-                    hapticFeedback: true,
-                    language: 'en-US',
-                    timeFormat: '12',
-                    saveHistory: true,
-                    analytics: false,
-                    voiceActivation: false
-                };
-            }
-            
-            saveHistory() {
-                if (this.settings.saveHistory) {
-                    localStorage.setItem('voiceAssistantHistory', JSON.stringify(this.history));
-                }
-            }
-            
-            loadHistory() {
-                const saved = localStorage.getItem('voiceAssistantHistory');
-                return saved ? JSON.parse(saved) : [];
-            }
-            
-            addToHistory(query) {
-                const entry = {
-                    id: Date.now(),
-                    query: query,
-                    timestamp: new Date().toISOString(),
-                    type: this.detectCommandType(query)
-                };
-                
-                this.history.unshift(entry);
-                
-                // Keep only last 100 entries
-                if (this.history.length > 100) {
-                    this.history = this.history.slice(0, 100);
-                }
-                
-                this.saveHistory();
-            }
-            
-            detectCommandType(query) {
-                for (const [key, cmd] of Object.entries(this.commands)) {
-                    for (const pattern of cmd.patterns) {
-                        if (query.includes(pattern)) {
-                            return key;
-                        }
-                    }
-                }
-                return 'query';
-            }
-            
-            loadHistoryView() {
-                const historyList = document.getElementById('historyList');
-                historyList.innerHTML = '';
-                
-                const filteredHistory = this.getFilteredHistory();
-                
-                if (filteredHistory.length === 0) {
-                    historyList.innerHTML = '<p style="text-align: center; color: var(--text-tertiary);">No history found</p>';
-                    return;
-                }
-                
-                // Group by date
-                const grouped = this.groupHistoryByDate(filteredHistory);
-                
-                for (const [date, entries] of Object.entries(grouped)) {
-                    entries.forEach(entry => {
-                        const item = document.createElement('div');
-                        item.className = 'history-item';
-                        item.innerHTML = `
-                            <div class="history-date">${this.formatHistoryDate(entry.timestamp)}</div>
-                            <div class="history-content">
-                                <div class="history-query">${entry.query}</div>
-                                <div class="history-response">Type: ${entry.type}</div>
-                            </div>
-                        `;
-                        item.addEventListener('click', () => {
-                            this.addMessage(entry.query, 'user');
-                            this.processCommand(entry.query.toLowerCase());
-                        });
-                        historyList.appendChild(item);
-                    });
-                }
-            }
-            
-            getFilteredHistory() {
-                const filter = document.querySelector('.filter-chip.active').dataset.filter;
-                const now = new Date();
-                
-                return this.history.filter(entry => {
-                    const entryDate = new Date(entry.timestamp);
-                    
-                    switch(filter) {
-                        case 'today':
-                            return entryDate.toDateString() === now.toDateString();
-                        case 'week':
-                            const weekAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-                            return entryDate > weekAgo;
-                        case 'commands':
-                            return entry.type !== 'query';
-                        case 'queries':
-                            return entry.type === 'query';
-                        default:
-                            return true;
-                    }
-                });
-            }
-            
-            groupHistoryByDate(history) {
-                const grouped = {};
-                
-                history.forEach(entry => {
-                    const date = new Date(entry.timestamp).toDateString();
-                    if (!grouped[date]) {
-                        grouped[date] = [];
-                    }
-                    grouped[date].push(entry);
-                });
-                
-                return grouped;
-            }
-            
-            formatHistoryDate(timestamp) {
-                const date = new Date(timestamp);
-                const now = new Date();
-                
-                if (date.toDateString() === now.toDateString()) {
-                    return 'Today, ' + date.toLocaleTimeString('en-US', { 
-                        hour: 'numeric', 
-                        minute: '2-digit' 
-                    });
-                } else if (date.toDateString() === new Date(now.getTime() - 24 * 60 * 60 * 1000).toDateString()) {
-                    return 'Yesterday, ' + date.toLocaleTimeString('en-US', { 
-                        hour: 'numeric', 
-                        minute: '2-digit' 
-                    });
-                } else {
-                    return date.toLocaleDateString('en-US', { 
-                        month: 'short', 
-                        day: 'numeric',
-                        hour: 'numeric',
-                        minute: '2-digit'
-                    });
-                }
-            }
-            
-            filterHistory(filter) {
-                this.loadHistoryView();
-            }
-            
-            clearAllData() {
-                localStorage.clear();
-                this.history = [];
-                this.settings = this.loadSettings();
-                this.showToast('All data cleared', 'success');
-                location.reload();
-            }
-            
-            exportData() {
-                const data = {
-                    settings: this.settings,
-                    history: this.history,
-                    exportDate: new Date().toISOString()
-                };
-                
-                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-                const url = URL.createObjectURL(blob);
-                const a = document.createElement('a');
-                a.href = url;
-                a.download = `voice-assistant-backup-${new Date().toISOString().split('T')[0]}.json`;
-                a.click();
-                URL.revokeObjectURL(url);
-                
-                this.showToast('Data exported successfully', 'success');
-            }
-            
-            importData() {
-                const input = document.createElement('input');
-                input.type = 'file';
-                input.accept = '.json';
-                input.onchange = (e) => {
-                    const file = e.target.files[0];
-                    if (file) {
-                        const reader = new FileReader();
-                        reader.onload = (e) => {
-                            try {
-                                const data = JSON.parse(e.target.result);
-                                if (data.settings) this.settings = data.settings;
-                                if (data.history) this.history = data.history;
-                                this.saveSettings();
-                                this.saveHistory();
-                                this.showToast('Data imported successfully', 'success');
-                                location.reload();
-                            } catch (err) {
-                                this.showToast('Invalid backup file', 'error');
-                            }
-                        };
-                        reader.readAsText(file);
-                    }
-                };
-                input.click();
-            }
-            
-            saveNote(note) {
-                const notes = JSON.parse(localStorage.getItem('voiceAssistantNotes') || '[]');
-                notes.unshift({
-                    id: Date.now(),
-                    text: note,
-                    timestamp: new Date().toISOString()
-                });
-                localStorage.setItem('voiceAssistantNotes', JSON.stringify(notes));
-                this.showToast('Note saved', 'success');
-            }
-            
-            trackCommand(command) {
-                // Analytics implementation
-                console.log('Analytics:', command);
-            }
-            
-            showAbout() {
-                this.showModal('About Luna', `
-                    <div style="text-align: center;">
-                        <div style="width: 80px; height: 80px; background: var(--primary); border-radius: 20px; margin: 0 auto 20px; display: flex; align-items: center; justify-content: center;">
-                            <svg width="40" height="40" viewBox="0 0 24 24" fill="white">
-                                <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm-2 15l-5-5 1.41-1.41L10 14.17l7.59-7.59L19 8l-9 9z"/>
-                            </svg>
-                        </div>
-                        <h2>Luna Voice Assistant</h2>
-                        <p style="color: var(--text-secondary); margin: 10px 0;">Version 2.0.0</p>
-                        <p style="color: var(--text-tertiary); line-height: 1.6;">
-                            An advanced AI-powered voice assistant designed for mobile devices. 
-                            Built with cutting-edge web technologies for a seamless experience.
+              </div>
+              
+              <div className="space-y-4 max-h-[500px] overflow-y-auto">
+                {messages.slice(1).reverse().map(message => (
+                  <div key={message.id} className="bg-gray-700 rounded-lg p-4 hover:bg-gray-600 transition-colors">
+                    <div className="flex items-start justify-between">
+                      <div className="flex-1">
+                        <p className={`text-sm ${message.type === 'user' ? 'text-blue-400' : 'text-purple-400'} mb-1`}>
+                          {message.type === 'user' ? 'You' : 'LUNA'}
                         </p>
-                        <p style="margin-top: 20px; font-size: 0.9rem; color: var(--text-tertiary);">
-                            © 2024 Advanced AI Systems
-                        </p>
+                        <p className="text-gray-200">{message.content}</p>
+                      </div>
+                      <p className="text-xs text-gray-500 ml-4">
+                        {message.timestamp.toLocaleString()}
+                      </p>
                     </div>
-                `);
-            }
-            
-            showHelp() {
-                this.showModal('Help & Support', `
-                    <div class="help-content">
-                        <h3>Getting Started</h3>
-                        <p>Tap the microphone button and speak naturally. Luna will understand and respond to your commands.</p>
-                        
-                        <h3>Voice Commands</h3>
-                        <ul style="list-style: none; padding: 0;">
-                            <li>📅 "What time is it?"</li>
-                            <li>☀️ "What's the weather?"</li>
-                            <li>😄 "Tell me a joke"</li>
-                            <li>🔢 "Calculate 25 times 4"</li>
-                            <li>⏰ "Set a timer for 5 minutes"</li>
-                            <li>🌐 "Open YouTube"</li>
-                            <li>🔍 "Search for recipes"</li>
-                        </ul>
-                        
-                        <h3>Tips</h3>
-                        <ul style="list-style: none; padding: 0;">
-                            <li>• Speak clearly and naturally</li>
-                            <li>• Wait for the beep before speaking</li>
-                            <li>• Long-press for continuous listening</li>
-                            <li>• Swipe to navigate between screens</li>
-                        </ul>
-                        
-                        <h3>Troubleshooting</h3>
-                        <p>If Luna can't hear you:</p>
-                        <ul style="list-style: none; padding: 0;">
-                            <li>• Check microphone permissions</li>
-                            <li>• Ensure internet connection</li>
-                            <li>• Reduce background noise</li>
-                            <li>• Try refreshing the page</li>
-                        </ul>
+                  </div>
+                ))}
+              </div>
+            </div>
+          </div>
+        )}
+
+        {/* Settings Tab */}
+        {activeTab === 'settings' && (
+          <div className="max-w-4xl mx-auto">
+            <div className="bg-gray-800 rounded-xl p-6 space-y-6">
+              <h2 className="text-2xl font-semibold mb-6">Settings</h2>
+              
+              {/* API Configuration */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium flex items-center space-x-2">
+                  <Shield size={20} />
+                  <span>API Configuration</span>
+                </h3>
+                <input
+                  type="password"
+                  placeholder="API Key"
+                  value={settings.apiKey}
+                  onChange={(e) => setSettings({ ...settings, apiKey: e.target.value })}
+                  className="w-full bg-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              </div>
+
+              {/* Voice Settings */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium flex items-center space-x-2">
+                  <Volume2 size={20} />
+                  <span>Voice Settings</span>
+                </h3>
+                
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  <div>
+                    <label className="block text-sm text-gray-400 mb-2">Voice Type</label>
+                    <select
+                      value={settings.voiceType}
+                      onChange={(e) => setSettings({ ...settings, voiceType: e.target.value })}
+                      className="w-full bg-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="female">Female</option>
+                      <option value="male">Male</option>
+                      <option value="neutral">Neutral</option>
+                    </select>
+                  </div>
+                  
+                  <div>
+                    <label className="block text-sm text-gray-400 mb-2">Language</label>
+                    <select
+                      value={settings.language}
+                      onChange={(e) => setSettings({ ...settings, language: e.target.value })}
+                      className="w-full bg-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
+                    >
+                      <option value="en-US">English (US)</option>
+                      <option value="en-GB">English (UK)</option>
+                      <option value="es-ES">Spanish</option>
+                      <option value="fr-FR">French</option>
+                      <option value="de-DE">German</option>
+                      <option value="ja-JP">Japanese</option>
+                    </select>
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm text-gray-400 mb-2">
+                    Speech Rate: {settings.speechRate}x
+                  </label>
+                  <input
+                    type="range"
+                    min="0.5"
+                    max="2"
+                    step="0.1"
+                    value={settings.speechRate}
+                    onChange={(e) => setSettings({ ...settings, speechRate: parseFloat(e.target.value) })}
+                    className="w-full"
+                  />
+                </div>
+              </div>
+
+              {/* Advanced Features */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium flex items-center space-x-2">
+                  <Brain size={20} />
+                  <span>Advanced Features</span>
+                </h3>
+                
+                <div className="space-y-3">
+                  <label className="flex items-center space-x-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={settings.enableEmotions}
+                      onChange={(e) => setSettings({ ...settings, enableEmotions: e.target.checked })}
+                      className="w-5 h-5 rounded bg-gray-700 border-gray-600 text-blue-600 focus:ring-blue-500"
+                    />
+                    <div>
+                      <p className="font-medium">Emotion Detection</p>
+                      <p className="text-sm text-gray-400">Analyze and display emotional context</p>
                     </div>
-                `);
-            }
+                  </label>
+                  
+                  <label className="flex items-center space-x-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={settings.enableDiarization}
+                      onChange={(e) => setSettings({ ...settings, enableDiarization: e.target.checked })}
+                      className="w-5 h-5 rounded bg-gray-700 border-gray-600 text-blue-600 focus:ring-blue-500"
+                    />
+                    <div>
+                      <p className="font-medium">Speaker Diarization</p>
+                      <p className="text-sm text-gray-400">Identify multiple speakers</p>
+                    </div>
+                  </label>
+                  
+                  <label className="flex items-center space-x-3 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={settings.autoListen}
+                      onChange={(e) => setSettings({ ...settings, autoListen: e.target.checked })}
+                      className="w-5 h-5 rounded bg-gray-700 border-gray-600 text-blue-600 focus:ring-blue-500"
+                    />
+                    <div>
+                      <p className="font-medium">Auto Listen</p>
+                      <p className="text-sm text-gray-400">Continue listening after responses</p>
+                    </div>
+                  </label>
+                </div>
+              </div>
+
+              {/* Appearance */}
+              <div className="space-y-4">
+                <h3 className="text-lg font-medium flex items-center space-x-2">
+                  {settings.darkMode ? <Moon size={20} /> : <Sun size={20} />}
+                  <span>Appearance</span>
+                </h3>
+                
+                <label className="flex items-center space-x-3 cursor-pointer">
+                  <input
+                    type="checkbox"
+                    checked={settings.darkMode}
+                    onChange={(e) => setSettings({ ...settings, darkMode: e.target.checked })}
+                    className="w-5 h-5 rounded bg-gray-700 border-gray-600 text-blue-600 focus:ring-blue-500"
+                  />
+                  <div>
+                    <p className="font-medium">Dark Mode</p>
+                    <p className="text-sm text-gray-400">Use dark theme</p>
+                  </div>
+                </label>
+              </div>
+            </div>
+          </div>
+        )}
+      </main>
+
+      {/* Notifications */}
+      <div className="fixed top-20 right-4 space-y-2 z-50">
+        {notifications.map(notification => (
+          <div
+            key={notification.id}
+            className={`
+              flex items-center space-x-3 px-4 py-3 rounded-lg shadow-lg
+              transform transition-all duration-300 animate-slide-in
+              ${notification.type === 'success' ? 'bg-green-600' : ''}
+              ${notification.type === 'error' ? 'bg-red-600' : ''}
+              ${notification.type === 'info' ? 'bg-blue-600' : ''}
+            `}
+          >
+            {notification.type === 'success' && <CheckCircle size={20} />}
+            {notification.type === 'error' && <XCircle size={20} />}
+            {notification.type === 'info' && <AlertCircle size={20} />}
+            <span className="text-sm">{notification.message}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Command Palette */}
+      {commandPalette && (
+        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
+          <div className="bg-gray-800 rounded-xl shadow-2xl w-full max-w-lg p-6">
+            <div className="flex items-center justify-between mb-4">
+              <h3 className="text-xl font-semibold">Command Palette</h3>
+              <button
+                onClick={() => setCommandPalette(false)}
+                className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
+              >
+                <X size={20} />
+              </button>
+            </div>
             
-            updateUI() {
-                // Update settings UI
-                document.getElementById('voiceSelect').value = this.settings.voiceType;
-                document.getElementById('speechRate').value = this.settings.speechRate;
-                document.getElementById('speechRateValue').textContent = this.settings.speechRate;
-                document.getElementById('languageSelect').value = this.settings.language;
-                document.getElementById('timeFormatSelect').value = this.settings.timeFormat;
-                
-                // Update switches
-                if (this.settings.hapticFeedback) {
-                    document.getElementById('hapticSwitch').classList.add('active');
-                }
-                if (this.settings.saveHistory) {
-                    document.getElementById('saveHistorySwitch').classList.add('active');
-                }
-                if (this.settings.analytics) {
-                    document.getElementById('analyticsSwitch').classList.add('active');
-                }
-                
-                // Update time
-                this.updateTime();
-                setInterval(() => this.updateTime(), 60000);
-            }
-            
-            updateTime() {
-                const now = new Date();
-                const timeStr = this.settings.timeFormat === '24' 
-                    ? now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: false })
-                    : now.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit', hour12: true });
-                
-                const timeElements = document.querySelectorAll('#currentTime');
-                timeElements.forEach(el => el.textContent = timeStr);
-            }
-            
-            // PWA Features
-            checkInstallPrompt() {
-                window.addEventListener('beforeinstallprompt', (e) => {
-                    e.preventDefault();
-                    this.deferredPrompt = e;
-                    
-                    // Show install prompt after 30 seconds
-                    setTimeout(() => {
-                        if (this.deferredPrompt) {
-                            document.getElementById('installPrompt').classList.add('show');
-                        }
-                    }, 30000);
-                });
-                
-                window.addEventListener('appinstalled', () => {
-                    this.showToast('App installed successfully!', 'success');
-                    this.deferredPrompt = null;
-                });
-            }
-            
-            async installApp() {
-                if (!this.deferredPrompt) {
-                    this.showToast('App is already installed or not available', 'info');
-                    return;
-                }
-                
-                document.getElementById('installPrompt').classList.remove('show');
-                
-                this.deferredPrompt.prompt();
-                const { outcome } = await this.deferredPrompt.userChoice;
-                
-                if (outcome === 'accepted') {
-                    this.showToast('Installing app...', 'success');
-                }
-                
-                this.deferredPrompt = null;
-            }
-            
-            // Voice Activation (Wake Word)
-            startVoiceActivation() {
-                // This would use a wake word detection library
-                // For demo purposes, we'll simulate it
-                console.log('Voice activation enabled');
-            }
+            <div className="space-y-2">
+              {[
+                { id: 'clear', label: 'Clear Conversation', icon: Trash2 },
+                { id: 'export', label: 'Export Conversation', icon: Download },
+                { id: 'settings', label: 'Open Settings', icon: Settings },
+                { id: 'disconnect', label: 'Disconnect', icon: LogOut }
+              ].map(cmd => (
+                <button
+                  key={cmd.id}
+                  onClick={() => handleCommand(cmd.id)}
+                  className="w-full flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors"
+                >
+                  <cmd.icon size={18} className="text-gray-400" />
+                  <span>{cmd.label}</span>
+                </button>
+              ))}
+            </div>
+          </div>
+        </div>
+      )}
+
+      <style jsx>{`
+        @keyframes slide-in {
+          from {
+            transform: translateX(100%);
+            opacity: 0;
+          }
+          to {
+            transform: translateX(0);
+            opacity: 1;
+          }
         }
         
-        // Initialize the assistant
-        let assistant;
-        window.addEventListener('DOMContentLoaded', () => {
-            assistant = new VoiceAssistant();
-            
-            // Make assistant globally accessible for modal buttons
-            window.assistant = assistant;
-        });
-        
-        // Service Worker Registration
-        if ('serviceWorker' in navigator) {
-            navigator.serviceWorker.register('data:text/javascript,' + encodeURIComponent(`
-                self.addEventListener('install', e => {
-                    e.waitUntil(
-                        caches.open('v1').then(cache => {
-                            return cache.addAll(['/']);
-                        })
-                    );
-                });
-                
-                self.addEventListener('fetch', e => {
-                    e.respondWith(
-                        caches.match(e.request).then(response => {
-                            return response || fetch(e.request);
-                        })
-                    );
-                });
-            `)).catch(() => {});
+        .animate-slide-in {
+          animation: slide-in 0.3s ease-out;
         }
-        
-        // Handle visibility changes
-        document.addEventListener('visibilitychange', () => {
-            if (document.hidden && assistant) {
-                assistant.stopListening();
-            }
-        });
-        
-        // Prevent pull-to-refresh
-        let lastY = 0;
-        document.addEventListener('touchstart', (e) => {
-            lastY = e.touches[0].clientY;
-        });
-        
-        document.addEventListener('touchmove', (e) => {
-            const y = e.touches[0].clientY;
-            const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
-            
-            if (scrollTop === 0 && y > lastY) {
-                e.preventDefault();
-            }
-        }, { passive: false });
-    </script>
-</body>
-</html>
+      `}</style>
+    </div>
+  );
+};
+
+export default VoiceAssistant;
