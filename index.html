@@ -1,881 +1,2931 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
-import { Mic, MicOff, Send, Settings, History, Command, Home, Volume2, Loader, AlertCircle, CheckCircle, XCircle, Zap, Brain, Globe, Shield, Activity, Sparkles, ChevronRight, X, Menu, Bell, User, LogOut, Download, Upload, Trash2, Moon, Sun } from 'lucide-react';
-
-const VoiceAssistant = () => {
-  // State management
-  const [isListening, setIsListening] = useState(false);
-  const [messages, setMessages] = useState([
-    {
-      id: 1,
-      type: 'assistant',
-      content: "Hello! I'm LUNA, your advanced AI assistant. How can I help you today?",
-      timestamp: new Date(),
-      emotion: 'friendly',
-      confidence: 1.0
-    }
-  ]);
-  const [inputText, setInputText] = useState('');
-  const [activeTab, setActiveTab] = useState('chat');
-  const [isConnected, setIsConnected] = useState(false);
-  const [isProcessing, setIsProcessing] = useState(false);
-  const [settings, setSettings] = useState({
-    apiKey: '',
-    voiceType: 'female',
-    language: 'en-US',
-    speechRate: 1.0,
-    enableEmotions: true,
-    enableDiarization: false,
-    darkMode: true,
-    autoListen: false
-  });
-  const [transcript, setTranscript] = useState('');
-  const [audioLevel, setAudioLevel] = useState(0);
-  const [wsConnection, setWsConnection] = useState(null);
-  const [notifications, setNotifications] = useState([]);
-  const [commandPalette, setCommandPalette] = useState(false);
-
-  // Refs
-  const recognitionRef = useRef(null);
-  const synthRef = useRef(window.speechSynthesis);
-  const messagesEndRef = useRef(null);
-  const audioContextRef = useRef(null);
-  const analyserRef = useRef(null);
-  const animationFrameRef = useRef(null);
-
-  // Audio visualization
-  const setupAudioVisualization = useCallback(async () => {
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
-      audioContextRef.current = new (window.AudioContext || window.webkitAudioContext)();
-      analyserRef.current = audioContextRef.current.createAnalyser();
-      const source = audioContextRef.current.createMediaStreamSource(stream);
-      source.connect(analyserRef.current);
-      analyserRef.current.fftSize = 256;
-      
-      const updateLevel = () => {
-        if (analyserRef.current && isListening) {
-          const dataArray = new Uint8Array(analyserRef.current.frequencyBinCount);
-          analyserRef.current.getByteFrequencyData(dataArray);
-          const average = dataArray.reduce((a, b) => a + b) / dataArray.length;
-          setAudioLevel(average / 255);
-          animationFrameRef.current = requestAnimationFrame(updateLevel);
-        }
-      };
-      updateLevel();
-    } catch (error) {
-      console.error('Audio setup failed:', error);
-    }
-  }, [isListening]);
-
-  // Initialize speech recognition
-  useEffect(() => {
-    if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
-      const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
-      recognitionRef.current = new SpeechRecognition();
-      recognitionRef.current.continuous = true;
-      recognitionRef.current.interimResults = true;
-      recognitionRef.current.lang = settings.language;
-
-      recognitionRef.current.onresult = (event) => {
-        let finalTranscript = '';
-        let interimTranscript = '';
-
-        for (let i = event.resultIndex; i < event.results.length; i++) {
-          const transcript = event.results[i][0].transcript;
-          if (event.results[i].isFinal) {
-            finalTranscript += transcript;
-          } else {
-            interimTranscript += transcript;
-          }
-        }
-
-        setTranscript(interimTranscript || finalTranscript);
-
-        if (finalTranscript) {
-          handleVoiceInput(finalTranscript);
-        }
-      };
-
-      recognitionRef.current.onerror = (event) => {
-        console.error('Speech recognition error:', event.error);
-        setIsListening(false);
-        showNotification('Speech recognition error', 'error');
-      };
-
-      recognitionRef.current.onend = () => {
-        setIsListening(false);
-        if (animationFrameRef.current) {
-          cancelAnimationFrame(animationFrameRef.current);
-        }
-      };
-    }
-  }, [settings.language]);
-
-  // WebSocket connection
-  useEffect(() => {
-    if (settings.apiKey) {
-      connectWebSocket();
-    }
-    return () => {
-      if (wsConnection) {
-        wsConnection.close();
-      }
-    };
-  }, [settings.apiKey]);
-
-  const connectWebSocket = () => {
-    const ws = new WebSocket('wss://api.voiceassistant.com/ws/v1/assistant');
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <meta name="apple-mobile-web-app-capable" content="yes">
+    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+    <meta name="theme-color" content="#7c3aed">
+    <meta name="description" content="LUNA - Enterprise AI Voice Assistant">
+    <title>LUNA - Enterprise Voice Assistant</title>
     
-    ws.onopen = () => {
-      setIsConnected(true);
-      showNotification('Connected to LUNA servers', 'success');
-      ws.send(JSON.stringify({
-        type: 'auth',
-        apiKey: settings.apiKey
-      }));
-    };
-
-    ws.onmessage = (event) => {
-      const data = JSON.parse(event.data);
-      handleWebSocketMessage(data);
-    };
-
-    ws.onerror = () => {
-      setIsConnected(false);
-      showNotification('Connection error', 'error');
-    };
-
-    ws.onclose = () => {
-      setIsConnected(false);
-      setTimeout(connectWebSocket, 5000);
-    };
-
-    setWsConnection(ws);
-  };
-
-  const handleWebSocketMessage = (data) => {
-    switch (data.type) {
-      case 'assistant_response':
-        addMessage(data.response.text, 'assistant', {
-          emotion: data.response.emotion,
-          confidence: data.response.confidence,
-          audioUrl: data.response.audio_url
-        });
-        if (data.response.audio_url) {
-          playAudioResponse(data.response.audio_url);
-        }
-        break;
-      case 'interim_transcript':
-        setTranscript(data.transcript);
-        break;
-      case 'error':
-        showNotification(data.error.message, 'error');
-        break;
-    }
-  };
-
-  const handleVoiceInput = (text) => {
-    addMessage(text, 'user');
-    processCommand(text);
-  };
-
-  const processCommand = async (text) => {
-    setIsProcessing(true);
-    
-    if (wsConnection && wsConnection.readyState === WebSocket.OPEN) {
-      wsConnection.send(JSON.stringify({
-        type: 'text_command',
-        request_id: Date.now().toString(),
-        text: text,
-        context: {
-          enable_emotions: settings.enableEmotions,
-          voice_type: settings.voiceType
-        }
-      }));
-    } else {
-      // Fallback to REST API
-      try {
-        const response = await fetch('/api/v1/nlp/process', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${settings.apiKey}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            text: text,
-            options: {
-              extract_entities: true,
-              suggest_actions: true,
-              personalize: true
-            }
-          })
-        });
-        
-        const data = await response.json();
-        addMessage(data.response.text, 'assistant', {
-          emotion: data.response.emotion,
-          confidence: data.confidence_score
-        });
-        
-        // Use speech synthesis as fallback
-        speak(data.response.text);
-      } catch (error) {
-        console.error('API error:', error);
-        addMessage("I'm having trouble connecting. Please check your connection.", 'assistant', {
-          emotion: 'concerned'
-        });
-      }
-    }
-    
-    setIsProcessing(false);
-  };
-
-  const speak = (text) => {
-    if (synthRef.current) {
-      const utterance = new SpeechSynthesisUtterance(text);
-      utterance.rate = settings.speechRate;
-      utterance.lang = settings.language;
-      synthRef.current.speak(utterance);
-    }
-  };
-
-  const playAudioResponse = (audioUrl) => {
-    const audio = new Audio(audioUrl);
-    audio.play();
-  };
-
-  const toggleListening = () => {
-    if (isListening) {
-      recognitionRef.current?.stop();
-      setIsListening(false);
-    } else {
-      recognitionRef.current?.start();
-      setIsListening(true);
-      setupAudioVisualization();
-    }
-  };
-
-  const addMessage = (content, type, metadata = {}) => {
-    const newMessage = {
-      id: Date.now(),
-      type,
-      content,
-      timestamp: new Date(),
-      ...metadata
-    };
-    setMessages(prev => [...prev, newMessage]);
-    setTranscript('');
-  };
-
-  const showNotification = (message, type) => {
-    const notification = {
-      id: Date.now(),
-      message,
-      type
-    };
-    setNotifications(prev => [...prev, notification]);
-    setTimeout(() => {
-      setNotifications(prev => prev.filter(n => n.id !== notification.id));
-    }, 3000);
-  };
-
-  const sendTextMessage = () => {
-    if (inputText.trim()) {
-      handleVoiceInput(inputText);
-      setInputText('');
-    }
-  };
-
-  useEffect(() => {
-    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [messages]);
-
-  // Command palette handler
-  const handleCommand = (command) => {
-    setCommandPalette(false);
-    switch (command) {
-      case 'clear':
-        setMessages([messages[0]]);
-        showNotification('Conversation cleared', 'success');
-        break;
-      case 'export':
-        exportConversation();
-        break;
-      case 'settings':
-        setActiveTab('settings');
-        break;
-      case 'disconnect':
-        wsConnection?.close();
-        break;
-    }
-  };
-
-  const exportConversation = () => {
-    const data = {
-      messages,
-      exportDate: new Date().toISOString(),
-      settings: { language: settings.language, voiceType: settings.voiceType }
-    };
-    const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
-    const a = document.createElement('a');
-    a.href = url;
-    a.download = `luna-conversation-${new Date().toISOString().split('T')[0]}.json`;
-    a.click();
-    showNotification('Conversation exported', 'success');
-  };
-
-  // UI Components
-  const MessageBubble = ({ message }) => {
-    const isUser = message.type === 'user';
-    const emotionColors = {
-      happy: 'border-green-500',
-      sad: 'border-blue-500',
-      neutral: 'border-gray-500',
-      excited: 'border-yellow-500',
-      concerned: 'border-red-500',
-      friendly: 'border-purple-500'
-    };
-
-    return (
-      <div className={`flex ${isUser ? 'justify-end' : 'justify-start'} mb-4`}>
-        <div className={`max-w-[80%] ${isUser ? 'order-2' : 'order-1'}`}>
-          <div className={`
-            ${isUser ? 'bg-blue-600 text-white' : 'bg-gray-800 text-gray-100'}
-            rounded-2xl px-4 py-3 shadow-lg
-            ${!isUser && message.emotion ? `border-l-4 ${emotionColors[message.emotion] || 'border-gray-500'}` : ''}
-          `}>
-            <p className="text-sm">{message.content}</p>
-            {message.confidence && !isUser && (
-              <p className="text-xs mt-1 opacity-60">
-                Confidence: {Math.round(message.confidence * 100)}%
-              </p>
-            )}
-          </div>
-          <p className="text-xs text-gray-500 mt-1 px-2">
-            {message.timestamp.toLocaleTimeString()}
-          </p>
-        </div>
-        <div className={`w-8 h-8 rounded-full flex items-center justify-center
-          ${isUser ? 'bg-blue-600 order-1 mr-2' : 'bg-purple-600 order-2 ml-2'}
-        `}>
-          {isUser ? <User size={16} /> : <Sparkles size={16} />}
-        </div>
-      </div>
-    );
-  };
-
-  const AudioVisualizer = () => {
-    return (
-      <div className="flex items-center justify-center space-x-1 h-8">
-        {[...Array(5)].map((_, i) => (
-          <div
-            key={i}
-            className="w-1 bg-blue-500 rounded-full transition-all duration-150"
-            style={{
-              height: `${Math.max(8, audioLevel * 100 * (1 + Math.sin(Date.now() / 100 + i) * 0.3))}px`
-            }}
-          />
-        ))}
-      </div>
-    );
-  };
-
-  return (
-    <div className={`min-h-screen ${settings.darkMode ? 'bg-gray-900' : 'bg-gray-50'}`}>
-      {/* Header */}
-      <header className="bg-gradient-to-r from-purple-600 to-blue-600 text-white shadow-xl">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-3">
-              <Brain className="w-8 h-8" />
-              <div>
-                <h1 className="text-2xl font-bold">LUNA</h1>
-                <p className="text-xs opacity-80">Advanced Voice Assistant</p>
-              </div>
-            </div>
+    <style>
+        :root {
+            --primary: #7c3aed;
+            --primary-dark: #6d28d9;
+            --primary-light: #8b5cf6;
+            --secondary: #3b82f6;
+            --accent: #f59e0b;
+            --success: #10b981;
+            --error: #ef4444;
+            --warning: #f59e0b;
+            --info: #3b82f6;
+            --bg-primary: #111827;
+            --bg-secondary: #1f2937;
+            --bg-tertiary: #374151;
+            --text-primary: #f9fafb;
+            --text-secondary: #e5e7eb;
+            --text-tertiary: #9ca3af;
+            --border: #374151;
+            --glass: rgba(255, 255, 255, 0.05);
+            --glass-border: rgba(255, 255, 255, 0.1);
+            --shadow: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
+            --animation-duration: 0.3s;
             
-            <div className="flex items-center space-x-4">
-              <div className="flex items-center space-x-2">
-                <div className={`w-2 h-2 rounded-full ${isConnected ? 'bg-green-400' : 'bg-red-400'} animate-pulse`} />
-                <span className="text-sm">{isConnected ? 'Connected' : 'Offline'}</span>
-              </div>
-              
-              <button
-                onClick={() => setCommandPalette(true)}
-                className="p-2 hover:bg-white/20 rounded-lg transition-colors"
-              >
-                <Command size={20} />
-              </button>
-              
-              <button className="relative p-2 hover:bg-white/20 rounded-lg transition-colors">
-                <Bell size={20} />
-                {notifications.length > 0 && (
-                  <span className="absolute -top-1 -right-1 w-4 h-4 bg-red-500 rounded-full text-xs flex items-center justify-center">
-                    {notifications.length}
-                  </span>
-                )}
-              </button>
-            </div>
-          </div>
-        </div>
-      </header>
-
-      {/* Navigation */}
-      <nav className="bg-gray-800 border-b border-gray-700">
-        <div className="container mx-auto px-4">
-          <div className="flex space-x-1">
-            {[
-              { id: 'chat', label: 'Chat', icon: Home },
-              { id: 'commands', label: 'Commands', icon: Command },
-              { id: 'history', label: 'History', icon: History },
-              { id: 'settings', label: 'Settings', icon: Settings }
-            ].map(tab => (
-              <button
-                key={tab.id}
-                onClick={() => setActiveTab(tab.id)}
-                className={`
-                  flex items-center space-x-2 px-4 py-3 transition-all
-                  ${activeTab === tab.id 
-                    ? 'bg-gray-700 text-white border-b-2 border-blue-500' 
-                    : 'text-gray-400 hover:text-white hover:bg-gray-700/50'
-                  }
-                `}
-              >
-                <tab.icon size={18} />
-                <span>{tab.label}</span>
-              </button>
-            ))}
-          </div>
-        </div>
-      </nav>
-
-      {/* Main Content */}
-      <main className="container mx-auto px-4 py-6">
-        {/* Chat Tab */}
-        {activeTab === 'chat' && (
-          <div className="max-w-4xl mx-auto">
-            <div className="bg-gray-800 rounded-xl shadow-2xl overflow-hidden">
-              {/* Messages */}
-              <div className="h-[500px] overflow-y-auto p-6 space-y-4">
-                {messages.map(message => (
-                  <MessageBubble key={message.id} message={message} />
-                ))}
-                {isProcessing && (
-                  <div className="flex items-center space-x-2 text-gray-400">
-                    <Loader className="animate-spin" size={16} />
-                    <span className="text-sm">LUNA is thinking...</span>
-                  </div>
-                )}
-                <div ref={messagesEndRef} />
-              </div>
-
-              {/* Audio Visualizer */}
-              {isListening && (
-                <div className="px-6 py-3 bg-gray-700/50">
-                  <AudioVisualizer />
-                  <p className="text-center text-sm text-gray-400 mt-2">
-                    {transcript || 'Listening...'}
-                  </p>
-                </div>
-              )}
-
-              {/* Input Area */}
-              <div className="border-t border-gray-700 p-4">
-                <div className="flex items-center space-x-3">
-                  <button
-                    onClick={toggleListening}
-                    className={`
-                      p-4 rounded-full transition-all transform
-                      ${isListening 
-                        ? 'bg-red-600 hover:bg-red-700 scale-110 animate-pulse' 
-                        : 'bg-blue-600 hover:bg-blue-700'
-                      }
-                    `}
-                  >
-                    {isListening ? <MicOff size={24} /> : <Mic size={24} />}
-                  </button>
-                  
-                  <input
-                    type="text"
-                    value={inputText}
-                    onChange={(e) => setInputText(e.target.value)}
-                    onKeyPress={(e) => e.key === 'Enter' && sendTextMessage()}
-                    placeholder="Type a message or use voice..."
-                    className="flex-1 bg-gray-700 text-white rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                  />
-                  
-                  <button
-                    onClick={sendTextMessage}
-                    disabled={!inputText.trim()}
-                    className="p-3 bg-blue-600 hover:bg-blue-700 rounded-lg disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
-                  >
-                    <Send size={20} />
-                  </button>
-                </div>
-
-                {/* Quick Actions */}
-                <div className="flex flex-wrap gap-2 mt-3">
-                  {['What\'s the weather?', 'Set a timer', 'Tell me a joke', 'Search the web'].map(action => (
-                    <button
-                      key={action}
-                      onClick={() => handleVoiceInput(action)}
-                      className="px-3 py-1 bg-gray-700 hover:bg-gray-600 rounded-full text-sm transition-colors"
-                    >
-                      {action}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Commands Tab */}
-        {activeTab === 'commands' && (
-          <div className="max-w-4xl mx-auto">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {[
-                {
-                  category: 'Productivity',
-                  icon: Zap,
-                  color: 'from-yellow-500 to-orange-500',
-                  commands: [
-                    'Set a reminder for...',
-                    'Create a todo list',
-                    'Schedule a meeting',
-                    'Take a note'
-                  ]
-                },
-                {
-                  category: 'Information',
-                  icon: Globe,
-                  color: 'from-blue-500 to-cyan-500',
-                  commands: [
-                    'What\'s the weather?',
-                    'Search for...',
-                    'Latest news',
-                    'Define...'
-                  ]
-                },
-                {
-                  category: 'Entertainment',
-                  icon: Sparkles,
-                  color: 'from-purple-500 to-pink-500',
-                  commands: [
-                    'Play music',
-                    'Tell me a joke',
-                    'Fun fact',
-                    'Movie recommendations'
-                  ]
-                },
-                {
-                  category: 'System',
-                  icon: Shield,
-                  color: 'from-green-500 to-emerald-500',
-                  commands: [
-                    'System status',
-                    'Battery level',
-                    'Network info',
-                    'Device settings'
-                  ]
-                }
-              ].map(category => (
-                <div key={category.category} className="bg-gray-800 rounded-xl p-6 hover:shadow-xl transition-shadow">
-                  <div className={`inline-flex p-3 rounded-lg bg-gradient-to-r ${category.color} mb-4`}>
-                    <category.icon size={24} className="text-white" />
-                  </div>
-                  <h3 className="text-xl font-semibold mb-3">{category.category}</h3>
-                  <ul className="space-y-2">
-                    {category.commands.map(command => (
-                      <li key={command}>
-                        <button
-                          onClick={() => handleVoiceInput(command)}
-                          className="w-full text-left px-3 py-2 rounded-lg hover:bg-gray-700 transition-colors flex items-center justify-between group"
-                        >
-                          <span className="text-gray-300">{command}</span>
-                          <ChevronRight size={16} className="opacity-0 group-hover:opacity-100 transition-opacity" />
-                        </button>
-                      </li>
-                    ))}
-                  </ul>
-                </div>
-              ))}
-            </div>
-          </div>
-        )}
-
-        {/* History Tab */}
-        {activeTab === 'history' && (
-          <div className="max-w-4xl mx-auto">
-            <div className="bg-gray-800 rounded-xl p-6">
-              <div className="flex items-center justify-between mb-6">
-                <h2 className="text-2xl font-semibold">Conversation History</h2>
-                <div className="flex space-x-2">
-                  <button
-                    onClick={exportConversation}
-                    className="px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg flex items-center space-x-2 transition-colors"
-                  >
-                    <Download size={16} />
-                    <span>Export</span>
-                  </button>
-                  <button
-                    onClick={() => {
-                      setMessages([messages[0]]);
-                      showNotification('History cleared', 'success');
-                    }}
-                    className="px-4 py-2 bg-red-600 hover:bg-red-700 rounded-lg flex items-center space-x-2 transition-colors"
-                  >
-                    <Trash2 size={16} />
-                    <span>Clear</span>
-                  </button>
-                </div>
-              </div>
-              
-              <div className="space-y-4 max-h-[500px] overflow-y-auto">
-                {messages.slice(1).reverse().map(message => (
-                  <div key={message.id} className="bg-gray-700 rounded-lg p-4 hover:bg-gray-600 transition-colors">
-                    <div className="flex items-start justify-between">
-                      <div className="flex-1">
-                        <p className={`text-sm ${message.type === 'user' ? 'text-blue-400' : 'text-purple-400'} mb-1`}>
-                          {message.type === 'user' ? 'You' : 'LUNA'}
-                        </p>
-                        <p className="text-gray-200">{message.content}</p>
-                      </div>
-                      <p className="text-xs text-gray-500 ml-4">
-                        {message.timestamp.toLocaleString()}
-                      </p>
-                    </div>
-                  </div>
-                ))}
-              </div>
-            </div>
-          </div>
-        )}
-
-        {/* Settings Tab */}
-        {activeTab === 'settings' && (
-          <div className="max-w-4xl mx-auto">
-            <div className="bg-gray-800 rounded-xl p-6 space-y-6">
-              <h2 className="text-2xl font-semibold mb-6">Settings</h2>
-              
-              {/* API Configuration */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium flex items-center space-x-2">
-                  <Shield size={20} />
-                  <span>API Configuration</span>
-                </h3>
-                <input
-                  type="password"
-                  placeholder="API Key"
-                  value={settings.apiKey}
-                  onChange={(e) => setSettings({ ...settings, apiKey: e.target.value })}
-                  className="w-full bg-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                />
-              </div>
-
-              {/* Voice Settings */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium flex items-center space-x-2">
-                  <Volume2 size={20} />
-                  <span>Voice Settings</span>
-                </h3>
-                
-                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                  <div>
-                    <label className="block text-sm text-gray-400 mb-2">Voice Type</label>
-                    <select
-                      value={settings.voiceType}
-                      onChange={(e) => setSettings({ ...settings, voiceType: e.target.value })}
-                      className="w-full bg-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="female">Female</option>
-                      <option value="male">Male</option>
-                      <option value="neutral">Neutral</option>
-                    </select>
-                  </div>
-                  
-                  <div>
-                    <label className="block text-sm text-gray-400 mb-2">Language</label>
-                    <select
-                      value={settings.language}
-                      onChange={(e) => setSettings({ ...settings, language: e.target.value })}
-                      className="w-full bg-gray-700 rounded-lg px-4 py-3 focus:outline-none focus:ring-2 focus:ring-blue-500"
-                    >
-                      <option value="en-US">English (US)</option>
-                      <option value="en-GB">English (UK)</option>
-                      <option value="es-ES">Spanish</option>
-                      <option value="fr-FR">French</option>
-                      <option value="de-DE">German</option>
-                      <option value="ja-JP">Japanese</option>
-                    </select>
-                  </div>
-                </div>
-                
-                <div>
-                  <label className="block text-sm text-gray-400 mb-2">
-                    Speech Rate: {settings.speechRate}x
-                  </label>
-                  <input
-                    type="range"
-                    min="0.5"
-                    max="2"
-                    step="0.1"
-                    value={settings.speechRate}
-                    onChange={(e) => setSettings({ ...settings, speechRate: parseFloat(e.target.value) })}
-                    className="w-full"
-                  />
-                </div>
-              </div>
-
-              {/* Advanced Features */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium flex items-center space-x-2">
-                  <Brain size={20} />
-                  <span>Advanced Features</span>
-                </h3>
-                
-                <div className="space-y-3">
-                  <label className="flex items-center space-x-3 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={settings.enableEmotions}
-                      onChange={(e) => setSettings({ ...settings, enableEmotions: e.target.checked })}
-                      className="w-5 h-5 rounded bg-gray-700 border-gray-600 text-blue-600 focus:ring-blue-500"
-                    />
-                    <div>
-                      <p className="font-medium">Emotion Detection</p>
-                      <p className="text-sm text-gray-400">Analyze and display emotional context</p>
-                    </div>
-                  </label>
-                  
-                  <label className="flex items-center space-x-3 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={settings.enableDiarization}
-                      onChange={(e) => setSettings({ ...settings, enableDiarization: e.target.checked })}
-                      className="w-5 h-5 rounded bg-gray-700 border-gray-600 text-blue-600 focus:ring-blue-500"
-                    />
-                    <div>
-                      <p className="font-medium">Speaker Diarization</p>
-                      <p className="text-sm text-gray-400">Identify multiple speakers</p>
-                    </div>
-                  </label>
-                  
-                  <label className="flex items-center space-x-3 cursor-pointer">
-                    <input
-                      type="checkbox"
-                      checked={settings.autoListen}
-                      onChange={(e) => setSettings({ ...settings, autoListen: e.target.checked })}
-                      className="w-5 h-5 rounded bg-gray-700 border-gray-600 text-blue-600 focus:ring-blue-500"
-                    />
-                    <div>
-                      <p className="font-medium">Auto Listen</p>
-                      <p className="text-sm text-gray-400">Continue listening after responses</p>
-                    </div>
-                  </label>
-                </div>
-              </div>
-
-              {/* Appearance */}
-              <div className="space-y-4">
-                <h3 className="text-lg font-medium flex items-center space-x-2">
-                  {settings.darkMode ? <Moon size={20} /> : <Sun size={20} />}
-                  <span>Appearance</span>
-                </h3>
-                
-                <label className="flex items-center space-x-3 cursor-pointer">
-                  <input
-                    type="checkbox"
-                    checked={settings.darkMode}
-                    onChange={(e) => setSettings({ ...settings, darkMode: e.target.checked })}
-                    className="w-5 h-5 rounded bg-gray-700 border-gray-600 text-blue-600 focus:ring-blue-500"
-                  />
-                  <div>
-                    <p className="font-medium">Dark Mode</p>
-                    <p className="text-sm text-gray-400">Use dark theme</p>
-                  </div>
-                </label>
-              </div>
-            </div>
-          </div>
-        )}
-      </main>
-
-      {/* Notifications */}
-      <div className="fixed top-20 right-4 space-y-2 z-50">
-        {notifications.map(notification => (
-          <div
-            key={notification.id}
-            className={`
-              flex items-center space-x-3 px-4 py-3 rounded-lg shadow-lg
-              transform transition-all duration-300 animate-slide-in
-              ${notification.type === 'success' ? 'bg-green-600' : ''}
-              ${notification.type === 'error' ? 'bg-red-600' : ''}
-              ${notification.type === 'info' ? 'bg-blue-600' : ''}
-            `}
-          >
-            {notification.type === 'success' && <CheckCircle size={20} />}
-            {notification.type === 'error' && <XCircle size={20} />}
-            {notification.type === 'info' && <AlertCircle size={20} />}
-            <span className="text-sm">{notification.message}</span>
-          </div>
-        ))}
-      </div>
-
-      {/* Command Palette */}
-      {commandPalette && (
-        <div className="fixed inset-0 bg-black/50 backdrop-blur-sm z-50 flex items-center justify-center p-4">
-          <div className="bg-gray-800 rounded-xl shadow-2xl w-full max-w-lg p-6">
-            <div className="flex items-center justify-between mb-4">
-              <h3 className="text-xl font-semibold">Command Palette</h3>
-              <button
-                onClick={() => setCommandPalette(false)}
-                className="p-2 hover:bg-gray-700 rounded-lg transition-colors"
-              >
-                <X size={20} />
-              </button>
-            </div>
-            
-            <div className="space-y-2">
-              {[
-                { id: 'clear', label: 'Clear Conversation', icon: Trash2 },
-                { id: 'export', label: 'Export Conversation', icon: Download },
-                { id: 'settings', label: 'Open Settings', icon: Settings },
-                { id: 'disconnect', label: 'Disconnect', icon: LogOut }
-              ].map(cmd => (
-                <button
-                  key={cmd.id}
-                  onClick={() => handleCommand(cmd.id)}
-                  className="w-full flex items-center space-x-3 px-4 py-3 hover:bg-gray-700 rounded-lg transition-colors"
-                >
-                  <cmd.icon size={18} className="text-gray-400" />
-                  <span>{cmd.label}</span>
-                </button>
-              ))}
-            </div>
-          </div>
-        </div>
-      )}
-
-      <style jsx>{`
-        @keyframes slide-in {
-          from {
-            transform: translateX(100%);
+            /* Light mode */
+            --light-bg-primary: #ffffff;
+            --light-bg-secondary: #f9fafb;
+            --light-bg-tertiary: #f3f4f6;
+            --light-text-primary: #111827;
+            --light-text-secondary: #4b5563;
+            --light-text-tertiary: #6b7280;
+            --light-border: #e5e7eb;
+        }
+        
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+            -webkit-tap-highlight-color: transparent;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, 'Helvetica Neue', Arial, sans-serif;
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            overflow-x: hidden;
+            position: relative;
+            min-height: 100vh;
+            -webkit-font-smoothing: antialiased;
+            -moz-osx-font-smoothing: grayscale;
+        }
+        
+        body.light-mode {
+            --bg-primary: var(--light-bg-primary);
+            --bg-secondary: var(--light-bg-secondary);
+            --bg-tertiary: var(--light-bg-tertiary);
+            --text-primary: var(--light-text-primary);
+            --text-secondary: var(--light-text-secondary);
+            --text-tertiary: var(--light-text-tertiary);
+            --border: var(--light-border);
+            --glass: rgba(0, 0, 0, 0.02);
+            --glass-border: rgba(0, 0, 0, 0.05);
+        }
+        
+        /* Scrollbar Styling */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: var(--bg-secondary);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: var(--bg-tertiary);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: var(--primary);
+        }
+        
+        /* App Container */
+        .app-container {
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            background: var(--bg-primary);
+        }
+        
+        /* Header */
+        .header {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+            color: white;
+            padding: 1rem 0;
+            box-shadow: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+            position: sticky;
+            top: 0;
+            z-index: 40;
+            backdrop-filter: blur(12px);
+        }
+        
+        .header-content {
+            max-width: 1280px;
+            margin: 0 auto;
+            padding: 0 1rem;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        .logo-section {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .logo {
+            width: 40px;
+            height: 40px;
+            background: rgba(255, 255, 255, 0.2);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+        }
+        
+        .logo-text h1 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            letter-spacing: -0.025em;
+        }
+        
+        .logo-text p {
+            font-size: 0.75rem;
+            opacity: 0.8;
+        }
+        
+        .header-actions {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .connection-status {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0.5rem 1rem;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 9999px;
+            font-size: 0.875rem;
+        }
+        
+        .status-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            animation: pulse 2s infinite;
+        }
+        
+        .status-dot.connected {
+            background: #10b981;
+        }
+        
+        .status-dot.disconnected {
+            background: #ef4444;
+            animation: none;
+        }
+        
+        .header-button {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            background: rgba(255, 255, 255, 0.1);
+            border: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all var(--animation-duration);
+            position: relative;
+        }
+        
+        .header-button:hover {
+            background: rgba(255, 255, 255, 0.2);
+            transform: translateY(-1px);
+        }
+        
+        .header-button:active {
+            transform: translateY(0);
+        }
+        
+        .notification-badge {
+            position: absolute;
+            top: -4px;
+            right: -4px;
+            background: var(--error);
+            color: white;
+            font-size: 0.75rem;
+            min-width: 18px;
+            height: 18px;
+            border-radius: 9999px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 600;
+            padding: 0 4px;
+        }
+        
+        /* Navigation Tabs */
+        .nav-container {
+            background: var(--bg-secondary);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 72px;
+            z-index: 30;
+            backdrop-filter: blur(8px);
+        }
+        
+        .nav-tabs {
+            max-width: 1280px;
+            margin: 0 auto;
+            display: flex;
+            gap: 2px;
+            padding: 0 1rem;
+        }
+        
+        .nav-tab {
+            flex: 1;
+            max-width: 200px;
+            padding: 1rem;
+            background: transparent;
+            border: none;
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--animation-duration);
+            position: relative;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+        }
+        
+        .nav-tab:hover {
+            color: var(--text-primary);
+            background: var(--glass);
+        }
+        
+        .nav-tab.active {
+            color: var(--primary);
+            background: var(--glass);
+        }
+        
+        .nav-tab.active::after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: var(--primary);
+        }
+        
+        .nav-tab svg {
+            width: 18px;
+            height: 18px;
+        }
+        
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            max-width: 1280px;
+            margin: 0 auto;
+            width: 100%;
+            padding: 2rem 1rem;
+        }
+        
+        .tab-content {
+            display: none;
+            animation: fadeIn var(--animation-duration) ease-out;
+        }
+        
+        .tab-content.active {
+            display: block;
+        }
+        
+        /* Chat Interface */
+        .chat-container {
+            max-width: 900px;
+            margin: 0 auto;
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            border: 1px solid var(--border);
+        }
+        
+        .chat-messages {
+            height: 500px;
+            overflow-y: auto;
+            padding: 1.5rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .message {
+            display: flex;
+            gap: 0.75rem;
+            animation: slideIn var(--animation-duration) ease-out;
+        }
+        
+        .message.user {
+            flex-direction: row-reverse;
+        }
+        
+        .message-avatar {
+            width: 36px;
+            height: 36px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+            font-size: 1.25rem;
+        }
+        
+        .message.assistant .message-avatar {
+            background: linear-gradient(135deg, var(--primary) 0%, var(--secondary) 100%);
+        }
+        
+        .message.user .message-avatar {
+            background: var(--bg-tertiary);
+        }
+        
+        .message-content {
+            max-width: 70%;
+            display: flex;
+            flex-direction: column;
+            gap: 0.25rem;
+        }
+        
+        .message-bubble {
+            padding: 0.75rem 1rem;
+            border-radius: 16px;
+            position: relative;
+            word-wrap: break-word;
+        }
+        
+        .message.assistant .message-bubble {
+            background: var(--bg-tertiary);
+            border-left: 3px solid transparent;
+        }
+        
+        .message.assistant .message-bubble.emotion-happy {
+            border-left-color: var(--success);
+        }
+        
+        .message.assistant .message-bubble.emotion-sad {
+            border-left-color: var(--info);
+        }
+        
+        .message.assistant .message-bubble.emotion-excited {
+            border-left-color: var(--warning);
+        }
+        
+        .message.assistant .message-bubble.emotion-concerned {
+            border-left-color: var(--error);
+        }
+        
+        .message.assistant .message-bubble.emotion-friendly {
+            border-left-color: var(--primary);
+        }
+        
+        .message.user .message-bubble {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .message-meta {
+            font-size: 0.75rem;
+            color: var(--text-tertiary);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            padding: 0 0.5rem;
+        }
+        
+        .confidence-score {
+            display: flex;
+            align-items: center;
+            gap: 0.25rem;
+            font-size: 0.7rem;
+            opacity: 0.7;
+        }
+        
+        .typing-indicator {
+            display: none;
+            align-items: center;
+            gap: 0.25rem;
+            padding: 0.75rem 1rem;
+            background: var(--bg-tertiary);
+            border-radius: 16px;
+            width: fit-content;
+        }
+        
+        .typing-indicator.active {
+            display: flex;
+        }
+        
+        .typing-dot {
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--text-tertiary);
+            animation: typing 1.4s infinite;
+        }
+        
+        .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+        .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+        
+        /* Audio Visualizer */
+        .audio-visualizer {
+            padding: 1rem;
+            background: var(--glass);
+            border-top: 1px solid var(--border);
+            display: none;
+        }
+        
+        .audio-visualizer.active {
+            display: block;
+        }
+        
+        .visualizer-bars {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 3px;
+            height: 40px;
+        }
+        
+        .visualizer-bar {
+            width: 3px;
+            background: var(--primary);
+            border-radius: 3px;
+            transition: height 0.1s ease;
+        }
+        
+        .transcript-preview {
+            text-align: center;
+            margin-top: 0.5rem;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+            min-height: 20px;
+        }
+        
+        /* Input Area */
+        .input-area {
+            padding: 1rem;
+            background: var(--bg-tertiary);
+            border-top: 1px solid var(--border);
+        }
+        
+        .input-controls {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+        }
+        
+        .voice-button {
+            width: 56px;
+            height: 56px;
+            border-radius: 50%;
+            border: none;
+            cursor: pointer;
+            transition: all var(--animation-duration);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            color: white;
+        }
+        
+        .voice-button.idle {
+            background: var(--primary);
+        }
+        
+        .voice-button.listening {
+            background: var(--error);
+            animation: pulse 1.5s infinite;
+        }
+        
+        .voice-button:hover {
+            transform: scale(1.05);
+        }
+        
+        .voice-button:active {
+            transform: scale(0.95);
+        }
+        
+        .voice-button svg {
+            width: 24px;
+            height: 24px;
+        }
+        
+        .input-field {
+            flex: 1;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 0.75rem 1rem;
+            font-size: 0.875rem;
+            color: var(--text-primary);
+            transition: all var(--animation-duration);
+        }
+        
+        .input-field:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+        }
+        
+        .send-button {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            background: var(--primary);
+            border: none;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all var(--animation-duration);
+        }
+        
+        .send-button:hover {
+            background: var(--primary-dark);
+        }
+        
+        .send-button:active {
+            transform: scale(0.95);
+        }
+        
+        .send-button:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+        
+        .send-button svg {
+            width: 20px;
+            height: 20px;
+        }
+        
+        /* Quick Actions */
+        .quick-actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin-top: 0.75rem;
+        }
+        
+        .quick-action {
+            padding: 0.5rem 0.75rem;
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 9999px;
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+            cursor: pointer;
+            transition: all var(--animation-duration);
+        }
+        
+        .quick-action:hover {
+            border-color: var(--primary);
+            color: var(--primary);
+            transform: translateY(-1px);
+        }
+        
+        .quick-action:active {
+            transform: translateY(0);
+        }
+        
+        /* Commands Grid */
+        .commands-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.5rem;
+        }
+        
+        .command-category {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+            transition: all var(--animation-duration);
+        }
+        
+        .command-category:hover {
+            transform: translateY(-2px);
+            box-shadow: var(--shadow);
+            border-color: var(--primary);
+        }
+        
+        .category-header {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .category-icon {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+        }
+        
+        .category-icon.productivity {
+            background: linear-gradient(135deg, #f59e0b 0%, #ef4444 100%);
+        }
+        
+        .category-icon.information {
+            background: linear-gradient(135deg, #3b82f6 0%, #06b6d4 100%);
+        }
+        
+        .category-icon.entertainment {
+            background: linear-gradient(135deg, #8b5cf6 0%, #ec4899 100%);
+        }
+        
+        .category-icon.system {
+            background: linear-gradient(135deg, #10b981 0%, #059669 100%);
+        }
+        
+        .category-icon svg {
+            width: 24px;
+            height: 24px;
+        }
+        
+        .category-title {
+            font-size: 1.25rem;
+            font-weight: 600;
+        }
+        
+        .command-list {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .command-item {
+            padding: 0.75rem 1rem;
+            background: var(--glass);
+            border: 1px solid transparent;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all var(--animation-duration);
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 0.875rem;
+            color: var(--text-secondary);
+        }
+        
+        .command-item:hover {
+            background: var(--bg-tertiary);
+            border-color: var(--primary);
+            color: var(--text-primary);
+            transform: translateX(4px);
+        }
+        
+        .command-item svg {
+            width: 16px;
+            height: 16px;
             opacity: 0;
-          }
-          to {
-            transform: translateX(0);
-            opacity: 1;
-          }
+            transition: opacity var(--animation-duration);
         }
         
-        .animate-slide-in {
-          animation: slide-in 0.3s ease-out;
+        .command-item:hover svg {
+            opacity: 1;
         }
-      `}</style>
+        
+        /* History */
+        .history-container {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+        }
+        
+        .history-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1.5rem;
+        }
+        
+        .history-title {
+            font-size: 1.5rem;
+            font-weight: 600;
+        }
+        
+        .history-actions {
+            display: flex;
+            gap: 0.5rem;
+        }
+        
+        .action-button {
+            padding: 0.5rem 1rem;
+            border-radius: 8px;
+            border: none;
+            font-size: 0.875rem;
+            font-weight: 500;
+            cursor: pointer;
+            transition: all var(--animation-duration);
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+        
+        .action-button.primary {
+            background: var(--primary);
+            color: white;
+        }
+        
+        .action-button.primary:hover {
+            background: var(--primary-dark);
+        }
+        
+        .action-button.danger {
+            background: var(--error);
+            color: white;
+        }
+        
+        .action-button.danger:hover {
+            background: #dc2626;
+        }
+        
+        .action-button svg {
+            width: 16px;
+            height: 16px;
+        }
+        
+        .history-list {
+            max-height: 500px;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+        }
+        
+        .history-item {
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem;
+            cursor: pointer;
+            transition: all var(--animation-duration);
+        }
+        
+        .history-item:hover {
+            border-color: var(--primary);
+            transform: translateY(-1px);
+        }
+        
+        .history-item-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 0.5rem;
+        }
+        
+        .history-item-type {
+            font-size: 0.75rem;
+            font-weight: 500;
+            color: var(--primary);
+        }
+        
+        .history-item-time {
+            font-size: 0.75rem;
+            color: var(--text-tertiary);
+        }
+        
+        .history-item-content {
+            color: var(--text-secondary);
+            font-size: 0.875rem;
+            line-height: 1.5;
+        }
+        
+        /* Settings */
+        .settings-container {
+            max-width: 800px;
+            margin: 0 auto;
+            display: flex;
+            flex-direction: column;
+            gap: 1.5rem;
+        }
+        
+        .settings-section {
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            padding: 1.5rem;
+            border: 1px solid var(--border);
+        }
+        
+        .settings-section-header {
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            margin-bottom: 1.5rem;
+            font-size: 1.125rem;
+            font-weight: 600;
+        }
+        
+        .settings-section-header svg {
+            width: 20px;
+            height: 20px;
+            color: var(--primary);
+        }
+        
+        .settings-group {
+            display: flex;
+            flex-direction: column;
+            gap: 1rem;
+        }
+        
+        .settings-item {
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+        }
+        
+        .settings-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-secondary);
+        }
+        
+        .settings-description {
+            font-size: 0.75rem;
+            color: var(--text-tertiary);
+        }
+        
+        .settings-input {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 0.875rem;
+            transition: all var(--animation-duration);
+        }
+        
+        .settings-input:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+        }
+        
+        .settings-select {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 0.875rem;
+            cursor: pointer;
+            transition: all var(--animation-duration);
+        }
+        
+        .settings-select:focus {
+            outline: none;
+            border-color: var(--primary);
+            box-shadow: 0 0 0 3px rgba(124, 58, 237, 0.1);
+        }
+        
+        .settings-toggle {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0.75rem 0;
+        }
+        
+        .settings-toggle-info {
+            flex: 1;
+        }
+        
+        .toggle-switch {
+            position: relative;
+            width: 48px;
+            height: 24px;
+            background: var(--bg-tertiary);
+            border-radius: 9999px;
+            cursor: pointer;
+            transition: background var(--animation-duration);
+        }
+        
+        .toggle-switch.active {
+            background: var(--primary);
+        }
+        
+        .toggle-slider {
+            position: absolute;
+            top: 2px;
+            left: 2px;
+            width: 20px;
+            height: 20px;
+            background: white;
+            border-radius: 50%;
+            transition: transform var(--animation-duration);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .toggle-switch.active .toggle-slider {
+            transform: translateX(24px);
+        }
+        
+        .settings-range {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+        
+        .range-slider {
+            flex: 1;
+            height: 6px;
+            background: var(--bg-tertiary);
+            border-radius: 3px;
+            outline: none;
+            -webkit-appearance: none;
+        }
+        
+        .range-slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            width: 20px;
+            height: 20px;
+            background: var(--primary);
+            border-radius: 50%;
+            cursor: pointer;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        }
+        
+        .range-value {
+            min-width: 50px;
+            text-align: right;
+            font-weight: 500;
+        }
+        
+        /* Command Palette */
+        .command-palette-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.75);
+            backdrop-filter: blur(8px);
+            z-index: 100;
+            display: none;
+            align-items: flex-start;
+            justify-content: center;
+            padding-top: 10vh;
+        }
+        
+        .command-palette-overlay.active {
+            display: flex;
+        }
+        
+        .command-palette {
+            width: 90%;
+            max-width: 600px;
+            background: var(--bg-secondary);
+            border-radius: 16px;
+            overflow: hidden;
+            box-shadow: 0 25px 50px -12px rgba(0, 0, 0, 0.25);
+            border: 1px solid var(--border);
+            animation: slideDown var(--animation-duration) ease-out;
+        }
+        
+        .command-palette-header {
+            padding: 1rem;
+            border-bottom: 1px solid var(--border);
+        }
+        
+        .command-palette-search {
+            width: 100%;
+            padding: 0.75rem;
+            background: var(--bg-tertiary);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            color: var(--text-primary);
+            font-size: 0.875rem;
+        }
+        
+        .command-palette-search:focus {
+            outline: none;
+            border-color: var(--primary);
+        }
+        
+        .command-palette-list {
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .command-palette-item {
+            padding: 0.75rem 1rem;
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            cursor: pointer;
+            transition: all var(--animation-duration);
+            border-left: 3px solid transparent;
+        }
+        
+        .command-palette-item:hover {
+            background: var(--bg-tertiary);
+            border-left-color: var(--primary);
+        }
+        
+        .command-palette-item svg {
+            width: 20px;
+            height: 20px;
+            color: var(--text-tertiary);
+        }
+        
+        .command-palette-item-text {
+            flex: 1;
+        }
+        
+        .command-palette-item-label {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+        
+        .command-palette-item-description {
+            font-size: 0.75rem;
+            color: var(--text-tertiary);
+        }
+        
+        .command-palette-shortcut {
+            font-size: 0.75rem;
+            color: var(--text-tertiary);
+            background: var(--bg-tertiary);
+            padding: 0.25rem 0.5rem;
+            border-radius: 4px;
+        }
+        
+        /* Notifications */
+        .notifications-container {
+            position: fixed;
+            top: 1rem;
+            right: 1rem;
+            z-index: 200;
+            display: flex;
+            flex-direction: column;
+            gap: 0.75rem;
+            pointer-events: none;
+        }
+        
+        .notification {
+            background: var(--bg-secondary);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 1rem;
+            min-width: 300px;
+            box-shadow: var(--shadow);
+            display: flex;
+            align-items: center;
+            gap: 0.75rem;
+            animation: slideInRight var(--animation-duration) ease-out;
+            pointer-events: auto;
+            cursor: pointer;
+        }
+        
+        .notification.success {
+            border-left: 3px solid var(--success);
+        }
+        
+        .notification.error {
+            border-left: 3px solid var(--error);
+        }
+        
+        .notification.warning {
+            border-left: 3px solid var(--warning);
+        }
+        
+        .notification.info {
+            border-left: 3px solid var(--info);
+        }
+        
+        .notification-icon {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+        }
+        
+        .notification.success .notification-icon {
+            color: var(--success);
+        }
+        
+        .notification.error .notification-icon {
+            color: var(--error);
+        }
+        
+        .notification.warning .notification-icon {
+            color: var(--warning);
+        }
+        
+        .notification.info .notification-icon {
+            color: var(--info);
+        }
+        
+        .notification-content {
+            flex: 1;
+        }
+        
+        .notification-title {
+            font-size: 0.875rem;
+            font-weight: 500;
+            color: var(--text-primary);
+        }
+        
+        .notification-message {
+            font-size: 0.75rem;
+            color: var(--text-secondary);
+        }
+        
+        /* Animations */
+        @keyframes fadeIn {
+            from {
+                opacity: 0;
+            }
+            to {
+                opacity: 1;
+            }
+        }
+        
+        @keyframes slideIn {
+            from {
+                opacity: 0;
+                transform: translateY(10px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes slideDown {
+            from {
+                opacity: 0;
+                transform: translateY(-20px);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0);
+            }
+        }
+        
+        @keyframes slideInRight {
+            from {
+                opacity: 0;
+                transform: translateX(100%);
+            }
+            to {
+                opacity: 1;
+                transform: translateX(0);
+            }
+        }
+        
+        @keyframes pulse {
+            0% {
+                box-shadow: 0 0 0 0 rgba(124, 58, 237, 0.7);
+            }
+            70% {
+                box-shadow: 0 0 0 20px rgba(124, 58, 237, 0);
+            }
+            100% {
+                box-shadow: 0 0 0 0 rgba(124, 58, 237, 0);
+            }
+        }
+        
+        @keyframes typing {
+            0%, 60%, 100% {
+                transform: translateY(0);
+                opacity: 0.7;
+            }
+            30% {
+                transform: translateY(-10px);
+                opacity: 1;
+            }
+        }
+        
+        /* Loading Spinner */
+        .spinner {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border: 2px solid var(--text-tertiary);
+            border-radius: 50%;
+            border-top-color: var(--primary);
+            animation: spin 1s linear infinite;
+        }
+        
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+        
+        /* Responsive Design */
+        @media (max-width: 768px) {
+            .header-content {
+                padding: 0 0.75rem;
+            }
+            
+            .logo-text h1 {
+                font-size: 1.25rem;
+            }
+            
+            .logo-text p {
+                display: none;
+            }
+            
+            .connection-status span {
+                display: none;
+            }
+            
+            .nav-tab span {
+                display: none;
+            }
+            
+            .nav-tab {
+                padding: 1rem 0.5rem;
+            }
+            
+            .chat-messages {
+                height: 400px;
+            }
+            
+            .message-content {
+                max-width: 85%;
+            }
+            
+            .commands-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .history-header {
+                flex-direction: column;
+                gap: 1rem;
+                align-items: flex-start;
+            }
+            
+            .notifications-container {
+                left: 1rem;
+                right: 1rem;
+            }
+            
+            .notification {
+                min-width: auto;
+            }
+        }
+        
+        /* PWA specific styles */
+        @media (display-mode: standalone) {
+            .header {
+                padding-top: env(safe-area-inset-top);
+            }
+        }
+        
+        /* Hide elements for printing */
+        @media print {
+            .header,
+            .nav-container,
+            .input-area,
+            .quick-actions,
+            .action-button {
+                display: none !important;
+            }
+            
+            .chat-messages {
+                height: auto;
+                max-height: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="app-container">
+        <!-- Header -->
+        <header class="header">
+            <div class="header-content">
+                <div class="logo-section">
+                    <div class="logo">🤖</div>
+                    <div class="logo-text">
+                        <h1>LUNA</h1>
+                        <p>Enterprise Voice Assistant</p>
+                    </div>
+                </div>
+                <div class="header-actions">
+                    <div class="connection-status">
+                        <div class="status-dot" id="statusDot"></div>
+                        <span id="statusText">Offline</span>
+                    </div>
+                    <button class="header-button" id="commandPaletteBtn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                            <line x1="9" y1="3" x2="9" y2="21"></line>
+                        </svg>
+                    </button>
+                    <button class="header-button" id="notificationBtn">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"></path>
+                            <path d="M13.73 21a2 2 0 0 1-3.46 0"></path>
+                        </svg>
+                        <span class="notification-badge" id="notificationBadge" style="display: none;">0</span>
+                    </button>
+                    <button class="header-button" id="themeToggle">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="5"></circle>
+                            <line x1="12" y1="1" x2="12" y2="3"></line>
+                            <line x1="12" y1="21" x2="12" y2="23"></line>
+                            <line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line>
+                            <line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line>
+                            <line x1="1" y1="12" x2="3" y2="12"></line>
+                            <line x1="21" y1="12" x2="23" y2="12"></line>
+                            <line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line>
+                            <line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </header>
+        
+        <!-- Navigation -->
+        <nav class="nav-container">
+            <div class="nav-tabs">
+                <button class="nav-tab active" data-tab="chat">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"></path>
+                    </svg>
+                    <span>Chat</span>
+                </button>
+                <button class="nav-tab" data-tab="commands">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect>
+                        <line x1="9" y1="9" x2="15" y2="9"></line>
+                        <line x1="9" y1="15" x2="15" y2="15"></line>
+                    </svg>
+                    <span>Commands</span>
+                </button>
+                <button class="nav-tab" data-tab="history">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <polyline points="1 4 1 10 7 10"></polyline>
+                        <path d="M3.51 15a9 9 0 1 0 2.13-9.36L1 10"></path>
+                    </svg>
+                    <span>History</span>
+                </button>
+                <button class="nav-tab" data-tab="settings">
+                    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        <circle cx="12" cy="12" r="3"></circle>
+                        <path d="M12 1v6m0 6v6m-9-9h6m6 0h6"></path>
+                    </svg>
+                    <span>Settings</span>
+                </button>
+            </div>
+        </nav>
+        
+        <!-- Main Content -->
+        <main class="main-content">
+            <!-- Chat Tab -->
+            <div class="tab-content active" data-tab="chat">
+                <div class="chat-container">
+                    <div class="chat-messages" id="chatMessages">
+                        <div class="message assistant">
+                            <div class="message-avatar">🤖</div>
+                            <div class="message-content">
+                                <div class="message-bubble emotion-friendly">
+                                    Hello! I'm LUNA, your advanced AI assistant. How can I help you today?
+                                </div>
+                                <div class="message-meta">
+                                    <span class="message-time"></span>
+                                    <span class="confidence-score">
+                                        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                        </svg>
+                                        100%
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="typing-indicator" id="typingIndicator">
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                        <div class="typing-dot"></div>
+                    </div>
+                    
+                    <div class="audio-visualizer" id="audioVisualizer">
+                        <div class="visualizer-bars" id="visualizerBars">
+                            <div class="visualizer-bar" style="height: 8px;"></div>
+                            <div class="visualizer-bar" style="height: 16px;"></div>
+                            <div class="visualizer-bar" style="height: 12px;"></div>
+                            <div class="visualizer-bar" style="height: 20px;"></div>
+                            <div class="visualizer-bar" style="height: 14px;"></div>
+                            <div class="visualizer-bar" style="height: 18px;"></div>
+                            <div class="visualizer-bar" style="height: 10px;"></div>
+                        </div>
+                        <div class="transcript-preview" id="transcriptPreview">Listening...</div>
+                    </div>
+                    
+                    <div class="input-area">
+                        <div class="input-controls">
+                            <button class="voice-button idle" id="voiceButton">
+                                <svg viewBox="0 0 24 24" fill="currentColor">
+                                    <path d="M12 14c1.66 0 3-1.34 3-3V5c0-1.66-1.34-3-3-3S9 3.34 9 5v6c0 1.66 1.34 3 3 3z"/>
+                                    <path d="M17 11c0 2.76-2.24 5-5 5s-5-2.24-5-5H5c0 3.53 2.61 6.43 6 6.92V21h2v-3.08c3.39-.49 6-3.39 6-6.92h-2z"/>
+                                </svg>
+                            </button>
+                            <input type="text" class="input-field" id="textInput" placeholder="Type a message or use voice..." />
+                            <button class="send-button" id="sendButton" disabled>
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <line x1="22" y1="2" x2="11" y2="13"></line>
+                                    <polygon points="22 2 15 22 11 13 2 9 22 2"></polygon>
+                                </svg>
+                            </button>
+                        </div>
+                        <div class="quick-actions">
+                            <button class="quick-action" data-command="What's the weather today?">What's the weather?</button>
+                            <button class="quick-action" data-command="Set a timer for 5 minutes">Set a timer</button>
+                            <button class="quick-action" data-command="Tell me a joke">Tell me a joke</button>
+                            <button class="quick-action" data-command="Search the web for latest news">Search the web</button>
+                            <button class="quick-action" data-command="What can you do?">Help</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Commands Tab -->
+            <div class="tab-content" data-tab="commands">
+                <div class="commands-grid">
+                    <div class="command-category">
+                        <div class="category-header">
+                            <div class="category-icon productivity">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polygon points="13 2 3 14 12 14 11 22 21 10 12 10 13 2"></polygon>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="category-title">Productivity</h3>
+                            </div>
+                        </div>
+                        <div class="command-list">
+                            <div class="command-item" data-command="Set a reminder for tomorrow at 3 PM">
+                                Set a reminder for...
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="9 18 15 12 9 6"></polyline>
+                                </svg>
+                            </div>
+                            <div class="command-item" data-command="Create a todo list">
+                                Create a todo list
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="9 18 15 12 9 6"></polyline>
+                                </svg>
+                            </div>
+                            <div class="command-item" data-command="Schedule a meeting">
+                                Schedule a meeting
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="9 18 15 12 9 6"></polyline>
+                                </svg>
+                            </div>
+                            <div class="command-item" data-command="Take a note">
+                                Take a note
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="9 18 15 12 9 6"></polyline>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="command-category">
+                        <div class="category-header">
+                            <div class="category-icon information">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <polyline points="12 6 12 12 16 14"></polyline>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="category-title">Information</h3>
+                            </div>
+                        </div>
+                        <div class="command-list">
+                            <div class="command-item" data-command="What's the weather forecast?">
+                                What's the weather?
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="9 18 15 12 9 6"></polyline>
+                                </svg>
+                            </div>
+                            <div class="command-item" data-command="Search for restaurants near me">
+                                Search for...
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="9 18 15 12 9 6"></polyline>
+                                </svg>
+                            </div>
+                            <div class="command-item" data-command="What's the latest news?">
+                                Latest news
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="9 18 15 12 9 6"></polyline>
+                                </svg>
+                            </div>
+                            <div class="command-item" data-command="Define artificial intelligence">
+                                Define...
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="9 18 15 12 9 6"></polyline>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="command-category">
+                        <div class="category-header">
+                            <div class="category-icon entertainment">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="category-title">Entertainment</h3>
+                            </div>
+                        </div>
+                        <div class="command-list">
+                            <div class="command-item" data-command="Play some relaxing music">
+                                Play music
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="9 18 15 12 9 6"></polyline>
+                                </svg>
+                            </div>
+                            <div class="command-item" data-command="Tell me a joke">
+                                Tell me a joke
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="9 18 15 12 9 6"></polyline>
+                                </svg>
+                            </div>
+                            <div class="command-item" data-command="Give me a fun fact">
+                                Fun fact
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="9 18 15 12 9 6"></polyline>
+                                </svg>
+                            </div>
+                            <div class="command-item" data-command="Recommend a movie">
+                                Movie recommendations
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="9 18 15 12 9 6"></polyline>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="command-category">
+                        <div class="category-header">
+                            <div class="category-icon system">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M12 2L2 7l10 5 10-5-10-5z"></path>
+                                    <path d="M2 17l10 5 10-5M2 12l10 5 10-5"></path>
+                                </svg>
+                            </div>
+                            <div>
+                                <h3 class="category-title">System</h3>
+                            </div>
+                        </div>
+                        <div class="command-list">
+                            <div class="command-item" data-command="Check system status">
+                                System status
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="9 18 15 12 9 6"></polyline>
+                                </svg>
+                            </div>
+                            <div class="command-item" data-command="What's my battery level?">
+                                Battery level
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="9 18 15 12 9 6"></polyline>
+                                </svg>
+                            </div>
+                            <div class="command-item" data-command="Show network information">
+                                Network info
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="9 18 15 12 9 6"></polyline>
+                                </svg>
+                            </div>
+                            <div class="command-item" data-command="Open device settings">
+                                Device settings
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="9 18 15 12 9 6"></polyline>
+                                </svg>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- History Tab -->
+            <div class="tab-content" data-tab="history">
+                <div class="history-container">
+                    <div class="history-header">
+                        <h2 class="history-title">Conversation History</h2>
+                        <div class="history-actions">
+                            <button class="action-button primary" id="exportButton">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                                    <polyline points="7 10 12 15 17 10"></polyline>
+                                    <line x1="12" y1="15" x2="12" y2="3"></line>
+                                </svg>
+                                Export
+                            </button>
+                            <button class="action-button danger" id="clearHistoryButton">
+                                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="3 6 5 6 21 6"></polyline>
+                                    <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                                </svg>
+                                Clear
+                            </button>
+                        </div>
+                    </div>
+                    <div class="history-list" id="historyList">
+                        <!-- History items will be dynamically added here -->
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Settings Tab -->
+            <div class="tab-content" data-tab="settings">
+                <div class="settings-container">
+                    <!-- API Configuration -->
+                    <div class="settings-section">
+                        <div class="settings-section-header">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <rect x="3" y="11" width="18" height="10" rx="2" ry="2"></rect>
+                                <path d="M7 11V7a5 5 0 0 1 10 0v4"></path>
+                            </svg>
+                            API Configuration
+                        </div>
+                        <div class="settings-group">
+                            <div class="settings-item">
+                                <label class="settings-label">API Key</label>
+                                <p class="settings-description">Enter your LUNA API key to enable cloud features</p>
+                                <input type="password" class="settings-input" id="apiKeyInput" placeholder="sk-..." />
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Voice Settings -->
+                    <div class="settings-section">
+                        <div class="settings-section-header">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <polygon points="11 5 6 9 2 9 2 15 6 15 11 19 11 5"></polygon>
+                                <path d="M19.07 4.93a10 10 0 0 1 0 14.14M15.54 8.46a5 5 0 0 1 0 7.07"></path>
+                            </svg>
+                            Voice Settings
+                        </div>
+                        <div class="settings-group">
+                            <div class="settings-item">
+                                <label class="settings-label">Voice Type</label>
+                                <select class="settings-select" id="voiceTypeSelect">
+                                    <option value="female">Female</option>
+                                    <option value="male">Male</option>
+                                    <option value="neutral">Neutral</option>
+                                </select>
+                            </div>
+                            <div class="settings-item">
+                                <label class="settings-label">Language</label>
+                                <select class="settings-select" id="languageSelect">
+                                    <option value="en-US">English (US)</option>
+                                    <option value="en-GB">English (UK)</option>
+                                    <option value="es-ES">Spanish</option>
+                                    <option value="fr-FR">French</option>
+                                    <option value="de-DE">German</option>
+                                    <option value="ja-JP">Japanese</option>
+                                    <option value="zh-CN">Chinese</option>
+                                </select>
+                            </div>
+                            <div class="settings-item">
+                                <label class="settings-label">Speech Rate</label>
+                                <div class="settings-range">
+                                    <input type="range" class="range-slider" id="speechRateSlider" min="0.5" max="2" step="0.1" value="1" />
+                                    <span class="range-value" id="speechRateValue">1.0x</span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Advanced Features -->
+                    <div class="settings-section">
+                        <div class="settings-section-header">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 1 1 7.072 0l-.548.547A3.374 3.374 0 0 0 14 18.469V19a2 2 0 1 1-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"></path>
+                            </svg>
+                            Advanced Features
+                        </div>
+                        <div class="settings-group">
+                            <div class="settings-toggle">
+                                <div class="settings-toggle-info">
+                                    <div class="settings-label">Emotion Detection</div>
+                                    <div class="settings-description">Analyze and display emotional context in responses</div>
+                                </div>
+                                <div class="toggle-switch" id="emotionToggle">
+                                    <div class="toggle-slider"></div>
+                                </div>
+                            </div>
+                            <div class="settings-toggle">
+                                <div class="settings-toggle-info">
+                                    <div class="settings-label">Speaker Diarization</div>
+                                    <div class="settings-description">Identify and distinguish multiple speakers</div>
+                                </div>
+                                <div class="toggle-switch" id="diarizationToggle">
+                                    <div class="toggle-slider"></div>
+                                </div>
+                            </div>
+                            <div class="settings-toggle">
+                                <div class="settings-toggle-info">
+                                    <div class="settings-label">Auto Listen</div>
+                                    <div class="settings-description">Continue listening after assistant responds</div>
+                                </div>
+                                <div class="toggle-switch" id="autoListenToggle">
+                                    <div class="toggle-slider"></div>
+                                </div>
+                            </div>
+                            <div class="settings-toggle">
+                                <div class="settings-toggle-info">
+                                    <div class="settings-label">Wake Word Detection</div>
+                                    <div class="settings-description">Activate with "Hey Luna" voice command</div>
+                                </div>
+                                <div class="toggle-switch" id="wakeWordToggle">
+                                    <div class="toggle-slider"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Privacy -->
+                    <div class="settings-section">
+                        <div class="settings-section-header">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"></path>
+                            </svg>
+                            Privacy & Data
+                        </div>
+                        <div class="settings-group">
+                            <div class="settings-toggle">
+                                <div class="settings-toggle-info">
+                                    <div class="settings-label">Save History Locally</div>
+                                    <div class="settings-description">Store conversation history on this device</div>
+                                </div>
+                                <div class="toggle-switch active" id="saveHistoryToggle">
+                                    <div class="toggle-slider"></div>
+                                </div>
+                            </div>
+                            <div class="settings-toggle">
+                                <div class="settings-toggle-info">
+                                    <div class="settings-label">Analytics</div>
+                                    <div class="settings-description">Help improve LUNA with anonymous usage data</div>
+                                </div>
+                                <div class="toggle-switch" id="analyticsToggle">
+                                    <div class="toggle-slider"></div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+        
+        <!-- Command Palette -->
+        <div class="command-palette-overlay" id="commandPalette">
+            <div class="command-palette">
+                <div class="command-palette-header">
+                    <input type="text" class="command-palette-search" id="commandPaletteSearch" placeholder="Type a command or search..." />
+                </div>
+                <div class="command-palette-list">
+                    <div class="command-palette-item" data-action="clear-conversation">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <polyline points="3 6 5 6 21 6"></polyline>
+                            <path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path>
+                        </svg>
+                        <div class="command-palette-item-text">
+                            <div class="command-palette-item-label">Clear Conversation</div>
+                            <div class="command-palette-item-description">Remove all messages from current session</div>
+                        </div>
+                        <span class="command-palette-shortcut">⌘K</span>
+                    </div>
+                    <div class="command-palette-item" data-action="export-data">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"></path>
+                            <polyline points="7 10 12 15 17 10"></polyline>
+                            <line x1="12" y1="15" x2="12" y2="3"></line>
+                        </svg>
+                        <div class="command-palette-item-text">
+                            <div class="command-palette-item-label">Export Conversation</div>
+                            <div class="command-palette-item-description">Download chat history as JSON</div>
+                        </div>
+                        <span class="command-palette-shortcut">⌘E</span>
+                    </div>
+                    <div class="command-palette-item" data-action="toggle-theme">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="5"></circle>
+                            <line x1="12" y1="1" x2="12" y2="3"></line>
+                            <line x1="12" y1="21" x2="12" y2="23"></line>
+                        </svg>
+                        <div class="command-palette-item-text">
+                            <div class="command-palette-item-label">Toggle Theme</div>
+                            <div class="command-palette-item-description">Switch between light and dark mode</div>
+                        </div>
+                        <span class="command-palette-shortcut">⌘D</span>
+                    </div>
+                    <div class="command-palette-item" data-action="disconnect">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M18.36 6.64a9 9 0 1 1-12.73 0"></path>
+                            <line x1="12" y1="2" x2="12" y2="12"></line>
+                        </svg>
+                        <div class="command-palette-item-text">
+                            <div class="command-palette-item-label">Disconnect</div>
+                            <div class="command-palette-item-description">Close connection to LUNA servers</div>
+                        </div>
+                    </div>
+                    <div class="command-palette-item" data-action="reset-settings">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <path d="M23 4v6h-6"></path>
+                            <path d="M1 20v-6h6"></path>
+                            <path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path>
+                        </svg>
+                        <div class="command-palette-item-text">
+                            <div class="command-palette-item-label">Reset Settings</div>
+                            <div class="command-palette-item-description">Restore all settings to default</div>
+                        </div>
+                    </div>
+                    <div class="command-palette-item" data-action="help">
+                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                        </svg>
+                        <div class="command-palette-item-text">
+                            <div class="command-palette-item-label">Help & Documentation</div>
+                            <div class="command-palette-item-description">View LUNA user guide</div>
+                        </div>
+                        <span class="command-palette-shortcut">⌘?</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Notifications Container -->
+        <div class="notifications-container" id="notificationsContainer">
+            <!-- Notifications will be dynamically added here -->
+        </div>
     </div>
-  );
-};
-
-export default VoiceAssistant;
+    
+    <script>
+        // LUNA Enterprise Voice Assistant
+        class LunaAssistant {
+            constructor() {
+                // Core properties
+                this.recognition = null;
+                this.synthesis = window.speechSynthesis;
+                this.isListening = false;
+                this.wsConnection = null;
+                this.isConnected = false;
+                this.messages = [];
+                this.notifications = [];
+                this.currentTab = 'chat';
+                this.audioContext = null;
+                this.analyser = null;
+                this.animationFrame = null;
+                
+                // Settings
+                this.settings = this.loadSettings();
+                
+                // Initialize
+                this.init();
+            }
+            
+            init() {
+                this.initializeSpeechRecognition();
+                this.setupEventListeners();
+                this.updateUI();
+                this.loadHistory();
+                
+                // Try to connect if API key exists
+                if (this.settings.apiKey) {
+                    this.connectWebSocket();
+                }
+                
+                // Update time in messages
+                this.updateMessageTimes();
+                setInterval(() => this.updateMessageTimes(), 60000);
+                
+                // Check for saved theme
+                if (this.settings.darkMode === false) {
+                    document.body.classList.add('light-mode');
+                }
+            }
+            
+            initializeSpeechRecognition() {
+                if ('webkitSpeechRecognition' in window || 'SpeechRecognition' in window) {
+                    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+                    this.recognition = new SpeechRecognition();
+                    this.recognition.continuous = true;
+                    this.recognition.interimResults = true;
+                    this.recognition.lang = this.settings.language;
+                    
+                    this.recognition.onstart = () => this.onRecognitionStart();
+                    this.recognition.onresult = (event) => this.onRecognitionResult(event);
+                    this.recognition.onerror = (event) => this.onRecognitionError(event);
+                    this.recognition.onend = () => this.onRecognitionEnd();
+                } else {
+                    this.showNotification('Speech recognition not supported', 'error');
+                }
+            }
+            
+            async setupAudioVisualization() {
+                try {
+                    const stream = await navigator.mediaDevices.getUserMedia({ audio: true });
+                    this.audioContext = new (window.AudioContext || window.webkitAudioContext)();
+                    this.analyser = this.audioContext.createAnalyser();
+                    const source = this.audioContext.createMediaStreamSource(stream);
+                    source.connect(this.analyser);
+                    this.analyser.fftSize = 256;
+                    
+                    this.updateVisualization();
+                } catch (error) {
+                    console.error('Audio setup failed:', error);
+                }
+            }
+            
+            updateVisualization() {
+                if (!this.analyser || !this.isListening) return;
+                
+                const dataArray = new Uint8Array(this.analyser.frequencyBinCount);
+                this.analyser.getByteFrequencyData(dataArray);
+                
+                const bars = document.querySelectorAll('.visualizer-bar');
+                bars.forEach((bar, index) => {
+                    const value = dataArray[index * 10] || 0;
+                    const height = Math.max(8, (value / 255) * 40);
+                    bar.style.height = `${height}px`;
+                });
+                
+                this.animationFrame = requestAnimationFrame(() => this.updateVisualization());
+            }
+            
+            connectWebSocket() {
+                const wsUrl = 'wss://api.voiceassistant.com/ws/v1/assistant';
+                
+                try {
+                    this.wsConnection = new WebSocket(wsUrl);
+                    
+                    this.wsConnection.onopen = () => {
+                        this.setConnectionStatus(true);
+                        this.showNotification('Connected to LUNA servers', 'success');
+                        
+                        // Authenticate
+                        this.wsConnection.send(JSON.stringify({
+                            type: 'auth',
+                            apiKey: this.settings.apiKey
+                        }));
+                    };
+                    
+                    this.wsConnection.onmessage = (event) => {
+                        const data = JSON.parse(event.data);
+                        this.handleWebSocketMessage(data);
+                    };
+                    
+                    this.wsConnection.onerror = (error) => {
+                        console.error('WebSocket error:', error);
+                        this.setConnectionStatus(false);
+                        this.showNotification('Connection error', 'error');
+                    };
+                    
+                    this.wsConnection.onclose = () => {
+                        this.setConnectionStatus(false);
+                        // Attempt reconnection after 5 seconds
+                        setTimeout(() => {
+                            if (this.settings.apiKey) {
+                                this.connectWebSocket();
+                            }
+                        }, 5000);
+                    };
+                } catch (error) {
+                    console.error('WebSocket connection failed:', error);
+                    this.showNotification('Failed to connect', 'error');
+                }
+            }
+            
+            handleWebSocketMessage(data) {
+                switch (data.type) {
+                    case 'assistant_response':
+                        this.addMessage(data.response.text, 'assistant', {
+                            emotion: data.response.emotion,
+                            confidence: data.response.confidence
+                        });
+                        if (data.response.audio_url && this.settings.voiceEnabled !== false) {
+                            this.playAudioResponse(data.response.audio_url);
+                        }
+                        break;
+                        
+                    case 'interim_transcript':
+                        document.getElementById('transcriptPreview').textContent = data.transcript;
+                        break;
+                        
+                    case 'error':
+                        this.showNotification(data.error.message, 'error');
+                        break;
+                        
+                    case 'auth_success':
+                        this.showNotification('Authentication successful', 'success');
+                        break;
+                }
+            }
+            
+            setConnectionStatus(connected) {
+                this.isConnected = connected;
+                const statusDot = document.getElementById('statusDot');
+                const statusText = document.getElementById('statusText');
+                
+                if (connected) {
+                    statusDot.classList.add('connected');
+                    statusDot.classList.remove('disconnected');
+                    statusText.textContent = 'Connected';
+                } else {
+                    statusDot.classList.remove('connected');
+                    statusDot.classList.add('disconnected');
+                    statusText.textContent = 'Offline';
+                }
+            }
+            
+            setupEventListeners() {
+                // Voice button
+                const voiceButton = document.getElementById('voiceButton');
+                voiceButton.addEventListener('click', () => this.toggleListening());
+                
+                // Text input
+                const textInput = document.getElementById('textInput');
+                const sendButton = document.getElementById('sendButton');
+                
+                textInput.addEventListener('input', (e) => {
+                    sendButton.disabled = !e.target.value.trim();
+                });
+                
+                textInput.addEventListener('keypress', (e) => {
+                    if (e.key === 'Enter' && !e.shiftKey) {
+                        e.preventDefault();
+                        this.sendTextMessage();
+                    }
+                });
+                
+                sendButton.addEventListener('click', () => this.sendTextMessage());
+                
+                // Navigation tabs
+                document.querySelectorAll('.nav-tab').forEach(tab => {
+                    tab.addEventListener('click', () => {
+                        this.switchTab(tab.dataset.tab);
+                    });
+                });
+                
+                // Quick actions
+                document.querySelectorAll('.quick-action').forEach(action => {
+                    action.addEventListener('click', () => {
+                        this.processCommand(action.dataset.command);
+                    });
+                });
+                
+                // Command items
+                document.querySelectorAll('.command-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        this.processCommand(item.dataset.command);
+                    });
+                });
+                
+                // Command palette
+                const commandPaletteBtn = document.getElementById('commandPaletteBtn');
+                const commandPalette = document.getElementById('commandPalette');
+                
+                commandPaletteBtn.addEventListener('click', () => {
+                    commandPalette.classList.add('active');
+                    document.getElementById('commandPaletteSearch').focus();
+                });
+                
+                commandPalette.addEventListener('click', (e) => {
+                    if (e.target === commandPalette) {
+                        commandPalette.classList.remove('active');
+                    }
+                });
+                
+                // Command palette items
+                document.querySelectorAll('.command-palette-item').forEach(item => {
+                    item.addEventListener('click', () => {
+                        this.executeCommand(item.dataset.action);
+                        commandPalette.classList.remove('active');
+                    });
+                });
+                
+                // Theme toggle
+                document.getElementById('themeToggle').addEventListener('click', () => {
+                    this.toggleTheme();
+                });
+                
+                // Settings
+                this.setupSettingsListeners();
+                
+                // History actions
+                document.getElementById('exportButton').addEventListener('click', () => {
+                    this.exportConversation();
+                });
+                
+                document.getElementById('clearHistoryButton').addEventListener('click', () => {
+                    if (confirm('Are you sure you want to clear all history?')) {
+                        this.clearHistory();
+                    }
+                });
+                
+                // Keyboard shortcuts
+                document.addEventListener('keydown', (e) => {
+                    if (e.metaKey || e.ctrlKey) {
+                        switch (e.key) {
+                            case 'k':
+                                e.preventDefault();
+                                commandPalette.classList.toggle('active');
+                                break;
+                            case 'e':
+                                e.preventDefault();
+                                this.exportConversation();
+                                break;
+                            case 'd':
+                                e.preventDefault();
+                                this.toggleTheme();
+                                break;
+                        }
+                    }
+                });
+            }
+            
+            setupSettingsListeners() {
+                // API Key
+                const apiKeyInput = document.getElementById('apiKeyInput');
+                apiKeyInput.value = this.settings.apiKey || '';
+                apiKeyInput.addEventListener('change', (e) => {
+                    this.settings.apiKey = e.target.value;
+                    this.saveSettings();
+                    if (e.target.value) {
+                        this.connectWebSocket();
+                    } else if (this.wsConnection) {
+                        this.wsConnection.close();
+                    }
+                });
+                
+                // Voice settings
+                document.getElementById('voiceTypeSelect').value = this.settings.voiceType;
+                document.getElementById('voiceTypeSelect').addEventListener('change', (e) => {
+                    this.settings.voiceType = e.target.value;
+                    this.saveSettings();
+                });
+                
+                document.getElementById('languageSelect').value = this.settings.language;
+                document.getElementById('languageSelect').addEventListener('change', (e) => {
+                    this.settings.language = e.target.value;
+                    this.recognition.lang = e.target.value;
+                    this.saveSettings();
+                });
+                
+                const speechRateSlider = document.getElementById('speechRateSlider');
+                const speechRateValue = document.getElementById('speechRateValue');
+                speechRateSlider.value = this.settings.speechRate;
+                speechRateValue.textContent = `${this.settings.speechRate}x`;
+                
+                speechRateSlider.addEventListener('input', (e) => {
+                    this.settings.speechRate = parseFloat(e.target.value);
+                    speechRateValue.textContent = `${e.target.value}x`;
+                    this.saveSettings();
+                });
+                
+                // Toggle switches
+                const toggles = [
+                    { id: 'emotionToggle', setting: 'enableEmotions', default: true },
+                    { id: 'diarizationToggle', setting: 'enableDiarization', default: false },
+                    { id: 'autoListenToggle', setting: 'autoListen', default: false },
+                    { id: 'wakeWordToggle', setting: 'wakeWord', default: false },
+                    { id: 'saveHistoryToggle', setting: 'saveHistory', default: true },
+                    { id: 'analyticsToggle', setting: 'analytics', default: false }
+                ];
+                
+                toggles.forEach(toggle => {
+                    const element = document.getElementById(toggle.id);
+                    if (this.settings[toggle.setting] !== false && 
+                        (this.settings[toggle.setting] || toggle.default)) {
+                        element.classList.add('active');
+                    }
+                    
+                    element.addEventListener('click', () => {
+                        element.classList.toggle('active');
+                        this.settings[toggle.setting] = element.classList.contains('active');
+                        this.saveSettings();
+                        
+                        if (toggle.setting === 'wakeWord') {
+                            if (this.settings[toggle.setting]) {
+                                this.startWakeWordDetection();
+                            } else {
+                                this.stopWakeWordDetection();
+                            }
+                        }
+                    });
+                });
+            }
+            
+            onRecognitionStart() {
+                this.isListening = true;
+                const voiceButton = document.getElementById('voiceButton');
+                voiceButton.classList.remove('idle');
+                voiceButton.classList.add('listening');
+                
+                document.getElementById('audioVisualizer').classList.add('active');
+                this.setupAudioVisualization();
+            }
+            
+            onRecognitionEnd() {
+                this.isListening = false;
+                const voiceButton = document.getElementById('voiceButton');
+                voiceButton.classList.remove('listening');
+                voiceButton.classList.add('idle');
+                
+                document.getElementById('audioVisualizer').classList.remove('active');
+                document.getElementById('transcriptPreview').textContent = 'Listening...';
+                
+                if (this.animationFrame) {
+                    cancelAnimationFrame(this.animationFrame);
+                }
+            }
+            
+            onRecognitionResult(event) {
+                let finalTranscript = '';
+                let interimTranscript = '';
+                
+                for (let i = event.resultIndex; i < event.results.length; i++) {
+                    const transcript = event.results[i][0].transcript;
+                    if (event.results[i].isFinal) {
+                        finalTranscript += transcript;
+                    } else {
+                        interimTranscript += transcript;
+                    }
+                }
+                
+                // Update preview
+                document.getElementById('transcriptPreview').textContent = 
+                    interimTranscript || finalTranscript || 'Listening...';
+                
+                if (finalTranscript) {
+                    this.processCommand(finalTranscript);
+                    
+                    // Stop listening unless auto-listen is enabled
+                    if (!this.settings.autoListen) {
+                        this.recognition.stop();
+                    }
+                }
+            }
+            
+            onRecognitionError(event) {
+                console.error('Speech recognition error:', event.error);
+                
+                let errorMessage = 'Speech recognition error';
+                switch (event.error) {
+                    case 'no-speech':
+                        errorMessage = 'No speech detected';
+                        break;
+                    case 'audio-capture':
+                        errorMessage = 'No microphone found';
+                        break;
+                    case 'not-allowed':
+                        errorMessage = 'Microphone permission denied';
+                        break;
+                }
+                
+                this.showNotification(errorMessage, 'error');
+            }
+            
+            toggleListening() {
+                if (this.isListening) {
+                    this.recognition.stop();
+                } else {
+                    this.recognition.start();
+                }
+            }
+            
+            sendTextMessage() {
+                const input = document.getElementById('textInput');
+                const text = input.value.trim();
+                
+                if (text) {
+                    this.processCommand(text);
+                    input.value = '';
+                    document.getElementById('sendButton').disabled = true;
+                }
+            }
+            
+            processCommand(command) {
+                // Add user message
+                this.addMessage(command, 'user');
+                
+                // Show typing indicator
+                document.getElementById('typingIndicator').classList.add('active');
+                
+                // Send to WebSocket if connected
+                if (this.wsConnection && this.wsConnection.readyState === WebSocket.OPEN) {
+                    this.wsConnection.send(JSON.stringify({
+                        type: 'text_command',
+                        request_id: Date.now().toString(),
+                        text: command,
+                        context: {
+                            enable_emotions: this.settings.enableEmotions,
+                            voice_type: this.settings.voiceType,
+                            language: this.settings.language
+                        }
+                    }));
+                } else {
+                    // Fallback to local processing
+                    this.processCommandLocally(command);
+                }
+            }
+            
+            async processCommandLocally(command) {
+                // Simulate processing delay
+                await new Promise(resolve => setTimeout(resolve, 1000));
+                
+                // Hide typing indicator
+                document.getElementById('typingIndicator').classList.remove('active');
+                
+                // Generate response based on command
+                let response = '';
+                let emotion = 'neutral';
+                
+                const lowerCommand = command.toLowerCase();
+                
+                if (lowerCommand.includes('weather')) {
+                    response = "I'd need to connect to the weather service to get current conditions. Please add your API key in settings to enable this feature.";
+                    emotion = 'helpful';
+                } else if (lowerCommand.includes('time')) {
+                    const now = new Date();
+                    response = `The current time is ${now.toLocaleTimeString()}.`;
+                    emotion = 'friendly';
+                } else if (lowerCommand.includes('date')) {
+                    const now = new Date();
+                    response = `Today is ${now.toLocaleDateString('en-US', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' })}.`;
+                    emotion = 'friendly';
+                } else if (lowerCommand.includes('joke')) {
+                    const jokes = [
+                        "Why don't scientists trust atoms? Because they make up everything!",
+                        "Why did the scarecrow win an award? He was outstanding in his field!",
+                        "Why don't eggs tell jokes? They'd crack up!"
+                    ];
+                    response = jokes[Math.floor(Math.random() * jokes.length)];
+                    emotion = 'happy';
+                } else if (lowerCommand.includes('help') || lowerCommand.includes('what can you do')) {
+                    response = "I'm LUNA, your AI assistant. I can help with information queries, set reminders, tell jokes, check the time, and much more. Try asking me anything!";
+                    emotion = 'helpful';
+                } else if (lowerCommand.includes('hello') || lowerCommand.includes('hi')) {
+                    response = "Hello! How can I assist you today?";
+                    emotion = 'friendly';
+                } else if (lowerCommand.includes('thank')) {
+                    response = "You're welcome! Is there anything else I can help you with?";
+                    emotion = 'happy';
+                } else if (lowerCommand.includes('battery')) {
+                    if (navigator.getBattery) {
+                        try {
+                            const battery = await navigator.getBattery();
+                            const level = Math.round(battery.level * 100);
+                            const charging = battery.charging ? 'charging' : 'not charging';
+                            response = `Your battery is at ${level}% and is ${charging}.`;
+                            emotion = 'helpful';
+                        } catch (error) {
+                            response = "I couldn't access battery information on this device.";
+                            emotion = 'concerned';
+                        }
+                    } else {
+                        response = "Battery information is not available on this device.";
+                        emotion = 'concerned';
+                    }
+                } else {
+                    response = "I'm currently running in offline mode. Connect to LUNA servers for full functionality. You can add your API key in the settings.";
+                    emotion = 'helpful';
+                }
+                
+                this.addMessage(response, 'assistant', {
+                    emotion: emotion,
+                    confidence: 0.95
+                });
+                
+                // Speak response
+                this.speak(response);
+            }
+            
+            addMessage(content, type, metadata = {}) {
+                const message = {
+                    id: Date.now(),
+                    type: type,
+                    content: content,
+                    timestamp: new Date(),
+                    ...metadata
+                };
+                
+                this.messages.push(message);
+                
+                // Add to UI
+                const messagesContainer = document.getElementById('chatMessages');
+                const messageEl = this.createMessageElement(message);
+                messagesContainer.appendChild(messageEl);
+                
+                // Scroll to bottom
+                messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                
+                // Save to history if enabled
+                if (this.settings.saveHistory) {
+                    this.saveHistory();
+                }
+                
+                // Update history view if active
+                if (this.currentTab === 'history') {
+                    this.updateHistoryView();
+                }
+                
+                // Hide typing indicator
+                document.getElementById('typingIndicator').classList.remove('active');
+            }
+            
+            createMessageElement(message) {
+                const messageDiv = document.createElement('div');
+                messageDiv.className = `message ${message.type}`;
+                
+                const avatar = document.createElement('div');
+                avatar.className = 'message-avatar';
+                avatar.textContent = message.type === 'user' ? '👤' : '🤖';
+                
+                const content = document.createElement('div');
+                content.className = 'message-content';
+                
+                const bubble = document.createElement('div');
+                bubble.className = `message-bubble${message.emotion ? ` emotion-${message.emotion}` : ''}`;
+                bubble.textContent = message.content;
+                
+                const meta = document.createElement('div');
+                meta.className = 'message-meta';
+                
+                const time = document.createElement('span');
+                time.className = 'message-time';
+                time.textContent = this.formatTime(message.timestamp);
+                meta.appendChild(time);
+                
+                if (message.confidence && message.type === 'assistant') {
+                    const confidence = document.createElement('span');
+                    confidence.className = 'confidence-score';
+                    confidence.innerHTML = `
+                        <svg width="12" height="12" viewBox="0 0 24 24" fill="currentColor">
+                            <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+                        </svg>
+                        ${Math.round(message.confidence * 100)}%
+                    `;
+                    meta.appendChild(confidence);
+                }
+                
+                content.appendChild(bubble);
+                content.appendChild(meta);
+                
+                messageDiv.appendChild(avatar);
+                messageDiv.appendChild(content);
+                
+                return messageDiv;
+            }
+            
+            formatTime(date) {
+                const now = new Date();
+                const diff = now - date;
+                
+                if (diff < 60000) { // Less than a minute
+                    return 'Just now';
+                } else if (diff < 3600000) { // Less than an hour
+                    const minutes = Math.floor(diff / 60000);
+                    return `${minutes} minute${minutes > 1 ? 's' : ''} ago`;
+                } else if (diff < 86400000) { // Less than a day
+                    return date.toLocaleTimeString('en-US', { hour: 'numeric', minute: '2-digit' });
+                } else {
+                    return date.toLocaleDateString('en-US', { month: 'short', day: 'numeric' });
+                }
+            }
+            
+            updateMessageTimes() {
+                document.querySelectorAll('.message-time').forEach((timeEl, index) => {
+                    if (this.messages[index]) {
+                        timeEl.textContent = this.formatTime(this.messages[index].timestamp);
+                    }
+                });
+            }
+            
+            speak(text) {
+                if (this.synthesis) {
+                    // Cancel any ongoing speech
+                    this.synthesis.cancel();
+                    
+                    const utterance = new SpeechSynthesisUtterance(text);
+                    utterance.rate = this.settings.speechRate;
+                    utterance.lang = this.settings.language;
+                    
+                    // Try to find a voice matching the settings
+                    const voices = this.synthesis.getVoices();
+                    const preferredVoice = voices.find(voice => {
+                        return voice.lang.startsWith(this.settings.language.split('-')[0]) &&
+                               voice.name.toLowerCase().includes(this.settings.voiceType);
+                    });
+                    
+                    if (preferredVoice) {
+                        utterance.voice = preferredVoice;
+                    }
+                    
+                    this.synthesis.speak(utterance);
+                }
+            }
+            
+            playAudioResponse(audioUrl) {
+                const audio = new Audio(audioUrl);
+                audio.play().catch(error => {
+                    console.error('Audio playback failed:', error);
+                    // Fallback to speech synthesis
+                    const lastMessage = this.messages[this.messages.length - 1];
+                    if (lastMessage && lastMessage.type === 'assistant') {
+                        this.speak(lastMessage.content);
+                    }
+                });
+            }
+            
+            showNotification(message, type = 'info') {
+                const notification = {
+                    id: Date.now(),
+                    message: message,
+                    type: type
+                };
+                
+                this.notifications.push(notification);
+                this.updateNotificationBadge();
+                
+                // Create notification element
+                const container = document.getElementById('notificationsContainer');
+                const notificationEl = document.createElement('div');
+                notificationEl.className = `notification ${type}`;
+                notificationEl.innerHTML = `
+                    <svg class="notification-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                        ${this.getNotificationIcon(type)}
+                    </svg>
+                    <div class="notification-content">
+                        <div class="notification-message">${message}</div>
+                    </div>
+                `;
+                
+                container.appendChild(notificationEl);
+                
+                // Auto-remove after 5 seconds
+                setTimeout(() => {
+                    notificationEl.style.opacity = '0';
+                    setTimeout(() => {
+                        notificationEl.remove();
+                        this.notifications = this.notifications.filter(n => n.id !== notification.id);
+                        this.updateNotificationBadge();
+                    }, 300);
+                }, 5000);
+                
+                // Click to dismiss
+                notificationEl.addEventListener('click', () => {
+                    notificationEl.remove();
+                    this.notifications = this.notifications.filter(n => n.id !== notification.id);
+                    this.updateNotificationBadge();
+                });
+            }
+            
+            getNotificationIcon(type) {
+                const icons = {
+                    success: '<path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline>',
+                    error: '<circle cx="12" cy="12" r="10"></circle><line x1="15" y1="9" x2="9" y2="15"></line><line x1="9" y1="9" x2="15" y2="15"></line>',
+                    warning: '<path d="M10.29 3.86L1.82 18a2 2 0 0 0 1.71 3h16.94a2 2 0 0 0 1.71-3L13.71 3.86a2 2 0 0 0-3.42 0z"></path><line x1="12" y1="9" x2="12" y2="13"></line><line x1="12" y1="17" x2="12.01" y2="17"></line>',
+                    info: '<circle cx="12" cy="12" r="10"></circle><line x1="12" y1="16" x2="12" y2="12"></line><line x1="12" y1="8" x2="12.01" y2="8"></line>'
+                };
+                return icons[type] || icons.info;
+            }
+            
+            updateNotificationBadge() {
+                const badge = document.getElementById('notificationBadge');
+                const count = this.notifications.length;
+                
+                if (count > 0) {
+                    badge.textContent = count > 9 ? '9+' : count;
+                    badge.style.display = 'flex';
+                } else {
+                    badge.style.display = 'none';
+                }
+            }
+            
+            switchTab(tabName) {
+                // Update active tab
+                document.querySelectorAll('.nav-tab').forEach(tab => {
+                    tab.classList.toggle('active', tab.dataset.tab === tabName);
+                });
+                
+                // Show active content
+                document.querySelectorAll('.tab-content').forEach(content => {
+                    content.classList.toggle('active', content.dataset.tab === tabName);
+                });
+                
+                this.currentTab = tabName;
+                
+                // Update history view if switching to history
+                if (tabName === 'history') {
+                    this.updateHistoryView();
+                }
+            }
+            
+            updateHistoryView() {
+                const historyList = document.getElementById('historyList');
+                historyList.innerHTML = '';
+                
+                // Group messages by conversation
+                const conversations = [];
+                let currentConversation = [];
+                
+                this.messages.forEach((message, index) => {
+                    currentConversation.push(message);
+                    
+                    // Start new conversation after assistant response or at end
+                    if (message.type === 'assistant' || index === this.messages.length - 1) {
+                        if (currentConversation.length > 1) { // Exclude initial greeting
+                            conversations.push([...currentConversation]);
+                        }
+                        currentConversation = [];
+                    }
+                });
+                
+                // Display conversations
+                conversations.reverse().forEach(conversation => {
+                    const historyItem = document.createElement('div');
+                    historyItem.className = 'history-item';
+                    
+                    const userMessage = conversation.find(m => m.type === 'user');
+                    const assistantMessage = conversation.find(m => m.type === 'assistant');
+                    
+                    if (userMessage && assistantMessage) {
+                        historyItem.innerHTML = `
+                            <div class="history-item-header">
+                                <span class="history-item-type">Conversation</span>
+                                <span class="history-item-time">${this.formatTime(userMessage.timestamp)}</span>
+                            </div>
+                            <div class="history-item-content">
+                                <strong>You:</strong> ${userMessage.content}<br>
+                                <strong>LUNA:</strong> ${assistantMessage.content.substring(0, 100)}${assistantMessage.content.length > 100 ? '...' : ''}
+                            </div>
+                        `;
+                        
+                        historyItem.addEventListener('click', () => {
+                            // Copy conversation to clipboard
+                            const text = `You: ${userMessage.content}\nLUNA: ${assistantMessage.content}`;
+                            navigator.clipboard.writeText(text);
+                            this.showNotification('Conversation copied to clipboard', 'success');
+                        });
+                        
+                        historyList.appendChild(historyItem);
+                    }
+                });
+                
+                if (conversations.length === 0) {
+                    historyList.innerHTML = '<p style="text-align: center; color: var(--text-tertiary);">No conversation history yet</p>';
+                }
+            }
+            
+            executeCommand(action) {
+                switch (action) {
+                    case 'clear-conversation':
+                        if (confirm('Clear all messages in the current conversation?')) {
+                            this.clearConversation();
+                        }
+                        break;
+                        
+                    case 'export-data':
+                        this.exportConversation();
+                        break;
+                        
+                    case 'toggle-theme':
+                        this.toggleTheme();
+                        break;
+                        
+                    case 'disconnect':
+                        if (this.wsConnection) {
+                            this.wsConnection.close();
+                            this.showNotification('Disconnected from server', 'info');
+                        }
+                        break;
+                        
+                    case 'reset-settings':
+                        if (confirm('Reset all settings to default values?')) {
+                            this.resetSettings();
+                        }
+                        break;
+                        
+                    case 'help':
+                        window.open('https://docs.voiceassistant.com', '_blank');
+                        break;
+                }
+            }
+            
+            clearConversation() {
+                // Keep only the initial message
+                this.messages = [this.messages[0]];
+                
+                // Clear UI
+                const messagesContainer = document.getElementById('chatMessages');
+                messagesContainer.innerHTML = '';
+                messagesContainer.appendChild(this.createMessageElement(this.messages[0]));
+                
+                this.saveHistory();
+                this.showNotification('Conversation cleared', 'success');
+            }
+            
+            clearHistory() {
+                this.messages = [this.messages[0]];
+                this.saveHistory();
+                this.updateHistoryView();
+                this.clearConversation();
+                this.showNotification('All history cleared', 'success');
+            }
+            
+            exportConversation() {
+                const data = {
+                    assistant: 'LUNA Enterprise',
+                    version: '2.0.0',
+                    exportDate: new Date().toISOString(),
+                    settings: {
+                        language: this.settings.language,
+                        voiceType: this.settings.voiceType
+                    },
+                    messages: this.messages.map(msg => ({
+                        type: msg.type,
+                        content: msg.content,
+                        timestamp: msg.timestamp,
+                        emotion: msg.emotion,
+                        confidence: msg.confidence
+                    }))
+                };
+                
+                const blob = new Blob([JSON.stringify(data, null, 2)], { type: 'application/json' });
+                const url = URL.createObjectURL(blob);
+                const a = document.createElement('a');
+                a.href = url;
+                a.download = `luna-conversation-${new Date().toISOString().split('T')[0]}.json`;
+                a.click();
+                URL.revokeObjectURL(url);
+                
+                this.showNotification('Conversation exported', 'success');
+            }
+            
+            toggleTheme() {
+                document.body.classList.toggle('light-mode');
+                this.settings.darkMode = !document.body.classList.contains('light-mode');
+                this.saveSettings();
+                
+                const themeIcon = document.getElementById('themeToggle').querySelector('svg');
+                if (this.settings.darkMode) {
+                    themeIcon.innerHTML = '<circle cx="12" cy="12" r="5"></circle><line x1="12" y1="1" x2="12" y2="3"></line><line x1="12" y1="21" x2="12" y2="23"></line><line x1="4.22" y1="4.22" x2="5.64" y2="5.64"></line><line x1="18.36" y1="18.36" x2="19.78" y2="19.78"></line><line x1="1" y1="12" x2="3" y2="12"></line><line x1="21" y1="12" x2="23" y2="12"></line><line x1="4.22" y1="19.78" x2="5.64" y2="18.36"></line><line x1="18.36" y1="5.64" x2="19.78" y2="4.22"></line>';
+                } else {
+                    themeIcon.innerHTML = '<path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"></path>';
+                }
+            }
+            
+            resetSettings() {
+                this.settings = this.getDefaultSettings();
+                this.saveSettings();
+                location.reload();
+            }
+            
+            getDefaultSettings() {
+                return {
+                    apiKey: '',
+                    voiceType: 'female',
+                    language: 'en-US',
+                    speechRate: 1.0,
+                    enableEmotions: true,
+                    enableDiarization: false,
+                    autoListen: false,
+                    wakeWord: false,
+                    saveHistory: true,
+                    analytics: false,
+                    darkMode: true
+                };
+            }
+            
+            saveSettings() {
+                localStorage.setItem('lunaSettings', JSON.stringify(this.settings));
+            }
+            
+            loadSettings() {
+                const saved = localStorage.getItem('lunaSettings');
+                if (saved) {
+                    return { ...this.getDefaultSettings(), ...JSON.parse(saved) };
+                }
+                return this.getDefaultSettings();
+            }
+            
+            saveHistory() {
+                if (this.settings.saveHistory) {
+                    localStorage.setItem('lunaHistory', JSON.stringify(this.messages));
+                }
+            }
+            
+            loadHistory() {
+                const saved = localStorage.getItem('lunaHistory');
+                if (saved && this.settings.saveHistory) {
+                    this.messages = JSON.parse(saved);
+                    
+                    // Restore messages to UI
+                    const messagesContainer = document.getElementById('chatMessages');
+                    messagesContainer.innerHTML = '';
+                    this.messages.forEach(message => {
+                        // Convert timestamp strings back to Date objects
+                        message.timestamp = new Date(message.timestamp);
+                        messagesContainer.appendChild(this.createMessageElement(message));
+                    });
+                    
+                    // Scroll to bottom
+                    messagesContainer.scrollTop = messagesContainer.scrollHeight;
+                } else {
+                    // Add initial greeting
+                    this.messages = [{
+                        id: Date.now(),
+                        type: 'assistant',
+                        content: "Hello! I'm LUNA, your advanced AI assistant. How can I help you today?",
+                        timestamp: new Date(),
+                        emotion: 'friendly',
+                        confidence: 1.0
+                    }];
+                }
+            }
+            
+            updateUI() {
+                // Update all time displays
+                this.updateMessageTimes();
+                
+                // Update connection status
+                this.setConnectionStatus(this.isConnected);
+                
+                // Update notification badge
+                this.updateNotificationBadge();
+            }
+            
+            // Wake word detection (placeholder)
+            startWakeWordDetection() {
+                console.log('Wake word detection started');
+                this.showNotification('Wake word detection enabled', 'success');
+                // In production, this would integrate with a wake word detection library
+            }
+            
+            stopWakeWordDetection() {
+                console.log('Wake word detection stopped');
+                this.showNotification('Wake word detection disabled', 'info');
+            }
+        }
+        
+        // Initialize the assistant
+        let assistant;
+        document.addEventListener('DOMContentLoaded', () => {
+            assistant = new LunaAssistant();
+            
+            // PWA installation
+            let deferredPrompt;
+            window.addEventListener('beforeinstallprompt', (e) => {
+                e.preventDefault();
+                deferredPrompt = e;
+            });
+            
+            // Service Worker registration
+            if ('serviceWorker' in navigator) {
+                navigator.serviceWorker.register('data:text/javascript,' + encodeURIComponent(`
+                    const CACHE_NAME = 'luna-v1';
+                    const urlsToCache = ['/'];
+                    
+                    self.addEventListener('install', event => {
+                        event.waitUntil(
+                            caches.open(CACHE_NAME)
+                                .then(cache => cache.addAll(urlsToCache))
+                        );
+                    });
+                    
+                    self.addEventListener('fetch', event => {
+                        event.respondWith(
+                            caches.match(event.request)
+                                .then(response => response || fetch(event.request))
+                        );
+                    });
+                `)).catch(err => console.log('SW registration failed:', err));
+            }
+        });
+        
+        // Handle visibility change
+        document.addEventListener('visibilitychange', () => {
+            if (document.hidden && assistant && assistant.isListening) {
+                assistant.recognition.stop();
+            }
+        });
+    </script>
+</body>
+</html>
