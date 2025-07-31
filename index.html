@@ -1,1829 +1,247 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Refit - Premium Maintenance Services</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        :root {
-            --primary-pink: #E8A5B7;
-            --dark-pink: #D47F99;
-            --light-pink: #F5E6EA;
-            --luxury-gold: #D4AF37;
-            --dark-gray: #1a1a1a;
-            --medium-gray: #333333;
-            --light-gray: #666666;
-            --white: #FFFFFF;
-            --shadow: 0 10px 30px rgba(0,0,0,0.1);
-        }
-
-        body {
-            font-family: 'Helvetica Neue', sans-serif;
-            line-height: 1.6;
-            color: var(--dark-gray);
-            overflow-x: hidden;
-            background: var(--white);
-        }
-
-        /* Enhanced Typography */
-        h1, h2, h3, h4, h5, h6 {
-            font-weight: 300;
-            letter-spacing: -0.5px;
-        }
-
-        /* Premium Loading Screen */
-        .loader-wrapper {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: var(--white);
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 10000;
-            transition: opacity 0.5s ease;
-        }
-
-        .loader-logo {
-            animation: pulse 2s infinite;
-        }
-
-        @keyframes pulse {
-            0%, 100% { transform: scale(1); opacity: 1; }
-            50% { transform: scale(1.1); opacity: 0.8; }
-        }
-
-        /* Enhanced Navigation with Member Button */
-        nav {
-            position: fixed;
-            width: 100%;
-            background: rgba(255, 255, 255, 0.98);
-            backdrop-filter: blur(20px);
-            z-index: 1000;
-            transition: all 0.3s ease;
-            box-shadow: 0 2px 30px rgba(0,0,0,0.05);
-        }
-
-        nav.scrolled {
-            padding: 10px 0;
-            box-shadow: 0 5px 40px rgba(0,0,0,0.1);
-        }
-
-        .nav-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 20px 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .logo {
-            font-size: 2.8rem;
-            font-weight: 200;
-            letter-spacing: -2px;
-            background: linear-gradient(135deg, var(--dark-pink), var(--primary-pink));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            position: relative;
-        }
-
-        .logo::after {
-            content: '®';
-            position: absolute;
-            top: 0;
-            right: -15px;
-            font-size: 0.8rem;
-            -webkit-text-fill-color: var(--light-gray);
-        }
-
-        .logo span {
-            font-size: 0.7rem;
-            display: block;
-            letter-spacing: 3px;
-            text-transform: uppercase;
-            -webkit-text-fill-color: var(--light-gray);
-            font-weight: 400;
-        }
-
-        .nav-center {
-            display: flex;
-            gap: 40px;
-            list-style: none;
-        }
-
-        .nav-center a {
-            text-decoration: none;
-            color: var(--dark-gray);
-            font-weight: 400;
-            font-size: 0.95rem;
-            transition: all 0.3s ease;
-            position: relative;
-            padding: 5px 0;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .nav-right {
-            display: flex;
-            align-items: center;
-            gap: 20px;
-        }
-
-        .member-btn {
-            padding: 10px 25px;
-            background: transparent;
-            border: 2px solid var(--primary-pink);
-            color: var(--primary-pink);
-            border-radius: 25px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-size: 0.85rem;
-        }
-
-        .member-btn:hover {
-            background: var(--primary-pink);
-            color: var(--white);
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(232, 165, 183, 0.3);
-        }
-
-        .admin-btn {
-            padding: 10px 25px;
-            background: var(--luxury-gold);
-            border: none;
-            color: var(--white);
-            border-radius: 25px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: 500;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-size: 0.85rem;
-            display: none;
-        }
-
-        .admin-btn.show {
-            display: block;
-        }
-
-        /* Login Modal */
-        .modal {
-            display: none;
-            position: fixed;
-            z-index: 2000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.8);
-            animation: fadeIn 0.3s ease;
-        }
-
-        .modal-content {
-            background: var(--white);
-            margin: 10% auto;
-            padding: 40px;
-            border-radius: 20px;
-            width: 90%;
-            max-width: 400px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-            animation: slideIn 0.3s ease;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        @keyframes slideIn {
-            from { transform: translateY(-50px); opacity: 0; }
-            to { transform: translateY(0); opacity: 1; }
-        }
-
-        .close {
-            color: var(--light-gray);
-            float: right;
-            font-size: 28px;
-            font-weight: 300;
-            cursor: pointer;
-            transition: color 0.3s ease;
-        }
-
-        .close:hover {
-            color: var(--dark-gray);
-        }
-
-        .login-form h2 {
-            color: var(--dark-gray);
-            margin-bottom: 30px;
-            font-size: 2rem;
-            font-weight: 300;
-        }
-
-        .form-group {
-            margin-bottom: 20px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            color: var(--light-gray);
-            font-size: 0.9rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .form-group input {
-            width: 100%;
-            padding: 12px 20px;
-            border: 1px solid #e0e0e0;
-            border-radius: 10px;
-            font-size: 1rem;
-            transition: all 0.3s ease;
-        }
-
-        .form-group input:focus {
-            outline: none;
-            border-color: var(--primary-pink);
-            box-shadow: 0 0 0 3px rgba(232, 165, 183, 0.1);
-        }
-
-        .login-submit {
-            width: 100%;
-            padding: 15px;
-            background: var(--primary-pink);
-            color: var(--white);
-            border: none;
-            border-radius: 10px;
-            font-size: 1rem;
-            font-weight: 500;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-top: 20px;
-        }
-
-        .login-submit:hover {
-            background: var(--dark-pink);
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(232, 165, 183, 0.4);
-        }
-
-        /* Admin Dashboard */
-        .admin-dashboard {
-            display: none;
-            position: fixed;
-            z-index: 2000;
-            left: 0;
-            top: 0;
-            width: 100%;
-            height: 100%;
-            background: rgba(0,0,0,0.9);
-            overflow-y: auto;
-        }
-
-        .dashboard-content {
-            background: var(--white);
-            margin: 2% auto;
-            padding: 40px;
-            border-radius: 20px;
-            width: 90%;
-            max-width: 1200px;
-            min-height: 90vh;
-        }
-
-        .dashboard-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 40px;
-            padding-bottom: 20px;
-            border-bottom: 1px solid #e0e0e0;
-        }
-
-        .dashboard-header h2 {
-            font-size: 2.5rem;
-            color: var(--dark-gray);
-            font-weight: 300;
-        }
-
-        .dashboard-nav {
-            display: flex;
-            gap: 30px;
-            margin-bottom: 40px;
-        }
-
-        .dashboard-nav button {
-            padding: 10px 30px;
-            background: transparent;
-            border: 1px solid #e0e0e0;
-            border-radius: 25px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-weight: 400;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .dashboard-nav button.active,
-        .dashboard-nav button:hover {
-            background: var(--primary-pink);
-            color: var(--white);
-            border-color: var(--primary-pink);
-        }
-
-        .dashboard-section {
-            display: none;
-        }
-
-        .dashboard-section.active {
-            display: block;
-        }
-
-        /* Photo Upload Section */
-        .upload-area {
-            border: 2px dashed var(--primary-pink);
-            border-radius: 20px;
-            padding: 60px;
-            text-align: center;
-            cursor: pointer;
-            transition: all 0.3s ease;
-            background: var(--light-pink);
-        }
-
-        .upload-area:hover {
-            border-color: var(--dark-pink);
-            background: #fce4ec;
-        }
-
-        .upload-area h3 {
-            color: var(--dark-gray);
-            margin-bottom: 10px;
-            font-size: 1.5rem;
-        }
-
-        .upload-area p {
-            color: var(--light-gray);
-        }
-
-        .uploaded-images {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 20px;
-            margin-top: 40px;
-        }
-
-        .uploaded-image {
-            position: relative;
-            border-radius: 10px;
-            overflow: hidden;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-            transition: transform 0.3s ease;
-        }
-
-        .uploaded-image:hover {
-            transform: scale(1.05);
-        }
-
-        .uploaded-image img {
-            width: 100%;
-            height: 200px;
-            object-fit: cover;
-        }
-
-        .image-actions {
-            position: absolute;
-            top: 10px;
-            right: 10px;
-            display: flex;
-            gap: 10px;
-        }
-
-        .image-actions button {
-            padding: 5px 10px;
-            background: rgba(255,255,255,0.9);
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            transition: all 0.3s ease;
-        }
-
-        .image-actions button:hover {
-            background: var(--primary-pink);
-            color: var(--white);
-        }
-
-        /* Enhanced Hero Section */
-        .hero {
-            height: 100vh;
-            background: linear-gradient(135deg, #fff5f7 0%, #ffffff 50%, #f8e1e7 100%);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            position: relative;
-            overflow: hidden;
-        }
-
-        .hero-content {
-            text-align: center;
-            z-index: 2;
-            animation: fadeInUp 1s ease;
-            max-width: 900px;
-            padding: 0 40px;
-        }
-
-        .hero h1 {
-            font-size: 4.5rem;
-            font-weight: 200;
-            margin-bottom: 20px;
-            color: var(--dark-gray);
-            letter-spacing: -2px;
-            line-height: 1.1;
-        }
-
-        .hero h1 span {
-            background: linear-gradient(135deg, var(--dark-pink), var(--primary-pink));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            font-weight: 400;
-        }
-
-        .hero .tagline {
-            font-size: 1.3rem;
-            color: var(--light-gray);
-            margin-bottom: 40px;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            font-weight: 300;
-        }
-
-        .cta-group {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-            flex-wrap: wrap;
-        }
-
-        .cta-button {
-            display: inline-block;
-            padding: 15px 40px;
-            background: var(--primary-pink);
-            color: var(--white);
-            text-decoration: none;
-            border-radius: 50px;
-            transition: all 0.3s ease;
-            font-weight: 500;
-            letter-spacing: 1px;
-            text-transform: uppercase;
-            font-size: 0.9rem;
-            box-shadow: 0 5px 20px rgba(232, 165, 183, 0.3);
-        }
-
-        .cta-button.secondary {
-            background: transparent;
-            border: 2px solid var(--primary-pink);
-            color: var(--primary-pink);
-        }
-
-        .cta-button:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 8px 30px rgba(232, 165, 183, 0.4);
-        }
-
-        .cta-button.secondary:hover {
-            background: var(--primary-pink);
-            color: var(--white);
-        }
-
-        /* Refined geometric shapes */
-        .hero-shapes {
-            position: absolute;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-            z-index: 1;
-        }
-
-        .shape {
-            position: absolute;
-            opacity: 0.05;
-        }
-
-        .shape-circle {
-            width: 500px;
-            height: 500px;
-            background: linear-gradient(135deg, var(--primary-pink), var(--luxury-gold));
-            border-radius: 50%;
-            top: -250px;
-            right: -250px;
-            animation: rotate 30s linear infinite;
-        }
-
-        .shape-square {
-            width: 300px;
-            height: 300px;
-            background: var(--dark-pink);
-            bottom: -150px;
-            left: -150px;
-            transform: rotate(45deg);
-            animation: float 20s ease-in-out infinite;
-        }
-
-        @keyframes rotate {
-            from { transform: rotate(0deg); }
-            to { transform: rotate(360deg); }
-        }
-
-        @keyframes float {
-            0%, 100% { transform: translateY(0) rotate(45deg); }
-            50% { transform: translateY(-30px) rotate(45deg); }
-        }
-
-        /* Services with Premium Cards */
-        .services {
-            padding: 120px 40px;
-            background: var(--white);
-        }
-
-        .section-title {
-            text-align: center;
-            font-size: 3.5rem;
-            margin-bottom: 20px;
-            color: var(--dark-gray);
-            font-weight: 200;
-            letter-spacing: -1px;
-        }
-
-        .section-subtitle {
-            text-align: center;
-            font-size: 1.1rem;
-            color: var(--light-gray);
-            margin-bottom: 60px;
-            text-transform: uppercase;
-            letter-spacing: 3px;
-            font-weight: 300;
-        }
-
-        .services-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 40px;
-            max-width: 1200px;
-            margin: 0 auto;
-        }
-
-        .service-card {
-            background: var(--white);
-            padding: 50px 40px;
-            border-radius: 20px;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.08);
-            transition: all 0.4s ease;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-            border: 1px solid #f0f0f0;
-        }
-
-        .service-card::before {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 5px;
-            background: linear-gradient(90deg, var(--dark-pink), var(--primary-pink), var(--luxury-gold));
-            transform: scaleX(0);
-            transition: transform 0.4s ease;
-        }
-
-        .service-card:hover::before {
-            transform: scaleX(1);
-        }
-
-        .service-card:hover {
-            transform: translateY(-15px);
-            box-shadow: 0 25px 60px rgba(0,0,0,0.12);
-        }
-
-        .service-icon {
-            width: 100px;
-            height: 100px;
-            margin: 0 auto 30px;
-            background: linear-gradient(135deg, #fff5f7, #fce4ec);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 2.5rem;
-            position: relative;
-            transition: all 0.4s ease;
-        }
-
-        .service-card:hover .service-icon {
-            background: linear-gradient(135deg, var(--dark-pink), var(--primary-pink));
-            color: var(--white);
-            transform: scale(1.1);
-        }
-
-        .service-card h3 {
-            font-size: 1.8rem;
-            margin-bottom: 15px;
-            color: var(--dark-gray);
-            font-weight: 400;
-        }
-
-        .service-card p {
-            color: var(--light-gray);
-            line-height: 1.8;
-        }
-
-        /* Premium Portfolio Gallery */
-        .portfolio {
-            padding: 120px 40px;
-            background: #fafafa;
-        }
-
-        .portfolio-controls {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            gap: 30px;
-            margin-bottom: 60px;
-            flex-wrap: wrap;
-        }
-
-        .filter-btn {
-            padding: 12px 35px;
-            background: transparent;
-            border: 1px solid #e0e0e0;
-            border-radius: 30px;
-            color: var(--dark-gray);
-            cursor: pointer;
-            transition: all 0.3s ease;
-            font-size: 0.95rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-weight: 400;
-        }
-
-        .filter-btn.active,
-        .filter-btn:hover {
-            background: var(--primary-pink);
-            color: var(--white);
-            border-color: var(--primary-pink);
-            transform: translateY(-2px);
-            box-shadow: 0 5px 20px rgba(232, 165, 183, 0.3);
-        }
-
-        .portfolio-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(350px, 1fr));
-            gap: 30px;
-            max-width: 1400px;
-            margin: 0 auto;
-        }
-
-        .portfolio-item {
-            position: relative;
-            overflow: hidden;
-            border-radius: 20px;
-            box-shadow: 0 15px 40px rgba(0,0,0,0.1);
-            cursor: pointer;
-            transition: all 0.4s ease;
-            height: 400px;
-            background: #f0f0f0;
-        }
-
-        .portfolio-item img {
-            width: 100%;
-            height: 100%;
-            object-fit: cover;
-            transition: transform 0.6s ease;
-        }
-
-        .portfolio-item:hover img {
-            transform: scale(1.1);
-        }
-
-        .portfolio-overlay {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            background: linear-gradient(to top, rgba(0,0,0,0.9), transparent);
-            padding: 30px;
-            transform: translateY(100%);
-            transition: transform 0.4s ease;
-        }
-
-        .portfolio-item:hover .portfolio-overlay {
-            transform: translateY(0);
-        }
-
-        .portfolio-overlay h3 {
-            color: var(--white);
-            font-size: 1.5rem;
-            margin-bottom: 10px;
-            font-weight: 400;
-        }
-
-        .portfolio-overlay p {
-            color: rgba(255,255,255,0.8);
-            font-size: 0.95rem;
-            line-height: 1.6;
-        }
-
-        .portfolio-category {
-            display: inline-block;
-            padding: 5px 15px;
-            background: var(--primary-pink);
-            color: var(--white);
-            border-radius: 20px;
-            font-size: 0.8rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            margin-top: 10px;
-        }
-
-        /* About Section with Brand Story */
-        .about {
-            padding: 120px 40px;
-            background: var(--white);
-        }
-
-        .about-content {
-            max-width: 1400px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 80px;
-            align-items: center;
-        }
-
-        .about-text h2 {
-            font-size: 3rem;
-            margin-bottom: 30px;
-            color: var(--dark-gray);
-            font-weight: 200;
-        }
-
-        .about-text .lead {
-            font-size: 1.3rem;
-            color: var(--light-gray);
-            margin-bottom: 30px;
-            line-height: 1.8;
-            font-weight: 300;
-        }
-
-        .about-stats {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 30px;
-            margin: 40px 0;
-        }
-
-        .stat-item {
-            text-align: center;
-            padding: 20px;
-            border-right: 1px solid #e0e0e0;
-        }
-
-        .stat-item:last-child {
-            border-right: none;
-        }
-
-        .stat-number {
-            font-size: 3rem;
-            font-weight: 200;
-            color: var(--primary-pink);
-            margin-bottom: 10px;
-        }
-
-        .stat-label {
-            color: var(--light-gray);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-size: 0.85rem;
-        }
-
-        /* Contact with Map Integration */
-        .contact {
-            padding: 120px 40px;
-            background: linear-gradient(135deg, #fff5f7 0%, #ffffff 100%);
-        }
-
-        .contact-content {
-            max-width: 1400px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 80px;
-        }
-
-        .contact-info h3 {
-            font-size: 2.5rem;
-            margin-bottom: 30px;
-            color: var(--dark-gray);
-            font-weight: 200;
-        }
-
-        .contact-details {
-            margin-top: 40px;
-        }
-
-        .contact-item {
-            display: flex;
-            align-items: start;
-            margin-bottom: 30px;
-            color: var(--light-gray);
-        }
-
-        .contact-icon {
-            width: 50px;
-            height: 50px;
-            background: linear-gradient(135deg, #fff5f7, #fce4ec);
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 20px;
-            color: var(--primary-pink);
-            font-size: 1.3rem;
-            flex-shrink: 0;
-        }
-
-        .contact-form {
-            background: var(--white);
-            padding: 50px;
-            border-radius: 20px;
-            box-shadow: 0 20px 60px rgba(0,0,0,0.1);
-        }
-
-        /* Premium Footer */
-        footer {
-            background: var(--dark-gray);
-            color: var(--white);
-            padding: 80px 40px 30px;
-        }
-
-        .footer-content {
-            max-width: 1400px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr 1fr;
-            gap: 60px;
-            margin-bottom: 60px;
-        }
-
-        .footer-brand h3 {
-            font-size: 2.5rem;
-            margin-bottom: 20px;
-            font-weight: 200;
-            background: linear-gradient(135deg, var(--dark-pink), var(--primary-pink));
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-        }
-
-        .footer-brand p {
-            color: rgba(255,255,255,0.6);
-            line-height: 1.8;
-        }
-
-        .footer-column h4 {
-            margin-bottom: 20px;
-            font-size: 1.1rem;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            font-weight: 400;
-        }
-
-        .footer-column ul {
-            list-style: none;
-        }
-
-        .footer-column ul li {
-            margin-bottom: 15px;
-        }
-
-        .footer-column ul li a {
-            color: rgba(255,255,255,0.6);
-            text-decoration: none;
-            transition: color 0.3s ease;
-        }
-
-        .footer-column ul li a:hover {
-            color: var(--primary-pink);
-        }
-
-        .footer-bottom {
-            padding-top: 40px;
-            border-top: 1px solid rgba(255,255,255,0.1);
-            text-align: center;
-            color: rgba(255,255,255,0.4);
-        }
-
-        /* Settings Panel */
-        .settings-panel {
-            display: none;
-            padding: 30px;
-        }
-
-        .settings-group {
-            margin-bottom: 30px;
-            padding: 20px;
-            background: #f8f8f8;
-            border-radius: 10px;
-        }
-
-        .settings-group h3 {
-            margin-bottom: 20px;
-            color: var(--dark-gray);
-        }
-
-        .color-picker {
-            display: flex;
-            gap: 20px;
-            align-items: center;
-            margin-bottom: 15px;
-        }
-
-        .color-picker input[type="color"] {
-            width: 50px;
-            height: 50px;
-            border: none;
-            border-radius: 50%;
-            cursor: pointer;
-        }
-
-        .color-picker label {
-            flex: 1;
-            color: var(--light-gray);
-        }
-
-        /* Member Dashboard */
-        .member-area {
-            display: none;
-            padding: 100px 40px;
-            min-height: 100vh;
-            background: #f8f8f8;
-        }
-
-        .member-header {
-            max-width: 1200px;
-            margin: 0 auto 40px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .member-header h2 {
-            font-size: 2.5rem;
-            color: var(--dark-gray);
-            font-weight: 300;
-        }
-
-        .member-content {
-            max-width: 1200px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: 250px 1fr;
-            gap: 40px;
-        }
-
-        .member-sidebar {
-            background: var(--white);
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
-        }
-
-        .member-nav {
-            list-style: none;
-        }
-
-        .member-nav li {
-            margin-bottom: 15px;
-        }
-
-        .member-nav a {
-            display: block;
-            padding: 10px 15px;
-            color: var(--dark-gray);
-            text-decoration: none;
-            border-radius: 8px;
-            transition: all 0.3s ease;
-        }
-
-        .member-nav a:hover,
-        .member-nav a.active {
-            background: var(--light-pink);
-            color: var(--primary-pink);
-        }
-
-        .member-main {
-            background: var(--white);
-            padding: 40px;
-            border-radius: 15px;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.05);
-        }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .nav-center {
-                display: none;
-                position: absolute;
-                top: 100%;
-                left: 0;
-                width: 100%;
-                background: var(--white);
-                flex-direction: column;
-                padding: 20px;
-                box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-            }
-
-            .nav-center.active {
-                display: flex;
-            }
-
-            .menu-toggle {
-                display: flex;
-                flex-direction: column;
-                cursor: pointer;
-            }
-
-            .menu-toggle span {
-                width: 25px;
-                height: 2px;
-                background: var(--dark-gray);
-                margin: 3px 0;
-                transition: 0.3s;
-            }
-
-            .hero h1 {
-                font-size: 3rem;
-            }
-
-            .about-content,
-            .contact-content {
-                grid-template-columns: 1fr;
-            }
-
-            .footer-content {
-                grid-template-columns: 1fr;
-                text-align: center;
-            }
-
-            .member-content {
-                grid-template-columns: 1fr;
-            }
-
-            .member-sidebar {
-                display: none;
-            }
-        }
-    </style>
-</head>
-<body>
-    <!-- Premium Loading Screen -->
-    <div class="loader-wrapper">
-        <div class="loader-logo">
-            <svg width="120" height="60" viewBox="0 0 120 60">
-                <defs>
-                    <linearGradient id="logoGradient" x1="0%" y1="0%" x2="100%" y2="100%">
-                        <stop offset="0%" style="stop-color:#D47F99;stop-opacity:1" />
-                        <stop offset="100%" style="stop-color:#E8A5B7;stop-opacity:1" />
-                    </linearGradient>
-                </defs>
-                <text x="60" y="40" font-family="Helvetica Neue" font-size="35" font-weight="200" text-anchor="middle" fill="url(#logoGradient)">refit</text>
-            </svg>
+import React, { useState } from 'react';
+import { Upload, FolderOpen, Check, X, Eye, Trash2, Plus } from 'lucide-react';
+
+const RefitAdminDashboard = () => {
+  const [selectedCategory, setSelectedCategory] = useState('commercial');
+  const [uploadedFiles, setUploadedFiles] = useState([]);
+  const [categories] = useState(['commercial', 'residential', 'maintenance', '3d-concepts']);
+  const [images, setImages] = useState({
+    commercial: [],
+    residential: [],
+    maintenance: [],
+    '3d-concepts': []
+  });
+  const [showConfirmModal, setShowConfirmModal] = useState(false);
+  const [pendingUploads, setPendingUploads] = useState([]);
+
+  const handleFileUpload = (e) => {
+    const files = Array.from(e.target.files);
+    const newFiles = files.map(file => ({
+      id: Date.now() + Math.random(),
+      name: file.name,
+      url: URL.createObjectURL(file),
+      category: selectedCategory,
+      status: 'pending'
+    }));
+    setUploadedFiles([...uploadedFiles, ...newFiles]);
+    setPendingUploads([...pendingUploads, ...newFiles]);
+  };
+
+  const confirmUpload = () => {
+    const confirmedImages = pendingUploads.map(img => ({
+      ...img,
+      status: 'confirmed',
+      uploadDate: new Date().toLocaleDateString()
+    }));
+    
+    setImages(prev => ({
+      ...prev,
+      [selectedCategory]: [...prev[selectedCategory], ...confirmedImages]
+    }));
+    
+    setPendingUploads([]);
+    setShowConfirmModal(false);
+  };
+
+  const cancelUpload = (id) => {
+    setUploadedFiles(uploadedFiles.filter(file => file.id !== id));
+    setPendingUploads(pendingUploads.filter(file => file.id !== id));
+  };
+
+  const deleteImage = (category, id) => {
+    setImages(prev => ({
+      ...prev,
+      [category]: prev[category].filter(img => img.id !== id)
+    }));
+  };
+
+  return (
+    <div className="min-h-screen bg-gray-50">
+      {/* Header with Logo */}
+      <header className="bg-white shadow-sm border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          <div className="flex items-center justify-between h-16">
+            <div className="flex items-center">
+              {/* REFIT Logo */}
+              <div className="flex items-center space-x-3">
+                <h1 className="text-3xl font-bold" style={{ color: '#E9869A' }}>refit</h1>
+                <span className="text-sm text-gray-500 mt-2">maintenance services</span>
+              </div>
+            </div>
+            <div className="text-sm text-gray-600">
+              Admin Dashboard
+            </div>
+          </div>
         </div>
-    </div>
+      </header>
 
-    <!-- Enhanced Navigation -->
-    <nav>
-        <div class="nav-container">
-            <div class="logo">
-                refit
-                <span>maintenance services</span>
-            </div>
-            <ul class="nav-center">
-                <li><a href="#home">Home</a></li>
-                <li><a href="#services">Services</a></li>
-                <li><a href="#portfolio">Portfolio</a></li>
-                <li><a href="#about">About</a></li>
-                <li><a href="#contact">Contact</a></li>
-            </ul>
-            <div class="nav-right">
-                <button class="member-btn" onclick="openLoginModal()">Member Login</button>
-                <button class="admin-btn" id="adminBtn" onclick="openAdminDashboard()">Admin</button>
-            </div>
-            <div class="menu-toggle">
-                <span></span>
-                <span></span>
-                <span></span>
-            </div>
-        </div>
-    </nav>
-
-    <!-- Login Modal -->
-    <div id="loginModal" class="modal">
-        <div class="modal-content">
-            <span class="close" onclick="closeLoginModal()">&times;</span>
-            <form class="login-form" onsubmit="handleLogin(event)">
-                <h2>Member Login</h2>
-                <div class="form-group">
-                    <label>Email</label>
-                    <input type="email" id="loginEmail" required>
-                </div>
-                <div class="form-group">
-                    <label>Password</label>
-                    <input type="password" id="loginPassword" required>
-                </div>
-                <button type="submit" class="login-submit">Login</button>
-                <p style="text-align: center; margin-top: 20px; color: #999; font-size: 0.9rem;">
-                    Admin: admin@refit.com / admin123<br>
-                    Member: member@refit.com / member123
-                </p>
-            </form>
-        </div>
-    </div>
-
-    <!-- Admin Dashboard -->
-    <div id="adminDashboard" class="admin-dashboard">
-        <div class="dashboard-content">
-            <div class="dashboard-header">
-                <h2>Admin Dashboard</h2>
-                <button class="close" onclick="closeAdminDashboard()" style="font-size: 40px;">&times;</button>
-            </div>
-            
-            <div class="dashboard-nav">
-                <button class="active" onclick="showDashboardSection('gallery')">Gallery Management</button>
-                <button onclick="showDashboardSection('settings')">Brand Settings</button>
-                <button onclick="showDashboardSection('members')">Member Management</button>
-            </div>
-
-            <!-- Gallery Management -->
-            <div id="gallery-section" class="dashboard-section active">
-                <h3>Upload Portfolio Images</h3>
-                <div class="upload-area" onclick="document.getElementById('imageUpload').click()">
-                    <h3>Click or Drag Images Here</h3>
-                    <p>Supported formats: JPG, PNG, WebP (Max 5MB)</p>
-                    <input type="file" id="imageUpload" style="display: none;" accept="image/*" multiple onchange="handleImageUpload(event)">
-                </div>
-                
-                <div class="uploaded-images" id="uploadedImages">
-                    <!-- Uploaded images will appear here -->
-                </div>
-            </div>
-
-            <!-- Brand Settings -->
-            <div id="settings-section" class="dashboard-section settings-panel">
-                <h3>Brand Customization</h3>
-                <div class="settings-group">
-                    <h4>Primary Colors</h4>
-                    <div class="color-picker">
-                        <input type="color" id="primaryColor" value="#E8A5B7">
-                        <label>Primary Pink</label>
+      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div className="grid grid-cols-1 lg:grid-cols-4 gap-6">
+          {/* Sidebar - Categories */}
+          <div className="lg:col-span-1">
+            <div className="bg-white rounded-lg shadow p-6">
+              <h2 className="text-lg font-semibold text-gray-800 mb-4 flex items-center">
+                <FolderOpen className="w-5 h-5 mr-2" style={{ color: '#E9869A' }} />
+                Categories
+              </h2>
+              <div className="space-y-2">
+                {categories.map(category => (
+                  <button
+                    key={category}
+                    onClick={() => setSelectedCategory(category)}
+                    className={`w-full text-left px-4 py-2 rounded-md transition-colors ${
+                      selectedCategory === category
+                        ? 'bg-pink-100 text-pink-700'
+                        : 'hover:bg-gray-100 text-gray-700'
+                    }`}
+                  >
+                    <div className="flex items-center justify-between">
+                      <span className="capitalize">{category.replace('-', ' ')}</span>
+                      <span className="text-sm text-gray-500">
+                        ({images[category].length})
+                      </span>
                     </div>
-                    <div class="color-picker">
-                        <input type="color" id="darkColor" value="#D47F99">
-                        <label>Dark Pink</label>
-                    </div>
-                    <div class="color-picker">
-                        <input type="color" id="accentColor" value="#D4AF37">
-                        <label>Accent Gold</label>
-                    </div>
-                </div>
-                
-                <div class="settings-group">
-                    <h4>Typography</h4>
-                    <select style="width: 100%; padding: 10px; margin-bottom: 15px;">
-                        <option>Helvetica Neue</option>
-                        <option>Georgia</option>
-                        <option>Futura</option>
-                        <option>Playfair Display</option>
-                    </select>
-                </div>
-                
-                <button class="login-submit" onclick="saveSettings()">Save Settings</button>
+                  </button>
+                ))}
+              </div>
             </div>
+          </div>
 
-            <!-- Member Management -->
-            <div id="members-section" class="dashboard-section">
-                <h3>Member Management</h3>
-                <div style="overflow-x: auto;">
-                    <table style="width: 100%; border-collapse: collapse;">
-                        <thead>
-                            <tr style="background: #f8f8f8;">
-                                <th style="padding: 15px; text-align: left;">Name</th>
-                                <th style="padding: 15px; text-align: left;">Email</th>
-                                <th style="padding: 15px; text-align: left;">Status</th>
-                                <th style="padding: 15px; text-align: left;">Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody id="membersList">
-                            <tr>
-                                <td style="padding: 15px; border-bottom: 1px solid #eee;">John Doe</td>
-                                <td style="padding: 15px; border-bottom: 1px solid #eee;">john@example.com</td>
-                                <td style="padding: 15px; border-bottom: 1px solid #eee;"><span style="color: green;">Active</span></td>
-                                <td style="padding: 15px; border-bottom: 1px solid #eee;">
-                                    <button style="padding: 5px 15px; margin-right: 10px;">Edit</button>
-                                    <button style="padding: 5px 15px;">Delete</button>
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                </div>
-            </div>
-        </div>
-    </div>
+          {/* Main Content Area */}
+          <div className="lg:col-span-3">
+            {/* Upload Section */}
+            <div className="bg-white rounded-lg shadow p-6 mb-6">
+              <h2 className="text-lg font-semibold text-gray-800 mb-4">
+                Upload Images to <span className="capitalize" style={{ color: '#E9869A' }}>
+                  {selectedCategory.replace('-', ' ')}
+                </span>
+              </h2>
+              
+              <div className="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-pink-400 transition-colors">
+                <Upload className="w-12 h-12 mx-auto mb-4 text-gray-400" />
+                <label htmlFor="file-upload" className="cursor-pointer">
+                  <span className="mt-2 block text-sm font-medium text-gray-900">
+                    Click to upload or drag and drop
+                  </span>
+                  <span className="mt-1 block text-xs text-gray-500">
+                    PNG, JPG, GIF up to 10MB
+                  </span>
+                  <input
+                    id="file-upload"
+                    type="file"
+                    multiple
+                    accept="image/*"
+                    className="hidden"
+                    onChange={handleFileUpload}
+                  />
+                </label>
+              </div>
 
-    <!-- Member Area -->
-    <div id="memberArea" class="member-area">
-        <div class="member-header">
-            <h2>Welcome, <span id="memberName">Member</span></h2>
-            <button class="member-btn" onclick="logout()">Logout</button>
-        </div>
-        
-        <div class="member-content">
-            <aside class="member-sidebar">
-                <ul class="member-nav">
-                    <li><a href="#" class="active">Dashboard</a></li>
-                    <li><a href="#">My Projects</a></li>
-                    <li><a href="#">Invoices</a></li>
-                    <li><a href="#">Support</a></li>
-                    <li><a href="#">Settings</a></li>
-                </ul>
-            </aside>
-            
-            <main class="member-main">
-                <h3>Dashboard Overview</h3>
-                <div class="about-stats" style="margin-top: 30px;">
-                    <div class="stat-item">
-                        <div class="stat-number">5</div>
-                        <div class="stat-label">Active Projects</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-number">12</div>
-                        <div class="stat-label">Completed</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-number">2</div>
-                        <div class="stat-label">Pending</div>
-                    </div>
-                </div>
-                
-                <h4 style="margin-top: 40px;">Recent Activity</h4>
-                <div style="margin-top: 20px;">
-                    <div style="padding: 20px; background: #f8f8f8; border-radius: 10px; margin-bottom: 15px;">
-                        <strong>Project Update:</strong> Kitchen Renovation - Phase 2 completed
-                        <div style="color: #999; font-size: 0.9rem; margin-top: 5px;">2 days ago</div>
-                    </div>
-                    <div style="padding: 20px; background: #f8f8f8; border-radius: 10px; margin-bottom: 15px;">
-                        <strong>Invoice:</strong> #INV-2024-001 has been sent
-                        <div style="color: #999; font-size: 0.9rem; margin-top: 5px;">5 days ago</div>
-                    </div>
-                </div>
-            </main>
-        </div>
-    </div>
-
-    <!-- Enhanced Hero Section -->
-    <section id="home" class="hero">
-        <div class="hero-shapes">
-            <div class="shape shape-circle"></div>
-            <div class="shape shape-square"></div>
-        </div>
-        <div class="hero-content">
-            <h1>From <span>Concept</span> to <span>Completion</span></h1>
-            <p class="tagline">Premium Maintenance & Design Services</p>
-            <div class="cta-group">
-                <a href="#portfolio" class="cta-button">View Portfolio</a>
-                <a href="#contact" class="cta-button secondary">Get Quote</a>
-            </div>
-        </div>
-    </section>
-
-    <!-- Premium Services Section -->
-    <section id="services" class="services">
-        <h2 class="section-title">Our Services</h2>
-        <p class="section-subtitle">Excellence in Every Detail</p>
-        <div class="services-grid">
-            <div class="service-card">
-                <div class="service-icon">🔧</div>
-                <h3>Maintenance Services</h3>
-                <p>Professional maintenance solutions ensuring your spaces remain pristine and functional with our expert care and attention to detail.</p>
-            </div>
-            <div class="service-card">
-                <div class="service-icon">🏗️</div>
-                <h3>Interior Construction</h3>
-                <p>Transform your vision into reality with our expert architectural construction and renovation services, delivered with precision.</p>
-            </div>
-            <div class="service-card">
-                <div class="service-icon">🎨</div>
-                <h3>Design & Illustration</h3>
-                <p>Creative interior design and 3D visualization services that bring your ideas to life before construction begins.</p>
-            </div>
-        </div>
-    </section>
-
-    <!-- Premium Portfolio Gallery -->
-    <section id="portfolio" class="portfolio">
-        <h2 class="section-title">Portfolio</h2>
-        <p class="section-subtitle">Showcasing Our Finest Work</p>
-        <div class="portfolio-controls">
-            <button class="filter-btn active" data-filter="all">All Projects</button>
-            <button class="filter-btn" data-filter="commercial">Commercial</button>
-            <button class="filter-btn" data-filter="residential">Residential</button>
-            <button class="filter-btn" data-filter="maintenance">Maintenance</button>
-        </div>
-        <div class="portfolio-grid" id="portfolioGrid">
-            <div class="portfolio-item" data-category="commercial">
-                <img src="data:image/svg+xml,%3Csvg width='400' height='400' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='400' height='400' fill='%23f0f0f0'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%23999'%3ECath Kidston%3C/text%3E%3C/svg%3E" alt="Cath Kidston">
-                <div class="portfolio-overlay">
-                    <h3>Cath Kidston</h3>
-                    <p>Complete retail store design featuring custom fixtures and brand-aligned aesthetics</p>
-                    <span class="portfolio-category">Commercial</span>
-                </div>
-            </div>
-            <div class="portfolio-item" data-category="commercial">
-                <img src="data:image/svg+xml,%3Csvg width='400' height='400' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='400' height='400' fill='%23f0f0f0'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%23999'%3ETusan Ice Cream%3C/text%3E%3C/svg%3E" alt="Tusan Ice Cream">
-                <div class="portfolio-overlay">
-                    <h3>Tusan Ice Cream</h3>
-                    <p>Modern F&B outlet design with emphasis on customer experience and brand identity</p>
-                    <span class="portfolio-category">Commercial</span>
-                </div>
-            </div>
-            <div class="portfolio-item" data-category="residential">
-                <img src="data:image/svg+xml,%3Csvg width='400' height='400' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='400' height='400' fill='%23f0f0f0'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%23999'%3ELuxury Apartment%3C/text%3E%3C/svg%3E" alt="Luxury Apartment">
-                <div class="portfolio-overlay">
-                    <h3>Luxury Apartment</h3>
-                    <p>High-end residential design featuring premium materials and contemporary aesthetics</p>
-                    <span class="portfolio-category">Residential</span>
-                </div>
-            </div>
-            <div class="portfolio-item" data-category="commercial">
-                <img src="data:image/svg+xml,%3Csvg width='400' height='400' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='400' height='400' fill='%23f0f0f0'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%23999'%3EOffice Space%3C/text%3E%3C/svg%3E" alt="Office Space">
-                <div class="portfolio-overlay">
-                    <h3>Corporate Office</h3>
-                    <p>Modern workspace design focusing on productivity and employee wellbeing</p>
-                    <span class="portfolio-category">Commercial</span>
-                </div>
-            </div>
-            <div class="portfolio-item" data-category="maintenance">
-                <img src="data:image/svg+xml,%3Csvg width='400' height='400' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='400' height='400' fill='%23f0f0f0'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%23999'%3ETopshop%3C/text%3E%3C/svg%3E" alt="Topshop">
-                <div class="portfolio-overlay">
-                    <h3>Topshop & Topman</h3>
-                    <p>Ongoing maintenance services for premium retail locations</p>
-                    <span class="portfolio-category">Maintenance</span>
-                </div>
-            </div>
-            <div class="portfolio-item" data-category="commercial">
-                <img src="data:image/svg+xml,%3Csvg width='400' height='400' xmlns='http://www.w3.org/2000/svg'%3E%3Crect width='400' height='400' fill='%23f0f0f0'/%3E%3Ctext x='50%25' y='50%25' text-anchor='middle' dy='.3em' fill='%23999'%3EBackhaus%3C/text%3E%3C/svg%3E" alt="Backhaus">
-                <div class="portfolio-overlay">
-                    <h3>Backhaus Bakery</h3>
-                    <p>German bakery design combining functionality with warm, inviting aesthetics</p>
-                    <span class="portfolio-category">Commercial</span>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- About Section with Brand Story -->
-    <section id="about" class="about">
-        <div class="about-content">
-            <div class="about-text">
-                <h2>The Refit Story</h2>
-                <p class="lead">With over a decade of excellence in transforming spaces, Refit has become synonymous with quality, innovation, and reliability in Malaysia's maintenance and renovation industry.</p>
-                <p>Our journey began with a simple vision: to provide responsible and professional quality services that exceed expectations. Today, we stand as a leading service provider, trusted by prestigious brands and discerning homeowners alike.</p>
-                
-                <div class="about-stats">
-                    <div class="stat-item">
-                        <div class="stat-number">500+</div>
-                        <div class="stat-label">Projects Completed</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-number">10+</div>
-                        <div class="stat-label">Years Experience</div>
-                    </div>
-                    <div class="stat-item">
-                        <div class="stat-number">100%</div>
-                        <div class="stat-label">Client Satisfaction</div>
-                    </div>
-                </div>
-            </div>
-            <div class="about-image">
-                <div style="background: linear-gradient(135deg, var(--primary-pink), var(--dark-pink)); height: 600px; border-radius: 20px; display: flex; align-items: center; justify-content: center; color: white; font-size: 2.5rem; text-align: center; padding: 40px; line-height: 1.4;">
-                    Creating Spaces<br>That Inspire
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Premium Contact Section -->
-    <section id="contact" class="contact">
-        <h2 class="section-title">Let's Create Together</h2>
-        <p class="section-subtitle">Your Vision, Our Expertise</p>
-        <div class="contact-content">
-            <div class="contact-info">
-                <h3>Get in Touch</h3>
-                <p style="color: var(--light-gray); line-height: 1.8; margin-bottom: 40px;">
-                    Ready to transform your space? Contact us today for a consultation and discover how we can bring your vision to life.
-                </p>
-                
-                <div class="contact-details">
-                    <div class="contact-item">
-                        <div class="contact-icon">📍</div>
-                        <div>
-                            <strong>Visit Our Office</strong><br>
-                            C-08-34, Centum @ Oasis Corporate Park,<br>
-                            Oasis Damansara, No.2 Jalan PJU 1A/2,<br>
-                            Ara Damansara, 47301 Petaling Jaya,<br>
-                            Selangor, Malaysia
+              {/* Pending Uploads */}
+              {pendingUploads.length > 0 && (
+                <div className="mt-4">
+                  <h3 className="text-sm font-medium text-gray-700 mb-2">Pending Uploads</h3>
+                  <div className="space-y-2">
+                    {pendingUploads.map(file => (
+                      <div key={file.id} className="flex items-center justify-between bg-yellow-50 p-3 rounded-md">
+                        <div className="flex items-center space-x-3">
+                          <img src={file.url} alt={file.name} className="w-10 h-10 object-cover rounded" />
+                          <span className="text-sm text-gray-700">{file.name}</span>
                         </div>
+                        <button
+                          onClick={() => cancelUpload(file.id)}
+                          className="text-red-500 hover:text-red-700"
+                        >
+                          <X className="w-4 h-4" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                  
+                  <button
+                    onClick={() => setShowConfirmModal(true)}
+                    className="mt-4 w-full bg-pink-500 text-white py-2 px-4 rounded-md hover:bg-pink-600 transition-colors flex items-center justify-center"
+                    style={{ backgroundColor: '#E9869A' }}
+                  >
+                    <Check className="w-4 h-4 mr-2" />
+                    Confirm Upload to Page
+                  </button>
+                </div>
+              )}
+            </div>
+
+            {/* Images Grid */}
+            <div className="bg-white rounded-lg shadow p-6">
+              <h2 className="text-lg font-semibold text-gray-800 mb-4">
+                {selectedCategory.replace('-', ' ')} Images
+              </h2>
+              
+              {images[selectedCategory].length === 0 ? (
+                <div className="text-center py-12 text-gray-500">
+                  <FolderOpen className="w-16 h-16 mx-auto mb-4 text-gray-300" />
+                  <p>No images in this category yet</p>
+                </div>
+              ) : (
+                <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+                  {images[selectedCategory].map(image => (
+                    <div key={image.id} className="relative group">
+                      <img
+                        src={image.url}
+                        alt={image.name}
+                        className="w-full h-40 object-cover rounded-lg"
+                      />
+                      <div className="absolute inset-0 bg-black bg-opacity-50 opacity-0 group-hover:opacity-100 transition-opacity rounded-lg flex items-center justify-center space-x-2">
+                        <button className="bg-white text-gray-700 p-2 rounded-full hover:bg-gray-100">
+                          <Eye className="w-4 h-4" />
+                        </button>
+                        <button
+                          onClick={() => deleteImage(selectedCategory, image.id)}
+                          className="bg-white text-red-500 p-2 rounded-full hover:bg-gray-100"
+                        >
+                          <Trash2 className="w-4 h-4" />
+                        </button>
+                      </div>
+                      <div className="mt-2">
+                        <p className="text-sm text-gray-700 truncate">{image.name}</p>
+                        <p className="text-xs text-gray-500">{image.uploadDate}</p>
+                      </div>
                     </div>
-                    <div class="contact-item">
-                        <div class="contact-icon">📧</div>
-                        <div>
-                            <strong>Email Us</strong><br>
-                            info@refitservices.com
-                        </div>
-                    </div>
-                    <div class="contact-item">
-                        <div class="contact-icon">📞</div>
-                        <div>
-                            <strong>Call Us</strong><br>
-                            +60 3-1234 5678
-                        </div>
-                    </div>
+                  ))}
                 </div>
+              )}
             </div>
-            
-            <form class="contact-form" onsubmit="handleContactSubmit(event)">
-                <div class="form-group">
-                    <input type="text" placeholder="Your Name" required>
-                </div>
-                <div class="form-group">
-                    <input type="email" placeholder="Your Email" required>
-                </div>
-                <div class="form-group">
-                    <input type="tel" placeholder="Phone Number">
-                </div>
-                <div class="form-group">
-                    <select style="width: 100%; padding: 12px 20px; border: 1px solid #e0e0e0; border-radius: 10px;">
-                        <option>Select Service</option>
-                        <option>Maintenance Services</option>
-                        <option>Interior Construction</option>
-                        <option>Design & Illustration</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <textarea rows="5" placeholder="Tell us about your project" required></textarea>
-                </div>
-                <button type="submit" class="login-submit">Send Message</button>
-            </form>
+          </div>
         </div>
-    </section>
+      </div>
 
-    <!-- Premium Footer -->
-    <footer>
-        <div class="footer-content">
-            <div class="footer-brand">
-                <h3>refit</h3>
-                <p>From Concept to Completion - Creating exceptional spaces through innovative design and meticulous execution.</p>
-                <div style="display: flex; gap: 15px; margin-top: 20px;">
-                    <a href="#" style="width: 40px; height: 40px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; text-decoration: none; transition: all 0.3s;">f</a>
-                    <a href="#" style="width: 40px; height: 40px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; text-decoration: none; transition: all 0.3s;">in</a>
-                    <a href="#" style="width: 40px; height: 40px; background: rgba(255,255,255,0.1); border-radius: 50%; display: flex; align-items: center; justify-content: center; color: white; text-decoration: none; transition: all 0.3s;">ig</a>
-                </div>
+      {/* Confirmation Modal */}
+      {showConfirmModal && (
+        <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
+          <div className="bg-white rounded-lg p-6 max-w-md w-full mx-4">
+            <h3 className="text-lg font-semibold text-gray-800 mb-4">Confirm Upload</h3>
+            <p className="text-gray-600 mb-6">
+              Are you sure you want to upload {pendingUploads.length} image(s) to the {selectedCategory} category?
+            </p>
+            <div className="flex space-x-3">
+              <button
+                onClick={confirmUpload}
+                className="flex-1 bg-pink-500 text-white py-2 px-4 rounded-md hover:bg-pink-600 transition-colors"
+                style={{ backgroundColor: '#E9869A' }}
+              >
+                Confirm Upload
+              </button>
+              <button
+                onClick={() => setShowConfirmModal(false)}
+                className="flex-1 bg-gray-200 text-gray-700 py-2 px-4 rounded-md hover:bg-gray-300 transition-colors"
+              >
+                Cancel
+              </button>
             </div>
-            
-            <div class="footer-column">
-                <h4>Services</h4>
-                <ul>
-                    <li><a href="#">Maintenance</a></li>
-                    <li><a href="#">Construction</a></li>
-                    <li><a href="#">Design</a></li>
-                    <li><a href="#">Consultation</a></li>
-                </ul>
-            </div>
-            
-            <div class="footer-column">
-                <h4>Company</h4>
-                <ul>
-                    <li><a href="#">About Us</a></li>
-                    <li><a href="#">Portfolio</a></li>
-                    <li><a href="#">Careers</a></li>
-                    <li><a href="#">Contact</a></li>
-                </ul>
-            </div>
-            
-            <div class="footer-column">
-                <h4>Support</h4>
-                <ul>
-                    <li><a href="#">FAQ</a></li>
-                    <li><a href="#">Terms</a></li>
-                    <li><a href="#">Privacy</a></li>
-                    <li><a href="#">Sitemap</a></li>
-                </ul>
-            </div>
+          </div>
         </div>
-        
-        <div class="footer-bottom">
-            <p>&copy; 2024 Refit Maintenance Services Sdn Bhd. All rights reserved.</p>
-        </div>
-    </footer>
+      )}
+    </div>
+  );
+};
 
-    <script>
-        // Enhanced loader
-        window.addEventListener('load', () => {
-            setTimeout(() => {
-                document.querySelector('.loader-wrapper').style.opacity = '0';
-                setTimeout(() => {
-                    document.querySelector('.loader-wrapper').style.display = 'none';
-                    // Animate hero content
-                    document.querySelector('.hero-content').style.animation = 'fadeInUp 1s ease forwards';
-                }, 500);
-            }, 2000);
-        });
-
-        // Navigation scroll effect
-        let lastScroll = 0;
-        window.addEventListener('scroll', () => {
-            const nav = document.querySelector('nav');
-            const currentScroll = window.pageYOffset;
-            
-            if (currentScroll > 50) {
-                nav.classList.add('scrolled');
-            } else {
-                nav.classList.remove('scrolled');
-            }
-            
-            lastScroll = currentScroll;
-        });
-
-        // Mobile menu
-        const menuToggle = document.querySelector('.menu-toggle');
-        const navCenter = document.querySelector('.nav-center');
-        
-        menuToggle?.addEventListener('click', () => {
-            navCenter.classList.toggle('active');
-        });
-
-        // Login Modal Functions
-        function openLoginModal() {
-            document.getElementById('loginModal').style.display = 'block';
-        }
-
-        function closeLoginModal() {
-            document.getElementById('loginModal').style.display = 'none';
-        }
-
-        function handleLogin(event) {
-            event.preventDefault();
-            const email = document.getElementById('loginEmail').value;
-            const password = document.getElementById('loginPassword').value;
-            
-            // Simple authentication (in real app, this would be server-side)
-            if (email === 'admin@refit.com' && password === 'admin123') {
-                localStorage.setItem('userRole', 'admin');
-                localStorage.setItem('userName', 'Admin');
-                document.getElementById('adminBtn').classList.add('show');
-                closeLoginModal();
-                alert('Welcome Admin!');
-            } else if (email === 'member@refit.com' && password === 'member123') {
-                localStorage.setItem('userRole', 'member');
-                localStorage.setItem('userName', 'John Doe');
-                closeLoginModal();
-                showMemberArea();
-            } else {
-                alert('Invalid credentials!');
-            }
-        }
-
-        // Admin Dashboard Functions
-        function openAdminDashboard() {
-            document.getElementById('adminDashboard').style.display = 'block';
-        }
-
-        function closeAdminDashboard() {
-            document.getElementById('adminDashboard').style.display = 'none';
-        }
-
-        function showDashboardSection(section) {
-            // Hide all sections
-            document.querySelectorAll('.dashboard-section').forEach(sec => {
-                sec.classList.remove('active');
-            });
-            
-            // Remove active from all buttons
-            document.querySelectorAll('.dashboard-nav button').forEach(btn => {
-                btn.classList.remove('active');
-            });
-            
-            // Show selected section
-            document.getElementById(`${section}-section`).classList.add('active');
-            
-            // Set active button
-            event.target.classList.add('active');
-        }
-
-        // Image Upload Handler
-        function handleImageUpload(event) {
-            const files = event.target.files;
-            const uploadedImages = document.getElementById('uploadedImages');
-            
-            for (let file of files) {
-                if (file.type.startsWith('image/')) {
-                    const reader = new FileReader();
-                    
-                    reader.onload = function(e) {
-                        const imageDiv = document.createElement('div');
-                        imageDiv.className = 'uploaded-image';
-                        imageDiv.innerHTML = `
-                            <img src="${e.target.result}" alt="${file.name}">
-                            <div class="image-actions">
-                                <button onclick="editImage(this)">Edit</button>
-                                <button onclick="deleteImage(this)">Delete</button>
-                            </div>
-                        `;
-                        uploadedImages.appendChild(imageDiv);
-                    };
-                    
-                    reader.readAsDataURL(file);
-                }
-            }
-        }
-
-        function deleteImage(btn) {
-            if (confirm('Delete this image?')) {
-                btn.closest('.uploaded-image').remove();
-            }
-        }
-
-        function editImage(btn) {
-            alert('Image editing feature coming soon!');
-        }
-
-        // Settings Functions
-        function saveSettings() {
-            const primaryColor = document.getElementById('primaryColor').value;
-            const darkColor = document.getElementById('darkColor').value;
-            const accentColor = document.getElementById('accentColor').value;
-            
-            // Update CSS variables
-            document.documentElement.style.setProperty('--primary-pink', primaryColor);
-            document.documentElement.style.setProperty('--dark-pink', darkColor);
-            document.documentElement.style.setProperty('--luxury-gold', accentColor);
-            
-            alert('Settings saved successfully!');
-        }
-
-        // Member Area Functions
-        function showMemberArea() {
-            document.getElementById('memberArea').style.display = 'block';
-            document.getElementById('memberName').textContent = localStorage.getItem('userName');
-            // Hide main content
-            document.querySelector('.hero').style.display = 'none';
-            document.querySelector('.services').style.display = 'none';
-            document.querySelector('.portfolio').style.display = 'none';
-            document.querySelector('.about').style.display = 'none';
-            document.querySelector('.contact').style.display = 'none';
-            document.querySelector('footer').style.display = 'none';
-        }
-
-        function logout() {
-            localStorage.removeItem('userRole');
-            localStorage.removeItem('userName');
-            location.reload();
-        }
-
-        // Check if user is logged in on page load
-        window.addEventListener('DOMContentLoaded', () => {
-            const userRole = localStorage.getItem('userRole');
-            if (userRole === 'admin') {
-                document.getElementById('adminBtn').classList.add('show');
-            } else if (userRole === 'member') {
-                showMemberArea();
-            }
-        });
-
-        // Portfolio Filter
-        const filterBtns = document.querySelectorAll('.filter-btn');
-        const portfolioItems = document.querySelectorAll('.portfolio-item');
-
-        filterBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                filterBtns.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-
-                const filter = btn.getAttribute('data-filter');
-
-                portfolioItems.forEach(item => {
-                    if (filter === 'all' || item.getAttribute('data-category') === filter) {
-                        item.style.display = 'block';
-                        setTimeout(() => {
-                            item.style.opacity = '1';
-                            item.style.transform = 'scale(1)';
-                        }, 100);
-                    } else {
-                        item.style.opacity = '0';
-                        item.style.transform = 'scale(0.8)';
-                        setTimeout(() => {
-                            item.style.display = 'none';
-                        }, 300);
-                    }
-                });
-            });
-        });
-
-        // Contact form handler
-        function handleContactSubmit(event) {
-            event.preventDefault();
-            alert('Thank you for your inquiry! We will contact you within 24 hours.');
-            event.target.reset();
-        }
-
-        // Smooth scrolling for navigation links
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
-                    });
-                }
-            });
-        });
-
-        // Close modals when clicking outside
-        window.onclick = function(event) {
-            const loginModal = document.getElementById('loginModal');
-            const adminDashboard = document.getElementById('adminDashboard');
-            
-            if (event.target === loginModal) {
-                closeLoginModal();
-            }
-            if (event.target === adminDashboard) {
-                closeAdminDashboard();
-            }
-        }
-
-        // Add parallax effect to hero section
-        window.addEventListener('scroll', () => {
-            const scrolled = window.pageYOffset;
-            const hero = document.querySelector('.hero');
-            const heroContent = document.querySelector('.hero-content');
-            
-            if (hero) {
-                hero.style.transform = `translateY(${scrolled * 0.5}px)`;
-            }
-            
-            if (heroContent) {
-                heroContent.style.transform = `translateY(${scrolled * 0.3}px)`;
-                heroContent.style.opacity = 1 - (scrolled * 0.002);
-            }
-        });
-
-        // Intersection Observer for scroll animations
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -100px 0px'
-        };
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.style.opacity = '1';
-                    entry.target.style.transform = 'translateY(0)';
-                }
-            });
-        }, observerOptions);
-
-        // Observe all sections
-        document.querySelectorAll('section').forEach(section => {
-            section.style.opacity = '0';
-            section.style.transform = 'translateY(50px)';
-            section.style.transition = 'all 1s ease';
-            observer.observe(section);
-        });
-    </script>
-</body>
-</html>
+export default RefitAdminDashboard;
