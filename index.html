@@ -3,7 +3,39 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="Refit Maintenance Services - Professional maintenance, interior construction & renovation, and design services in Malaysia. From concept to completion.">
+    <meta name="keywords" content="refit, maintenance services, interior design, renovation, construction, malaysia, petaling jaya">
+    <meta name="author" content="Refit Maintenance Services">
+    <meta property="og:title" content="Refit - Transforming Spaces with Excellence">
+    <meta property="og:description" content="Professional maintenance, interior construction & renovation services in Malaysia">
+    <meta property="og:image" content="/images/refit-og-image.jpg">
+    <meta property="og:url" content="https://refitservices.com">
+    <meta name="twitter:card" content="summary_large_image">
+    
+    <!-- Structured Data for SEO -->
+    <script type="application/ld+json">
+    {
+        "@context": "https://schema.org",
+        "@type": "LocalBusiness",
+        "name": "Refit Maintenance Services",
+        "description": "Professional maintenance, interior construction & renovation services",
+        "address": {
+            "@type": "PostalAddress",
+            "streetAddress": "C-08-34, Centum @ Oasis Corporate Park, Oasis Damansara, No.2 Jalan PJU 1A/2",
+            "addressLocality": "Petaling Jaya",
+            "addressRegion": "Selangor",
+            "postalCode": "47301",
+            "addressCountry": "MY"
+        },
+        "telephone": "+60312345678",
+        "email": "info@refitservices.com"
+    }
+    </script>
+    
     <title>Refit - Transforming Spaces with Excellence</title>
+    <link rel="canonical" href="https://refitservices.com">
+    <link rel="icon" type="image/png" href="/favicon.png">
+    
     <style>
         * {
             margin: 0;
@@ -53,6 +85,44 @@
             overflow-x: hidden;
             background: var(--white);
             cursor: none;
+        }
+
+        /* Language Switcher */
+        .language-switcher {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            z-index: 1002;
+            display: flex;
+            gap: 10px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 8px;
+            border-radius: 25px;
+            backdrop-filter: blur(10px);
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .lang-btn {
+            padding: 8px 16px;
+            background: transparent;
+            border: 2px solid transparent;
+            border-radius: 20px;
+            cursor: none;
+            font-size: 0.9rem;
+            font-weight: 600;
+            transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+            color: var(--dark-gray);
+        }
+
+        .lang-btn:hover {
+            background: var(--light-pink);
+            transform: translateY(-2px);
+        }
+
+        .lang-btn.active {
+            background: var(--gradient);
+            color: var(--white);
+            border-color: transparent;
         }
 
         /* Enhanced Cursor */
@@ -440,6 +510,33 @@
             75% { 
                 transform: translate(200px, 100px) rotate(270deg) scale(1.1); 
             }
+        }
+
+        /* Interactive Elements */
+        .interactive-badge {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            background: var(--gradient);
+            color: var(--white);
+            padding: 15px 25px;
+            border-radius: 50px;
+            font-weight: 600;
+            box-shadow: 0 10px 30px rgba(212, 127, 153, 0.3);
+            cursor: none;
+            transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+            z-index: 100;
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.05); }
+        }
+
+        .interactive-badge:hover {
+            transform: scale(1.1);
+            box-shadow: 0 15px 40px rgba(212, 127, 153, 0.5);
         }
 
         /* Services Section Enhanced */
@@ -834,7 +931,7 @@
             line-height: 1.6;
         }
 
-        /* Design Yourself Section */
+        /* Enhanced Design Yourself Section */
         .design-yourself {
             padding: 150px 40px;
             background: linear-gradient(135deg, #f8f8f8 0%, #ffffff 50%, #fafafa 100%);
@@ -984,6 +1081,131 @@
 
         .scheme-luxury {
             background: linear-gradient(135deg, #8e44ad 0%, #9b59b6 50%, #e8a5b7 100%);
+        }
+
+        /* New Design Options */
+        .style-options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+            margin-top: 20px;
+        }
+
+        .style-btn {
+            padding: 12px;
+            background: #f8f8f8;
+            border: 2px solid transparent;
+            border-radius: 12px;
+            cursor: none;
+            transition: all 0.3s ease;
+            font-size: 0.85rem;
+            text-align: center;
+            color: var(--dark-gray);
+        }
+
+        .style-btn:hover {
+            border-color: var(--primary-pink);
+            transform: translateY(-2px);
+        }
+
+        .style-btn.active {
+            background: var(--light-pink);
+            border-color: var(--primary-pink);
+            color: var(--darker-pink);
+        }
+
+        .material-options {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 20px;
+        }
+
+        .material-item {
+            width: 50px;
+            height: 50px;
+            border-radius: 10px;
+            cursor: none;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            border: 2px solid transparent;
+        }
+
+        .material-wood {
+            background: linear-gradient(135deg, #8b6f47, #654321);
+        }
+
+        .material-marble {
+            background: linear-gradient(135deg, #f5f5f5, #e0e0e0);
+        }
+
+        .material-concrete {
+            background: linear-gradient(135deg, #9e9e9e, #616161);
+        }
+
+        .material-fabric {
+            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
+        }
+
+        .material-item:hover {
+            transform: scale(1.1);
+            border-color: var(--primary-pink);
+        }
+
+        .material-item.active {
+            border-color: var(--dark-pink);
+            box-shadow: 0 5px 15px rgba(212, 127, 153, 0.3);
+        }
+
+        .lighting-controls {
+            margin-top: 20px;
+        }
+
+        .slider-container {
+            margin-top: 15px;
+        }
+
+        .slider-label {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+            color: var(--light-gray);
+        }
+
+        .slider {
+            width: 100%;
+            height: 6px;
+            border-radius: 3px;
+            background: #f0f0f0;
+            outline: none;
+            -webkit-appearance: none;
+        }
+
+        .slider::-webkit-slider-thumb {
+            -webkit-appearance: none;
+            appearance: none;
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--gradient);
+            cursor: none;
+            transition: all 0.3s ease;
+        }
+
+        .slider::-webkit-slider-thumb:hover {
+            transform: scale(1.2);
+            box-shadow: 0 5px 15px rgba(212, 127, 153, 0.5);
+        }
+
+        .slider::-moz-range-thumb {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: var(--gradient);
+            cursor: none;
+            transition: all 0.3s ease;
         }
 
         .furniture-options {
@@ -1152,6 +1374,17 @@
         .save-design:hover {
             transform: translateY(-3px);
             box-shadow: 0 20px 50px rgba(232, 165, 183, 0.4);
+        }
+
+        .share-design {
+            background: var(--dark-pink);
+            color: var(--white);
+            box-shadow: 0 15px 40px rgba(212, 127, 153, 0.3);
+        }
+
+        .share-design:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 20px 50px rgba(212, 127, 153, 0.4);
         }
 
         .reset-design {
@@ -1523,6 +1756,137 @@
             background: var(--primary-pink);
         }
 
+        /* Admin Settings Modal */
+        .admin-settings {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            background: var(--gradient);
+            color: var(--white);
+            width: 60px;
+            height: 60px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: none;
+            box-shadow: 0 10px 30px rgba(212, 127, 153, 0.3);
+            transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+            z-index: 100;
+        }
+
+        .admin-settings:hover {
+            transform: scale(1.1);
+            box-shadow: 0 15px 40px rgba(212, 127, 153, 0.5);
+        }
+
+        .settings-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            background: var(--white);
+            padding: 50px;
+            border-radius: 30px;
+            box-shadow: 0 50px 100px rgba(0,0,0,0.2);
+            z-index: 1000;
+            max-width: 600px;
+            width: 90%;
+            max-height: 80vh;
+            overflow-y: auto;
+            opacity: 0;
+            transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .settings-modal.active {
+            transform: translate(-50%, -50%) scale(1);
+            opacity: 1;
+        }
+
+        .settings-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+        }
+
+        .settings-header h2 {
+            font-size: 2rem;
+            color: var(--dark-gray);
+        }
+
+        .close-settings {
+            width: 40px;
+            height: 40px;
+            background: #f0f0f0;
+            border: none;
+            border-radius: 50%;
+            cursor: none;
+            transition: all 0.3s ease;
+            font-size: 1.5rem;
+            color: var(--dark-gray);
+        }
+
+        .close-settings:hover {
+            background: var(--light-pink);
+            transform: rotate(90deg);
+        }
+
+        .settings-section {
+            margin-bottom: 30px;
+            padding: 30px;
+            background: #f8f8f8;
+            border-radius: 20px;
+        }
+
+        .settings-section h3 {
+            font-size: 1.3rem;
+            margin-bottom: 20px;
+            color: var(--dark-gray);
+        }
+
+        .setting-item {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .setting-item label {
+            color: var(--light-gray);
+            font-size: 1rem;
+        }
+
+        .toggle-switch {
+            position: relative;
+            width: 60px;
+            height: 30px;
+            background: #e0e0e0;
+            border-radius: 30px;
+            cursor: none;
+            transition: all 0.3s ease;
+        }
+
+        .toggle-switch.active {
+            background: var(--gradient);
+        }
+
+        .toggle-switch::after {
+            content: '';
+            position: absolute;
+            top: 3px;
+            left: 3px;
+            width: 24px;
+            height: 24px;
+            background: var(--white);
+            border-radius: 50%;
+            transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .toggle-switch.active::after {
+            transform: translateX(30px);
+        }
+
         /* Responsive */
         @media (max-width: 1024px) {
             .nav-container {
@@ -1553,9 +1917,24 @@
                 height: 500px;
                 transform: none;
             }
+
+            .design-container {
+                grid-template-columns: 1fr;
+            }
+
+            .design-controls {
+                position: relative;
+                top: 0;
+            }
         }
 
         @media (max-width: 768px) {
+            .language-switcher {
+                top: auto;
+                bottom: 100px;
+                right: 20px;
+            }
+
             .nav-links {
                 display: none;
                 position: fixed;
@@ -1625,6 +2004,12 @@
             .section-title {
                 font-size: 3rem;
                 margin-bottom: 60px;
+            }
+
+            .room-types,
+            .style-options,
+            .furniture-options {
+                grid-template-columns: 1fr;
             }
         }
 
@@ -1733,6 +2118,25 @@
             background: var(--white);
             padding: 0 10px;
         }
+
+        /* Backend Settings Overlay */
+        .settings-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            z-index: 999;
+        }
+
+        .settings-overlay.active {
+            opacity: 1;
+            visibility: visible;
+        }
     </style>
 </head>
 <body>
@@ -1742,6 +2146,13 @@
     <!-- Custom Cursor -->
     <div class="cursor"></div>
     <div class="cursor-follower"></div>
+
+    <!-- Language Switcher -->
+    <div class="language-switcher">
+        <button class="lang-btn active" data-lang="en">EN</button>
+        <button class="lang-btn" data-lang="ms">MS</button>
+        <button class="lang-btn" data-lang="zh">中文</button>
+    </div>
 
     <!-- Loading Screen -->
     <div class="loader-wrapper">
@@ -1756,13 +2167,13 @@
         <div class="nav-container">
             <div class="logo">refit</div>
             <ul class="nav-links">
-                <li><a href="#home" class="active">Home</a></li>
-                <li><a href="#services">Services</a></li>
-                <li><a href="#about">About</a></li>
-                <li><a href="#portfolio">Portfolio</a></li>
-                <li><a href="#design-yourself">Design</a></li>
-                <li><a href="#process">Process</a></li>
-                <li><a href="#contact" class="nav-cta">Get Quote</a></li>
+                <li><a href="#home" class="active" data-translate="nav.home">Home</a></li>
+                <li><a href="#services" data-translate="nav.services">Services</a></li>
+                <li><a href="#about" data-translate="nav.about">About</a></li>
+                <li><a href="#portfolio" data-translate="nav.portfolio">Portfolio</a></li>
+                <li><a href="#design-yourself" data-translate="nav.design">Design</a></li>
+                <li><a href="#process" data-translate="nav.process">Process</a></li>
+                <li><a href="#contact" class="nav-cta" data-translate="nav.contact">Get Quote</a></li>
             </ul>
             <div class="menu-toggle">
                 <span></span>
@@ -1772,6 +2183,9 @@
         </div>
     </nav>
 
+    <!-- Interactive Badge -->
+    <div class="interactive-badge" data-translate="badge.interactive">Interactive Mode ✨</div>
+
     <!-- Hero Section -->
     <section id="home" class="hero">
         <div class="floating-shapes">
@@ -1780,30 +2194,30 @@
             <div class="shape shape3"></div>
         </div>
         <div class="hero-content">
-            <h1>From <span>Concept</span> to <span>Completion</span></h1>
-            <p>Transforming Spaces, Creating Excellence</p>
-            <a href="#portfolio" class="cta-button"><span>Explore Our Work</span></a>
+            <h1><span data-translate="hero.from">From</span> <span data-translate="hero.concept">Concept</span> <span data-translate="hero.to">to</span> <span data-translate="hero.completion">Completion</span></h1>
+            <p data-translate="hero.subtitle">Transforming Spaces, Creating Excellence</p>
+            <a href="#portfolio" class="cta-button"><span data-translate="hero.cta">Explore Our Work</span></a>
         </div>
     </section>
 
     <!-- Services Section -->
     <section id="services" class="services">
-        <h2 class="section-title reveal fade-bottom">What We Do</h2>
+        <h2 class="section-title reveal fade-bottom" data-translate="services.title">What We Do</h2>
         <div class="services-grid">
             <div class="service-card reveal fade-bottom">
                 <div class="service-icon">🔧</div>
-                <h3>Maintenance Services</h3>
-                <p>Professional maintenance solutions to keep your spaces functioning perfectly and looking their best year-round.</p>
+                <h3 data-translate="services.maintenance.title">Maintenance Services</h3>
+                <p data-translate="services.maintenance.desc">Professional maintenance solutions to keep your spaces functioning perfectly and looking their best year-round.</p>
             </div>
             <div class="service-card reveal fade-bottom">
                 <div class="service-icon">🏗️</div>
-                <h3>Interior Construction</h3>
-                <p>Expert architectural construction and renovation services that transform your vision into stunning reality.</p>
+                <h3 data-translate="services.construction.title">Interior Construction</h3>
+                <p data-translate="services.construction.desc">Expert architectural construction and renovation services that transform your vision into stunning reality.</p>
             </div>
             <div class="service-card reveal fade-bottom">
                 <div class="service-icon">🎨</div>
-                <h3>Design & Illustration</h3>
-                <p>Creative interior design and 3D illustration services to visualize and plan your perfect space with precision.</p>
+                <h3 data-translate="services.design.title">Design & Illustration</h3>
+                <p data-translate="services.design.desc">Creative interior design and 3D illustration services to visualize and plan your perfect space with precision.</p>
             </div>
         </div>
     </section>
@@ -1812,30 +2226,30 @@
     <section id="about" class="about">
         <div class="about-content">
             <div class="about-text reveal fade-left">
-                <h2>About <span>Refit</span></h2>
-                <p><strong>Our Mission:</strong> To provide responsible and professional quality services as well as components and materials sale, lease, exchange and building management by constantly improving and ensuring business growth.</p>
-                <p><strong>Our Vision:</strong> To gain customer trust and become a leading and competitive business aviation service provider in East and West Malaysia by offering innovative micro solutions team work management.</p>
+                <h2 data-translate="about.title">About <span>Refit</span></h2>
+                <p data-translate="about.mission"><strong>Our Mission:</strong> To provide responsible and professional quality services as well as components and materials sale, lease, exchange and building management by constantly improving and ensuring business growth.</p>
+                <p data-translate="about.vision"><strong>Our Vision:</strong> To gain customer trust and become a leading and competitive business aviation service provider in East and West Malaysia by offering innovative micro solutions team work management.</p>
                 <div class="values-grid">
                     <div class="value-item">
-                        <h4>Passion</h4>
-                        <p>Continuous learning and innovation</p>
+                        <h4 data-translate="values.passion.title">Passion</h4>
+                        <p data-translate="values.passion.desc">Continuous learning and innovation</p>
                     </div>
                     <div class="value-item">
-                        <h4>Responsibility</h4>
-                        <p>Honest and respectful service</p>
+                        <h4 data-translate="values.responsibility.title">Responsibility</h4>
+                        <p data-translate="values.responsibility.desc">Honest and respectful service</p>
                     </div>
                     <div class="value-item">
-                        <h4>Innovative</h4>
-                        <p>Constant improvement</p>
+                        <h4 data-translate="values.innovative.title">Innovative</h4>
+                        <p data-translate="values.innovative.desc">Constant improvement</p>
                     </div>
                     <div class="value-item">
-                        <h4>Respect</h4>
-                        <p>Valuing relationships</p>
+                        <h4 data-translate="values.respect.title">Respect</h4>
+                        <p data-translate="values.respect.desc">Valuing relationships</p>
                     </div>
                 </div>
             </div>
             <div class="about-image reveal fade-right">
-                <div class="about-image-content">
+                <div class="about-image-content" data-translate="about.excellence">
                     Excellence in Every Detail
                 </div>
             </div>
@@ -1844,70 +2258,84 @@
 
     <!-- Portfolio Section -->
     <section id="portfolio" class="portfolio">
-        <h2 class="section-title reveal fade-bottom">Our Portfolio</h2>
+        <h2 class="section-title reveal fade-bottom" data-translate="portfolio.title">Our Portfolio</h2>
         <div class="filter-buttons reveal fade-bottom">
-            <button class="filter-btn active" data-filter="all"><span>All Projects</span></button>
-            <button class="filter-btn" data-filter="commercial"><span>Commercial</span></button>
-            <button class="filter-btn" data-filter="residential"><span>Residential</span></button>
-            <button class="filter-btn" data-filter="maintenance"><span>Maintenance</span></button>
+            <button class="filter-btn active" data-filter="all"><span data-translate="portfolio.filter.all">All Projects</span></button>
+            <button class="filter-btn" data-filter="commercial"><span data-translate="portfolio.filter.commercial">Commercial</span></button>
+            <button class="filter-btn" data-filter="residential"><span data-translate="portfolio.filter.residential">Residential</span></button>
+            <button class="filter-btn" data-filter="maintenance"><span data-translate="portfolio.filter.maintenance">Maintenance</span></button>
         </div>
         <div class="portfolio-grid">
             <div class="portfolio-item reveal scale-up" data-category="commercial">
                 <div class="portfolio-overlay">
                     <h3>Cath Kidston</h3>
-                    <p>Premium Retail Store Design</p>
+                    <p data-translate="portfolio.retail">Premium Retail Store Design</p>
                 </div>
             </div>
             <div class="portfolio-item reveal scale-up" data-category="commercial">
                 <div class="portfolio-overlay">
                     <h3>Tusan Ice Cream</h3>
-                    <p>Modern F&B Outlet Design</p>
+                    <p data-translate="portfolio.fnb">Modern F&B Outlet Design</p>
                 </div>
             </div>
             <div class="portfolio-item reveal scale-up" data-category="commercial">
                 <div class="portfolio-overlay">
                     <h3>Bungkus Kaw Kaw</h3>
-                    <p>Contemporary Restaurant Interior</p>
+                    <p data-translate="portfolio.restaurant">Contemporary Restaurant Interior</p>
                 </div>
             </div>
             <div class="portfolio-item reveal scale-up" data-category="residential">
                 <div class="portfolio-overlay">
-                    <h3>Luxury Apartment</h3>
-                    <p>Modern Residential Design</p>
+                    <h3 data-translate="portfolio.apartment.title">Luxury Apartment</h3>
+                    <p data-translate="portfolio.apartment.desc">Modern Residential Design</p>
                 </div>
             </div>
             <div class="portfolio-item reveal scale-up" data-category="commercial">
                 <div class="portfolio-overlay">
-                    <h3>Corporate Office</h3>
-                    <p>Professional Workspace Interior</p>
+                    <h3 data-translate="portfolio.office.title">Corporate Office</h3>
+                    <p data-translate="portfolio.office.desc">Professional Workspace Interior</p>
                 </div>
             </div>
             <div class="portfolio-item reveal scale-up" data-category="maintenance">
                 <div class="portfolio-overlay">
                     <h3>Topshop & Topman</h3>
-                    <p>Retail Maintenance Excellence</p>
+                    <p data-translate="portfolio.maintenance.desc">Retail Maintenance Excellence</p>
                 </div>
             </div>
         </div>
     </section>
 
-    <!-- Design Yourself Section -->
+    <!-- Enhanced Design Yourself Section -->
     <section id="design-yourself" class="design-yourself">
-        <h2 class="section-title reveal fade-bottom">Design Your Space</h2>
+        <h2 class="section-title reveal fade-bottom" data-translate="design.title">Design Your Space</h2>
         <div class="design-container">
             <div class="design-controls reveal fade-left">
                 <div class="design-section">
-                    <h3>Choose Room Type</h3>
+                    <h3 data-translate="design.room.title">Choose Room Type</h3>
                     <div class="room-types">
-                        <button class="room-btn active" data-room="living">Living Room</button>
-                        <button class="room-btn" data-room="bedroom">Bedroom</button>
-                        <button class="room-btn" data-room="kitchen">Kitchen</button>
-                        <button class="room-btn" data-room="office">Office</button>
+                        <button class="room-btn active" data-room="living" data-translate="design.room.living">Living Room</button>
+                        <button class="room-btn" data-room="bedroom" data-translate="design.room.bedroom">Bedroom</button>
+                        <button class="room-btn" data-room="kitchen" data-translate="design.room.kitchen">Kitchen</button>
+                        <button class="room-btn" data-room="office" data-translate="design.room.office">Office</button>
+                        <button class="room-btn" data-room="bathroom" data-translate="design.room.bathroom">Bathroom</button>
+                        <button class="room-btn" data-room="dining" data-translate="design.room.dining">Dining Room</button>
                     </div>
                 </div>
 
                 <div class="design-section">
-                    <h3>Select Color Scheme</h3>
+                    <h3 data-translate="design.style.title">Interior Style</h3>
+                    <div class="style-options">
+                        <button class="style-btn active" data-style="modern" data-translate="design.style.modern">Modern</button>
+                        <button class="style-btn" data-style="minimalist" data-translate="design.style.minimalist">Minimalist</button>
+                        <button class="style-btn" data-style="industrial" data-translate="design.style.industrial">Industrial</button>
+                        <button class="style-btn" data-style="scandinavian" data-translate="design.style.scandinavian">Scandinavian</button>
+                        <button class="style-btn" data-style="traditional" data-translate="design.style.traditional">Traditional</button>
+                        <button class="style-btn" data-style="contemporary" data-translate="design.style.contemporary">Contemporary</button>
+                    </div>
+                </div>
+
+                <div class="design-section">
+                    <h3 data-translate="design.color.title">Select Color Scheme</h3>
                     <div class="color-schemes">
                         <div class="color-scheme scheme-modern active" data-scheme="modern"></div>
                         <div class="color-scheme scheme-warm" data-scheme="warm"></div>
@@ -1917,47 +2345,78 @@
                 </div>
 
                 <div class="design-section">
-                    <h3>Add Furniture</h3>
+                    <h3 data-translate="design.material.title">Materials & Finishes</h3>
+                    <div class="material-options">
+                        <div class="material-item material-wood" data-material="wood" title="Wood"></div>
+                        <div class="material-item material-marble" data-material="marble" title="Marble"></div>
+                        <div class="material-item material-concrete" data-material="concrete" title="Concrete"></div>
+                        <div class="material-item material-fabric" data-material="fabric" title="Fabric"></div>
+                    </div>
+                </div>
+
+                <div class="design-section">
+                    <h3 data-translate="design.lighting.title">Lighting Settings</h3>
+                    <div class="lighting-controls">
+                        <div class="slider-container">
+                            <div class="slider-label">
+                                <span data-translate="design.lighting.brightness">Brightness</span>
+                                <span id="brightness-value">70%</span>
+                            </div>
+                            <input type="range" min="0" max="100" value="70" class="slider" id="brightness-slider">
+                        </div>
+                        <div class="slider-container">
+                            <div class="slider-label">
+                                <span data-translate="design.lighting.warmth">Warmth</span>
+                                <span id="warmth-value">50%</span>
+                            </div>
+                            <input type="range" min="0" max="100" value="50" class="slider" id="warmth-slider">
+                        </div>
+                    </div>
+                </div>
+
+                <div class="design-section">
+                    <h3 data-translate="design.furniture.title">Add Furniture</h3>
                     <div class="furniture-options">
                         <div class="furniture-item" data-furniture="sofa">
                             <i>🛋️</i>
-                            <span>Sofa</span>
+                            <span data-translate="design.furniture.sofa">Sofa</span>
                         </div>
                         <div class="furniture-item" data-furniture="table">
                             <i>🪑</i>
-                            <span>Table</span>
+                            <span data-translate="design.furniture.table">Table</span>
                         </div>
                         <div class="furniture-item" data-furniture="storage">
                             <i>🗄️</i>
-                            <span>Storage</span>
+                            <span data-translate="design.furniture.storage">Storage</span>
                         </div>
                         <div class="furniture-item" data-furniture="lighting">
                             <i>💡</i>
-                            <span>Lighting</span>
+                            <span data-translate="design.furniture.lighting">Lighting</span>
                         </div>
                         <div class="furniture-item" data-furniture="decor">
                             <i>🖼️</i>
-                            <span>Decor</span>
+                            <span data-translate="design.furniture.decor">Decor</span>
                         </div>
                         <div class="furniture-item" data-furniture="plants">
                             <i>🪴</i>
-                            <span>Plants</span>
+                            <span data-translate="design.furniture.plants">Plants</span>
                         </div>
                     </div>
                 </div>
 
                 <div class="design-actions">
-                    <button class="design-btn save-design">Save Design</button>
-                    <button class="design-btn reset-design">Reset</button>
+                    <button class="design-btn save-design" data-translate="design.action.save">Save Design</button>
+                    <button class="design-btn share-design" data-translate="design.action.share">Share</button>
+                    <button class="design-btn reset-design" data-translate="design.action.reset">Reset</button>
                 </div>
             </div>
 
             <div class="design-preview reveal fade-right">
                 <div class="preview-header">
-                    <h3>Your Custom Space</h3>
+                    <h3 data-translate="design.preview.title">Your Custom Space</h3>
                     <div class="preview-info">
-                        <span>Room: <strong id="selected-room">Living Room</strong></span>
-                        <span>Style: <strong id="selected-style">Modern</strong></span>
+                        <span data-translate="design.preview.room">Room: <strong id="selected-room">Living Room</strong></span>
+                        <span data-translate="design.preview.style">Style: <strong id="selected-style">Modern</strong></span>
                     </div>
                 </div>
                 <div class="preview-content">
@@ -1979,41 +2438,41 @@
 
     <!-- Process Section -->
     <section id="process" class="process">
-        <h2 class="section-title reveal fade-bottom">Our Process</h2>
+        <h2 class="section-title reveal fade-bottom" data-translate="process.title">Our Process</h2>
         <div class="process-timeline">
             <div class="process-item reveal fade-left">
                 <div class="process-number">1</div>
-                <h3>Planning</h3>
-                <p>Setting performance objectives & developing strategic decisions on how to achieve them</p>
+                <h3 data-translate="process.planning.title">Planning</h3>
+                <p data-translate="process.planning.desc">Setting performance objectives & developing strategic decisions on how to achieve them</p>
             </div>
             <div class="process-item reveal fade-right">
                 <div class="process-number">2</div>
-                <h3>Organizing</h3>
-                <p>Creating structure: Setting tasks, arranging resources & coordinating activities</p>
+                <h3 data-translate="process.organizing.title">Organizing</h3>
+                <p data-translate="process.organizing.desc">Creating structure: Setting tasks, arranging resources & coordinating activities</p>
             </div>
             <div class="process-item reveal fade-left">
                 <div class="process-number">3</div>
-                <h3>Implementing</h3>
-                <p>Executing the plans to meet the set performance objectives with precision</p>
+                <h3 data-translate="process.implementing.title">Implementing</h3>
+                <p data-translate="process.implementing.desc">Executing the plans to meet the set performance objectives with precision</p>
             </div>
             <div class="process-item reveal fade-right">
                 <div class="process-number">4</div>
-                <h3>Controlling</h3>
-                <p>Measuring performance & taking corrective actions to restore specifications</p>
+                <h3 data-translate="process.controlling.title">Controlling</h3>
+                <p data-translate="process.controlling.desc">Measuring performance & taking corrective actions to restore specifications</p>
             </div>
         </div>
     </section>
 
     <!-- Contact Section -->
     <section id="contact" class="contact">
-        <h2 class="section-title reveal fade-bottom">Get In Touch</h2>
+        <h2 class="section-title reveal fade-bottom" data-translate="contact.title">Get In Touch</h2>
         <div class="contact-content">
             <div class="contact-info reveal fade-left">
-                <h3>Let's Create Something <span>Amazing</span> Together</h3>
+                <h3 data-translate="contact.subtitle">Let's Create Something <span>Amazing</span> Together</h3>
                 <div class="contact-item">
                     <i>📍</i>
                     <div>
-                        <p><strong>Address:</strong></p>
+                        <p><strong data-translate="contact.address.label">Address:</strong></p>
                         <p>C-08-34, Centum @ Oasis Corporate Park,<br>
                         Oasis Damansara, No.2 Jalan PJU 1A/2,<br>
                         Ara Damansara, 47301 Petaling Jaya,<br>
@@ -2029,20 +2488,20 @@
                     <p>+60 3-1234 5678</p>
                 </div>
             </div>
-            <form class="contact-form reveal fade-right">
+            <form class="contact-form reveal fade-right" id="contactForm">
                 <div class="form-group">
-                    <input type="text" placeholder="Your Name" required>
+                    <input type="text" placeholder="Your Name" required data-translate-placeholder="contact.form.name">
                 </div>
                 <div class="form-group">
-                    <input type="email" placeholder="Your Email" required>
+                    <input type="email" placeholder="Your Email" required data-translate-placeholder="contact.form.email">
                 </div>
                 <div class="form-group">
-                    <input type="text" placeholder="Subject">
+                    <input type="text" placeholder="Subject" data-translate-placeholder="contact.form.subject">
                 </div>
                 <div class="form-group">
-                    <textarea rows="5" placeholder="Your Message" required></textarea>
+                    <textarea rows="5" placeholder="Your Message" required data-translate-placeholder="contact.form.message"></textarea>
                 </div>
-                <button type="submit" class="submit-btn">Send Message</button>
+                <button type="submit" class="submit-btn" data-translate="contact.form.submit">Send Message</button>
             </form>
         </div>
     </section>
@@ -2051,17 +2510,345 @@
     <footer>
         <div class="footer-content">
             <div class="social-links">
-                <a href="#">f</a>
-                <a href="#">in</a>
-                <a href="#">ig</a>
-                <a href="#">tw</a>
+                <a href="#" aria-label="Facebook">f</a>
+                <a href="#" aria-label="LinkedIn">in</a>
+                <a href="#" aria-label="Instagram">ig</a>
+                <a href="#" aria-label="Twitter">tw</a>
             </div>
-            <p>&copy; 2024 Refit Maintenance Services. All rights reserved.</p>
-            <p>From Concept to Completion</p>
+            <p>&copy; 2024 Refit Maintenance Services. <span data-translate="footer.rights">All rights reserved.</span></p>
+            <p data-translate="footer.tagline">From Concept to Completion</p>
         </div>
     </footer>
 
+    <!-- Admin Settings Button -->
+    <button class="admin-settings" id="adminSettings" aria-label="Admin Settings">⚙️</button>
+
+    <!-- Settings Modal -->
+    <div class="settings-overlay" id="settingsOverlay"></div>
+    <div class="settings-modal" id="settingsModal">
+        <div class="settings-header">
+            <h2 data-translate="settings.title">Backend Settings</h2>
+            <button class="close-settings" id="closeSettings">×</button>
+        </div>
+
+        <div class="settings-section">
+            <h3 data-translate="settings.api.title">API Configuration</h3>
+            <div class="setting-item">
+                <label data-translate="settings.api.endpoint">API Endpoint</label>
+                <input type="text" value="https://api.refitservices.com" style="padding: 10px; border-radius: 10px; border: 2px solid #e0e0e0; width: 200px;">
+            </div>
+            <div class="setting-item">
+                <label data-translate="settings.api.key">API Key</label>
+                <input type="password" value="••••••••••••" style="padding: 10px; border-radius: 10px; border: 2px solid #e0e0e0; width: 200px;">
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <h3 data-translate="settings.features.title">Features Toggle</h3>
+            <div class="setting-item">
+                <label data-translate="settings.features.contact">Contact Form Email Notifications</label>
+                <div class="toggle-switch active" id="emailToggle"></div>
+            </div>
+            <div class="setting-item">
+                <label data-translate="settings.features.design">Design Tool Cloud Save</label>
+                <div class="toggle-switch active" id="cloudSaveToggle"></div>
+            </div>
+            <div class="setting-item">
+                <label data-translate="settings.features.portfolio">Dynamic Portfolio Loading</label>
+                <div class="toggle-switch" id="dynamicPortfolioToggle"></div>
+            </div>
+            <div class="setting-item">
+                <label data-translate="settings.features.analytics">Analytics Tracking</label>
+                <div class="toggle-switch active" id="analyticsToggle"></div>
+            </div>
+        </div>
+
+        <div class="settings-section">
+            <h3 data-translate="settings.admin.title">Admin Access</h3>
+            <div class="setting-item">
+                <label data-translate="settings.admin.cms">CMS Access</label>
+                <button style="padding: 10px 20px; background: var(--gradient); color: white; border: none; border-radius: 15px; cursor: pointer;">Open CMS</button>
+            </div>
+            <div class="setting-item">
+                <label data-translate="settings.admin.backup">Database Backup</label>
+                <button style="padding: 10px 20px; background: #4CAF50; color: white; border: none; border-radius: 15px; cursor: pointer;">Backup Now</button>
+            </div>
+        </div>
+    </div>
+
     <script>
+        // Translations object
+        const translations = {
+            en: {
+                nav: {
+                    home: "Home",
+                    services: "Services",
+                    about: "About",
+                    portfolio: "Portfolio",
+                    design: "Design",
+                    process: "Process",
+                    contact: "Get Quote"
+                },
+                hero: {
+                    from: "From",
+                    concept: "Concept",
+                    to: "to",
+                    completion: "Completion",
+                    subtitle: "Transforming Spaces, Creating Excellence",
+                    cta: "Explore Our Work"
+                },
+                services: {
+                    title: "What We Do",
+                    maintenance: {
+                        title: "Maintenance Services",
+                        desc: "Professional maintenance solutions to keep your spaces functioning perfectly and looking their best year-round."
+                    },
+                    construction: {
+                        title: "Interior Construction",
+                        desc: "Expert architectural construction and renovation services that transform your vision into stunning reality."
+                    },
+                    design: {
+                        title: "Design & Illustration",
+                        desc: "Creative interior design and 3D illustration services to visualize and plan your perfect space with precision."
+                    }
+                },
+                about: {
+                    title: "About",
+                    mission: "<strong>Our Mission:</strong> To provide responsible and professional quality services as well as components and materials sale, lease, exchange and building management by constantly improving and ensuring business growth.",
+                    vision: "<strong>Our Vision:</strong> To gain customer trust and become a leading and competitive business aviation service provider in East and West Malaysia by offering innovative micro solutions team work management.",
+                    excellence: "Excellence in Every Detail"
+                },
+                values: {
+                    passion: {
+                        title: "Passion",
+                        desc: "Continuous learning and innovation"
+                    },
+                    responsibility: {
+                        title: "Responsibility",
+                        desc: "Honest and respectful service"
+                    },
+                    innovative: {
+                        title: "Innovative",
+                        desc: "Constant improvement"
+                    },
+                    respect: {
+                        title: "Respect",
+                        desc: "Valuing relationships"
+                    }
+                },
+                portfolio: {
+                    title: "Our Portfolio",
+                    filter: {
+                        all: "All Projects",
+                        commercial: "Commercial",
+                        residential: "Residential",
+                        maintenance: "Maintenance"
+                    }
+                },
+                design: {
+                    title: "Design Your Space",
+                    room: {
+                        title: "Choose Room Type",
+                        living: "Living Room",
+                        bedroom: "Bedroom",
+                        kitchen: "Kitchen",
+                        office: "Office",
+                        bathroom: "Bathroom",
+                        dining: "Dining Room"
+                    },
+                    style: {
+                        title: "Interior Style",
+                        modern: "Modern",
+                        minimalist: "Minimalist",
+                        industrial: "Industrial",
+                        scandinavian: "Scandinavian",
+                        traditional: "Traditional",
+                        contemporary: "Contemporary"
+                    },
+                    preview: {
+                        title: "Your Custom Space",
+                        room: "Room:",
+                        style: "Style:"
+                    },
+                    action: {
+                        save: "Save Design",
+                        share: "Share",
+                        reset: "Reset"
+                    }
+                },
+                process: {
+                    title: "Our Process",
+                    planning: {
+                        title: "Planning",
+                        desc: "Setting performance objectives & developing strategic decisions on how to achieve them"
+                    },
+                    organizing: {
+                        title: "Organizing",
+                        desc: "Creating structure: Setting tasks, arranging resources & coordinating activities"
+                    },
+                    implementing: {
+                        title: "Implementing",
+                        desc: "Executing the plans to meet the set performance objectives with precision"
+                    },
+                    controlling: {
+                        title: "Controlling",
+                        desc: "Measuring performance & taking corrective actions to restore specifications"
+                    }
+                },
+                contact: {
+                    title: "Get In Touch",
+                    subtitle: "Let's Create Something <span>Amazing</span> Together",
+                    address: {
+                        label: "Address:"
+                    },
+                    form: {
+                        name: "Your Name",
+                        email: "Your Email",
+                        subject: "Subject",
+                        message: "Your Message",
+                        submit: "Send Message"
+                    }
+                },
+                footer: {
+                    rights: "All rights reserved.",
+                    tagline: "From Concept to Completion"
+                },
+                badge: {
+                    interactive: "Interactive Mode ✨"
+                }
+            },
+            ms: {
+                nav: {
+                    home: "Laman Utama",
+                    services: "Perkhidmatan",
+                    about: "Tentang Kami",
+                    portfolio: "Portfolio",
+                    design: "Reka Bentuk",
+                    process: "Proses",
+                    contact: "Dapatkan Sebut Harga"
+                },
+                hero: {
+                    from: "Dari",
+                    concept: "Konsep",
+                    to: "ke",
+                    completion: "Penyiapan",
+                    subtitle: "Mengubah Ruang, Mencipta Kecemerlangan",
+                    cta: "Terokai Kerja Kami"
+                },
+                services: {
+                    title: "Apa Yang Kami Lakukan",
+                    maintenance: {
+                        title: "Perkhidmatan Penyelenggaraan",
+                        desc: "Penyelesaian penyelenggaraan profesional untuk memastikan ruang anda berfungsi dengan sempurna dan kelihatan terbaik sepanjang tahun."
+                    },
+                    construction: {
+                        title: "Pembinaan Dalaman",
+                        desc: "Perkhidmatan pembinaan dan pengubahsuaian seni bina pakar yang mengubah visi anda menjadi realiti yang menakjubkan."
+                    },
+                    design: {
+                        title: "Reka Bentuk & Ilustrasi",
+                        desc: "Perkhidmatan reka bentuk dalaman kreatif dan ilustrasi 3D untuk memvisualisasikan dan merancang ruang sempurna anda dengan tepat."
+                    }
+                },
+                about: {
+                    title: "Tentang",
+                    mission: "<strong>Misi Kami:</strong> Menyediakan perkhidmatan berkualiti yang bertanggungjawab dan profesional serta jualan, pajakan, pertukaran komponen dan bahan serta pengurusan bangunan dengan sentiasa menambah baik dan memastikan pertumbuhan perniagaan.",
+                    vision: "<strong>Visi Kami:</strong> Mendapat kepercayaan pelanggan dan menjadi penyedia perkhidmatan penerbangan perniagaan yang terkemuka dan berdaya saing di Malaysia Timur dan Barat dengan menawarkan pengurusan kerja berpasukan penyelesaian mikro yang inovatif.",
+                    excellence: "Kecemerlangan dalam Setiap Butiran"
+                },
+                values: {
+                    passion: {
+                        title: "Keghairahan",
+                        desc: "Pembelajaran berterusan dan inovasi"
+                    },
+                    responsibility: {
+                        title: "Tanggungjawab",
+                        desc: "Perkhidmatan yang jujur dan penuh hormat"
+                    },
+                    innovative: {
+                        title: "Inovatif",
+                        desc: "Penambahbaikan berterusan"
+                    },
+                    respect: {
+                        title: "Hormat",
+                        desc: "Menghargai perhubungan"
+                    }
+                },
+                // ... continue with more translations
+                badge: {
+                    interactive: "Mod Interaktif ✨"
+                }
+            },
+            zh: {
+                nav: {
+                    home: "首页",
+                    services: "服务",
+                    about: "关于我们",
+                    portfolio: "作品集",
+                    design: "设计",
+                    process: "流程",
+                    contact: "获取报价"
+                },
+                hero: {
+                    from: "从",
+                    concept: "概念",
+                    to: "到",
+                    completion: "完成",
+                    subtitle: "改造空间，创造卓越",
+                    cta: "探索我们的作品"
+                },
+                // ... continue with more translations
+                badge: {
+                    interactive: "互动模式 ✨"
+                }
+            }
+        };
+
+        // Language switching functionality
+        let currentLang = 'en';
+        
+        function translatePage(lang) {
+            currentLang = lang;
+            const elements = document.querySelectorAll('[data-translate]');
+            
+            elements.forEach(element => {
+                const keys = element.getAttribute('data-translate').split('.');
+                let translation = translations[lang];
+                
+                for (const key of keys) {
+                    translation = translation[key];
+                }
+                
+                if (element.tagName === 'INPUT' || element.tagName === 'TEXTAREA') {
+                    element.placeholder = translation;
+                } else {
+                    element.innerHTML = translation;
+                }
+            });
+
+            // Update placeholders
+            const placeholderElements = document.querySelectorAll('[data-translate-placeholder]');
+            placeholderElements.forEach(element => {
+                const keys = element.getAttribute('data-translate-placeholder').split('.');
+                let translation = translations[lang];
+                
+                for (const key of keys) {
+                    translation = translation[key];
+                }
+                
+                element.placeholder = translation;
+            });
+        }
+
+        // Language button event listeners
+        document.querySelectorAll('.lang-btn').forEach(btn => {
+            btn.addEventListener('click', () => {
+                document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                translatePage(btn.getAttribute('data-lang'));
+            });
+        });
+
         // Enhanced Loading Screen
         window.addEventListener('load', () => {
             setTimeout(() => {
@@ -2104,7 +2891,7 @@
         animateCursor();
 
         // Cursor hover effects
-        const hoverElements = document.querySelectorAll('a, button, .service-card, .portfolio-item, .value-item, .contact-item, input, textarea');
+        const hoverElements = document.querySelectorAll('a, button, .service-card, .portfolio-item, .value-item, .contact-item, input, textarea, .room-btn, .style-btn, .color-scheme, .material-item, .furniture-item');
         hoverElements.forEach(element => {
             element.addEventListener('mouseenter', () => {
                 cursor.classList.add('hover');
@@ -2257,8 +3044,8 @@
         window.addEventListener('scroll', reveal);
         reveal();
 
-        // Enhanced Form submission with animation
-        document.querySelector('.contact-form').addEventListener('submit', (e) => {
+        // Enhanced Form submission with backend integration
+        document.querySelector('.contact-form').addEventListener('submit', async (e) => {
             e.preventDefault();
             
             const btn = e.target.querySelector('.submit-btn');
@@ -2269,17 +3056,40 @@
             btn.textContent = '✓';
             btn.style.background = 'linear-gradient(135deg, #4CAF50, #45a049)';
             
-            setTimeout(() => {
-                btn.textContent = 'Message Sent!';
+            // Collect form data
+            const formData = new FormData(e.target);
+            const data = Object.fromEntries(formData);
+            
+            try {
+                // Simulate API call (replace with actual backend endpoint)
+                const response = await fetch('/api/contact', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify(data)
+                });
                 
                 setTimeout(() => {
-                    alert('Thank you for your message! We will get back to you soon.');
-                    e.target.reset();
+                    btn.textContent = 'Message Sent!';
+                    
+                    setTimeout(() => {
+                        alert('Thank you for your message! We will get back to you soon.');
+                        e.target.reset();
+                        btn.textContent = originalText;
+                        btn.style.background = '';
+                        btn.style.width = '';
+                    }, 1500);
+                }, 500);
+            } catch (error) {
+                console.error('Error:', error);
+                btn.textContent = 'Error';
+                setTimeout(() => {
                     btn.textContent = originalText;
                     btn.style.background = '';
                     btn.style.width = '';
-                }, 1500);
-            }, 500);
+                }, 2000);
+            }
         });
 
         // Enhanced Parallax effect
@@ -2301,31 +3111,6 @@
                 });
             }
         });
-
-        // Smooth scroll for mouse wheel
-        function smoothScroll() {
-            const scrollSpeed = 0.8;
-            let currentScroll = window.pageYOffset;
-            let targetScroll = currentScroll;
-
-            window.addEventListener('wheel', (e) => {
-                e.preventDefault();
-                targetScroll += e.deltaY;
-                targetScroll = Math.max(0, Math.min(targetScroll, document.body.scrollHeight - window.innerHeight));
-            }, { passive: false });
-
-            function animate() {
-                currentScroll += (targetScroll - currentScroll) * scrollSpeed;
-                window.scrollTo(0, currentScroll);
-                requestAnimationFrame(animate);
-            }
-            animate();
-        }
-
-        // Enable smooth scroll on desktop only
-        if (window.innerWidth > 768) {
-            smoothScroll();
-        }
 
         // Magnetic buttons effect
         const magneticElements = document.querySelectorAll('.cta-button, .submit-btn, .filter-btn');
@@ -2391,15 +3176,24 @@
         `;
         document.head.appendChild(style);
 
-        // Design Yourself Functionality
+        // Enhanced Design Yourself Functionality
         const designSection = {
             selectedRoom: 'living',
+            selectedStyle: 'modern',
             selectedScheme: 'modern',
+            selectedMaterials: [],
             selectedFurniture: [],
+            lightingSettings: {
+                brightness: 70,
+                warmth: 50
+            },
             
             init() {
                 this.setupRoomButtons();
+                this.setupStyleButtons();
                 this.setupColorSchemes();
+                this.setupMaterials();
+                this.setupLighting();
                 this.setupFurniture();
                 this.setupActions();
                 this.updatePreview();
@@ -2412,6 +3206,18 @@
                         roomBtns.forEach(b => b.classList.remove('active'));
                         btn.classList.add('active');
                         this.selectedRoom = btn.dataset.room;
+                        this.updatePreview();
+                    });
+                });
+            },
+
+            setupStyleButtons() {
+                const styleBtns = document.querySelectorAll('.style-btn');
+                styleBtns.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        styleBtns.forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        this.selectedStyle = btn.dataset.style;
                         this.updatePreview();
                     });
                 });
@@ -2439,6 +3245,50 @@
                         this.updatePreview();
                     });
                 });
+            },
+
+            setupMaterials() {
+                const materialItems = document.querySelectorAll('.material-item');
+                materialItems.forEach(item => {
+                    item.addEventListener('click', () => {
+                        item.classList.toggle('active');
+                        const material = item.dataset.material;
+                        
+                        if (item.classList.contains('active')) {
+                            this.selectedMaterials.push(material);
+                        } else {
+                            this.selectedMaterials = this.selectedMaterials.filter(m => m !== material);
+                        }
+                    });
+                });
+            },
+
+            setupLighting() {
+                const brightnessSlider = document.getElementById('brightness-slider');
+                const warmthSlider = document.getElementById('warmth-slider');
+                const brightnessValue = document.getElementById('brightness-value');
+                const warmthValue = document.getElementById('warmth-value');
+
+                brightnessSlider.addEventListener('input', (e) => {
+                    this.lightingSettings.brightness = e.target.value;
+                    brightnessValue.textContent = `${e.target.value}%`;
+                    this.updateLighting();
+                });
+
+                warmthSlider.addEventListener('input', (e) => {
+                    this.lightingSettings.warmth = e.target.value;
+                    warmthValue.textContent = `${e.target.value}%`;
+                    this.updateLighting();
+                });
+            },
+
+            updateLighting() {
+                const roomBase = document.querySelector('.room-base');
+                const brightness = this.lightingSettings.brightness / 100;
+                const warmth = this.lightingSettings.warmth / 100;
+                
+                // Apply lighting effects
+                roomBase.style.filter = `brightness(${0.5 + brightness * 0.7}) sepia(${warmth * 0.3})`;
             },
 
             setupFurniture() {
@@ -2503,74 +3353,204 @@
 
             setupActions() {
                 const saveBtn = document.querySelector('.save-design');
+                const shareBtn = document.querySelector('.share-design');
                 const resetBtn = document.querySelector('.reset-design');
 
                 saveBtn.addEventListener('click', () => {
                     const design = {
                         room: this.selectedRoom,
+                        style: this.selectedStyle,
                         scheme: this.selectedScheme,
+                        materials: this.selectedMaterials,
                         furniture: this.selectedFurniture,
+                        lighting: this.lightingSettings,
                         timestamp: new Date().toISOString()
                     };
 
-                    // Simulate saving
-                    console.log('Saving design:', design);
-                    
-                    // Show success message
-                    const originalText = saveBtn.textContent;
+                    // Save to backend
+                    this.saveDesign(design);
+                });
+
+                shareBtn.addEventListener('click', () => {
+                    const design = {
+                        room: this.selectedRoom,
+                        style: this.selectedStyle,
+                        scheme: this.selectedScheme,
+                        materials: this.selectedMaterials,
+                        furniture: this.selectedFurniture,
+                        lighting: this.lightingSettings
+                    };
+
+                    this.shareDesign(design);
+                });
+
+                resetBtn.addEventListener('click', () => {
+                    if (confirm('Are you sure you want to reset your design?')) {
+                        this.resetDesign();
+                    }
+                });
+            },
+
+            async saveDesign(design) {
+                const saveBtn = document.querySelector('.save-design');
+                const originalText = saveBtn.textContent;
+                
+                try {
+                    // Show loading state
+                    saveBtn.textContent = 'Saving...';
+                    saveBtn.disabled = true;
+
+                    // Simulate API call (replace with actual backend endpoint)
+                    const response = await fetch('/api/designs', {
+                        method: 'POST',
+                        headers: {
+                            'Content-Type': 'application/json',
+                        },
+                        body: JSON.stringify(design)
+                    });
+
+                    // Success animation
                     saveBtn.textContent = 'Design Saved! ✓';
                     saveBtn.style.background = 'linear-gradient(135deg, #27ae60, #2ecc71)';
                     
                     setTimeout(() => {
                         saveBtn.textContent = originalText;
                         saveBtn.style.background = '';
+                        saveBtn.disabled = false;
                         
-                        // Download design as JSON
-                        const dataStr = JSON.stringify(design, null, 2);
-                        const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-                        
-                        const exportFileDefaultName = `refit-design-${this.selectedRoom}-${Date.now()}.json`;
-                        
-                        const linkElement = document.createElement('a');
-                        linkElement.setAttribute('href', dataUri);
-                        linkElement.setAttribute('download', exportFileDefaultName);
-                        linkElement.click();
+                        // Also offer to download design
+                        const download = confirm('Design saved! Would you like to download a copy?');
+                        if (download) {
+                            this.downloadDesign(design);
+                        }
                     }, 2000);
+                } catch (error) {
+                    console.error('Error saving design:', error);
+                    saveBtn.textContent = 'Save Failed';
+                    saveBtn.style.background = '#e74c3c';
+                    
+                    setTimeout(() => {
+                        saveBtn.textContent = originalText;
+                        saveBtn.style.background = '';
+                        saveBtn.disabled = false;
+                    }, 2000);
+                }
+            },
+
+            shareDesign(design) {
+                // Generate shareable link
+                const shareData = btoa(JSON.stringify(design));
+                const shareUrl = `${window.location.origin}?design=${shareData}`;
+                
+                // Create share modal
+                const modal = document.createElement('div');
+                modal.style.cssText = `
+                    position: fixed;
+                    top: 50%;
+                    left: 50%;
+                    transform: translate(-50%, -50%);
+                    background: white;
+                    padding: 40px;
+                    border-radius: 20px;
+                    box-shadow: 0 30px 60px rgba(0,0,0,0.3);
+                    z-index: 1000;
+                    max-width: 500px;
+                    width: 90%;
+                `;
+                
+                modal.innerHTML = `
+                    <h3 style="margin-bottom: 20px; color: var(--dark-gray);">Share Your Design</h3>
+                    <input type="text" value="${shareUrl}" readonly style="width: 100%; padding: 15px; border: 2px solid #e0e0e0; border-radius: 10px; margin-bottom: 20px;">
+                    <div style="display: flex; gap: 15px;">
+                        <button onclick="navigator.clipboard.writeText('${shareUrl}'); this.textContent='Copied!'; setTimeout(() => this.textContent='Copy Link', 2000)" style="flex: 1; padding: 15px; background: var(--gradient); color: white; border: none; border-radius: 10px; cursor: pointer;">Copy Link</button>
+                        <button onclick="this.parentElement.parentElement.remove(); document.querySelector('.modal-overlay').remove()" style="flex: 1; padding: 15px; background: #f0f0f0; border: none; border-radius: 10px; cursor: pointer;">Close</button>
+                    </div>
+                `;
+                
+                // Create overlay
+                const overlay = document.createElement('div');
+                overlay.className = 'modal-overlay';
+                overlay.style.cssText = `
+                    position: fixed;
+                    top: 0;
+                    left: 0;
+                    width: 100%;
+                    height: 100%;
+                    background: rgba(0,0,0,0.5);
+                    z-index: 999;
+                `;
+                overlay.onclick = () => {
+                    modal.remove();
+                    overlay.remove();
+                };
+                
+                document.body.appendChild(overlay);
+                document.body.appendChild(modal);
+            },
+
+            downloadDesign(design) {
+                const dataStr = JSON.stringify(design, null, 2);
+                const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+                
+                const exportFileDefaultName = `refit-design-${this.selectedRoom}-${Date.now()}.json`;
+                
+                const linkElement = document.createElement('a');
+                linkElement.setAttribute('href', dataUri);
+                linkElement.setAttribute('download', exportFileDefaultName);
+                linkElement.click();
+            },
+
+            resetDesign() {
+                // Reset selections
+                this.selectedRoom = 'living';
+                this.selectedStyle = 'modern';
+                this.selectedScheme = 'modern';
+                this.selectedMaterials = [];
+                this.selectedFurniture = [];
+                this.lightingSettings = {
+                    brightness: 70,
+                    warmth: 50
+                };
+
+                // Reset UI
+                document.querySelectorAll('.room-btn').forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.room === 'living');
                 });
 
-                resetBtn.addEventListener('click', () => {
-                    if (confirm('Are you sure you want to reset your design?')) {
-                        // Reset selections
-                        this.selectedRoom = 'living';
-                        this.selectedScheme = 'modern';
-                        this.selectedFurniture = [];
-
-                        // Reset UI
-                        document.querySelectorAll('.room-btn').forEach(btn => {
-                            btn.classList.toggle('active', btn.dataset.room === 'living');
-                        });
-
-                        document.querySelectorAll('.color-scheme').forEach(scheme => {
-                            scheme.classList.toggle('active', scheme.dataset.scheme === 'modern');
-                        });
-
-                        document.querySelectorAll('.furniture-item').forEach(item => {
-                            item.classList.remove('active');
-                        });
-
-                        document.querySelectorAll('.furniture-placeholder').forEach(slot => {
-                            slot.textContent = '+';
-                            slot.classList.remove('filled');
-                            delete slot.dataset.furniture;
-                        });
-
-                        // Reset room walls
-                        const roomWalls = document.querySelector('.room-walls');
-                        roomWalls.style.background = 'linear-gradient(135deg, #2c3e50 0%, #34495e 50%, #95a5a6 100%)';
-
-                        this.updatePreview();
-                    }
+                document.querySelectorAll('.style-btn').forEach(btn => {
+                    btn.classList.toggle('active', btn.dataset.style === 'modern');
                 });
+
+                document.querySelectorAll('.color-scheme').forEach(scheme => {
+                    scheme.classList.toggle('active', scheme.dataset.scheme === 'modern');
+                });
+
+                document.querySelectorAll('.material-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+
+                document.querySelectorAll('.furniture-item').forEach(item => {
+                    item.classList.remove('active');
+                });
+
+                document.querySelectorAll('.furniture-placeholder').forEach(slot => {
+                    slot.textContent = '+';
+                    slot.classList.remove('filled');
+                    delete slot.dataset.furniture;
+                });
+
+                // Reset sliders
+                document.getElementById('brightness-slider').value = 70;
+                document.getElementById('warmth-slider').value = 50;
+                document.getElementById('brightness-value').textContent = '70%';
+                document.getElementById('warmth-value').textContent = '50%';
+
+                // Reset room walls
+                const roomWalls = document.querySelector('.room-walls');
+                roomWalls.style.background = 'linear-gradient(135deg, #2c3e50 0%, #34495e 50%, #95a5a6 100%)';
+
+                this.updatePreview();
+                this.updateLighting();
             },
 
             updatePreview() {
@@ -2581,18 +3561,22 @@
                     living: 'Living Room',
                     bedroom: 'Bedroom',
                     kitchen: 'Kitchen',
-                    office: 'Office'
+                    office: 'Office',
+                    bathroom: 'Bathroom',
+                    dining: 'Dining Room'
                 };
 
                 const styleNames = {
                     modern: 'Modern',
-                    warm: 'Warm & Cozy',
-                    nature: 'Natural',
-                    luxury: 'Luxury'
+                    minimalist: 'Minimalist',
+                    industrial: 'Industrial',
+                    scandinavian: 'Scandinavian',
+                    traditional: 'Traditional',
+                    contemporary: 'Contemporary'
                 };
 
                 roomText.textContent = roomNames[this.selectedRoom];
-                styleText.textContent = styleNames[this.selectedScheme];
+                styleText.textContent = styleNames[this.selectedStyle];
 
                 // Animate preview update
                 const visualization = document.querySelector('.room-visualization');
@@ -2607,6 +3591,153 @@
         if (document.querySelector('.design-yourself')) {
             designSection.init();
         }
+
+        // Load design from URL if shared
+        const urlParams = new URLSearchParams(window.location.search);
+        const sharedDesign = urlParams.get('design');
+        if (sharedDesign) {
+            try {
+                const design = JSON.parse(atob(sharedDesign));
+                // Apply shared design
+                setTimeout(() => {
+                    // Apply room
+                    document.querySelector(`.room-btn[data-room="${design.room}"]`)?.click();
+                    // Apply style
+                    document.querySelector(`.style-btn[data-style="${design.style}"]`)?.click();
+                    // Apply color scheme
+                    document.querySelector(`.color-scheme[data-scheme="${design.scheme}"]`)?.click();
+                    // Apply materials
+                    design.materials?.forEach(material => {
+                        document.querySelector(`.material-item[data-material="${material}"]`)?.click();
+                    });
+                    // Apply furniture
+                    design.furniture?.forEach(furniture => {
+                        document.querySelector(`.furniture-item[data-furniture="${furniture}"]`)?.click();
+                    });
+                    // Apply lighting
+                    if (design.lighting) {
+                        document.getElementById('brightness-slider').value = design.lighting.brightness;
+                        document.getElementById('warmth-slider').value = design.lighting.warmth;
+                        document.getElementById('brightness-value').textContent = `${design.lighting.brightness}%`;
+                        document.getElementById('warmth-value').textContent = `${design.lighting.warmth}%`;
+                    }
+                }, 1000);
+            } catch (error) {
+                console.error('Error loading shared design:', error);
+            }
+        }
+
+        // Admin Settings functionality
+        const adminSettings = document.getElementById('adminSettings');
+        const settingsModal = document.getElementById('settingsModal');
+        const settingsOverlay = document.getElementById('settingsOverlay');
+        const closeSettings = document.getElementById('closeSettings');
+
+        adminSettings.addEventListener('click', () => {
+            settingsModal.classList.add('active');
+            settingsOverlay.classList.add('active');
+        });
+
+        closeSettings.addEventListener('click', () => {
+            settingsModal.classList.remove('active');
+            settingsOverlay.classList.remove('active');
+        });
+
+        settingsOverlay.addEventListener('click', () => {
+            settingsModal.classList.remove('active');
+            settingsOverlay.classList.remove('active');
+        });
+
+        // Toggle switches
+        document.querySelectorAll('.toggle-switch').forEach(toggle => {
+            toggle.addEventListener('click', () => {
+                toggle.classList.toggle('active');
+                // Here you would typically save the setting to backend
+                const setting = toggle.id;
+                const isActive = toggle.classList.contains('active');
+                console.log(`Setting ${setting} is now ${isActive ? 'enabled' : 'disabled'}`);
+            });
+        });
+
+        // Interactive badge animation
+        const interactiveBadge = document.querySelector('.interactive-badge');
+        let badgeTimeout;
+
+        function showInteractiveBadge() {
+            interactiveBadge.style.transform = 'translateX(0)';
+            clearTimeout(badgeTimeout);
+            badgeTimeout = setTimeout(() => {
+                interactiveBadge.style.transform = 'translateX(-120%)';
+            }, 5000);
+        }
+
+        // Show badge initially
+        setTimeout(showInteractiveBadge, 3000);
+
+        // Show badge on hover over interactive elements
+        document.querySelectorAll('.service-card, .portfolio-item, .value-item').forEach(element => {
+            element.addEventListener('mouseenter', showInteractiveBadge);
+        });
+
+        // Dynamic portfolio loading simulation
+        function loadMorePortfolio() {
+            const portfolioGrid = document.querySelector('.portfolio-grid');
+            const newItems = [
+                { title: 'Modern Villa', desc: 'Luxury Residential Project', category: 'residential' },
+                { title: 'Tech Startup Office', desc: 'Creative Workspace Design', category: 'commercial' },
+                { title: 'Boutique Hotel', desc: 'Hospitality Interior Design', category: 'commercial' }
+            ];
+
+            newItems.forEach((item, index) => {
+                setTimeout(() => {
+                    const portfolioItem = document.createElement('div');
+                    portfolioItem.className = 'portfolio-item reveal scale-up';
+                    portfolioItem.setAttribute('data-category', item.category);
+                    portfolioItem.innerHTML = `
+                        <div class="portfolio-overlay">
+                            <h3>${item.title}</h3>
+                            <p>${item.desc}</p>
+                        </div>
+                    `;
+                    portfolioGrid.appendChild(portfolioItem);
+                    
+                    // Trigger reveal animation
+                    setTimeout(() => {
+                        portfolioItem.classList.add('active');
+                    }, 100);
+                }, index * 200);
+            });
+        }
+
+        // Add load more button functionality (if needed)
+        // loadMorePortfolio();
+
+        // Performance optimization - Lazy load images
+        const imageObserver = new IntersectionObserver((entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    const img = entry.target;
+                    img.src = img.dataset.src;
+                    img.classList.add('loaded');
+                    observer.unobserve(img);
+                }
+            });
+        });
+
+        // Observe all images with data-src
+        document.querySelectorAll('img[data-src]').forEach(img => {
+            imageObserver.observe(img);
+        });
+
+        // Add console styling for development
+        console.log(
+            '%cRefit Maintenance Services',
+            'color: #E8A5B7; font-size: 24px; font-weight: bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.2);'
+        );
+        console.log(
+            '%cFrom Concept to Completion',
+            'color: #D47F99; font-size: 16px; font-style: italic;'
+        );
     </script>
 </body>
 </html>
