@@ -59,6 +59,11 @@
             --white: #FFFFFF;
             --gradient: linear-gradient(135deg, #D47F99 0%, #E8A5B7 50%, #F5E6EA 100%);
             --gradient-hover: linear-gradient(135deg, #C05478 0%, #D47F99 50%, #E8A5B7 100%);
+            --shadow-sm: 0 2px 4px rgba(0,0,0,0.05);
+            --shadow-md: 0 5px 20px rgba(0,0,0,0.08);
+            --shadow-lg: 0 15px 40px rgba(0,0,0,0.12);
+            --shadow-xl: 0 30px 80px rgba(0,0,0,0.15);
+            --transition-smooth: cubic-bezier(0.23, 1, 0.32, 1);
         }
 
         ::selection {
@@ -143,6 +148,12 @@
             z-index: 9998;
             mix-blend-mode: difference;
             backdrop-filter: invert(1);
+            animation: cursorPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes cursorPulse {
+            0%, 100% { transform: scale(1); }
+            50% { transform: scale(1.1); }
         }
 
         .cursor-follower {
@@ -155,11 +166,51 @@
             transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
             z-index: 9997;
             backdrop-filter: blur(5px);
+            animation: cursorRotate 10s linear infinite;
+        }
+
+        @keyframes cursorRotate {
+            0% { transform: rotate(0deg) scale(1); }
+            50% { transform: rotate(180deg) scale(1.2); }
+            100% { transform: rotate(360deg) scale(1); }
         }
 
         .cursor.hover {
             transform: scale(1.5);
             background: rgba(232, 165, 183, 0.3);
+            border-color: var(--white);
+            box-shadow: 0 0 20px rgba(232, 165, 183, 0.6);
+        }
+
+        .cursor.hover::before {
+            content: '';
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            border: 2px solid var(--primary-pink);
+            border-radius: 50%;
+            animation: cursorRipple 0.6s ease-out;
+        }
+
+        @keyframes cursorRipple {
+            0% {
+                transform: scale(0);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(2);
+                opacity: 0;
+            }
+        }
+
+        .cursor.click {
+            animation: cursorClick 0.5s ease-out;
+        }
+
+        @keyframes cursorClick {
+            0% { transform: scale(1); }
+            50% { transform: scale(0.7); }
+            100% { transform: scale(1); }
         }
 
         /* Premium Loading Screen */
@@ -176,12 +227,39 @@
             align-items: center;
             z-index: 9999;
             transition: all 0.8s cubic-bezier(0.4, 0, 0.2, 1);
+            overflow: hidden;
+        }
+
+        .loader-wrapper::before,
+        .loader-wrapper::after {
+            content: '';
+            position: absolute;
+            width: 200%;
+            height: 200%;
+            background: radial-gradient(circle, rgba(255,255,255,0.1) 0%, transparent 70%);
+            animation: ripple 4s linear infinite;
+        }
+
+        .loader-wrapper::after {
+            animation-delay: 2s;
+        }
+
+        @keyframes ripple {
+            0% {
+                transform: scale(0) translate(-50%, -50%);
+                opacity: 1;
+            }
+            100% {
+                transform: scale(2) translate(-50%, -50%);
+                opacity: 0;
+            }
         }
 
         .loader-wrapper.loaded {
             opacity: 0;
             visibility: hidden;
             transform: scale(1.1);
+            filter: blur(20px);
         }
 
         .loader-logo {
@@ -191,34 +269,63 @@
             margin-bottom: 3rem;
             letter-spacing: 10px;
             animation: floatGlow 3s ease-in-out infinite;
+            position: relative;
+            z-index: 1;
+        }
+
+        .loader-logo::before {
+            content: 'refit';
+            position: absolute;
+            top: 0;
+            left: 0;
+            color: transparent;
+            -webkit-text-stroke: 1px rgba(255,255,255,0.3);
+            animation: floatGlow 3s ease-in-out infinite reverse;
+            z-index: -1;
         }
 
         @keyframes floatGlow {
             0%, 100% { 
-                transform: translateY(0); 
+                transform: translateY(0) scale(1); 
                 text-shadow: 0 0 30px rgba(255,255,255,0.5);
+                filter: brightness(1);
             }
             50% { 
-                transform: translateY(-20px); 
+                transform: translateY(-20px) scale(1.05); 
                 text-shadow: 0 20px 40px rgba(255,255,255,0.8);
+                filter: brightness(1.2);
             }
         }
 
         .loader-bar {
             width: 300px;
-            height: 2px;
-            background: rgba(255, 255, 255, 0.2);
-            border-radius: 2px;
+            height: 3px;
+            background: rgba(255, 255, 255, 0.1);
+            border-radius: 3px;
             overflow: hidden;
             position: relative;
+            backdrop-filter: blur(10px);
         }
 
         .loader-progress {
             height: 100%;
-            background: var(--white);
-            border-radius: 2px;
+            background: linear-gradient(90deg, transparent, var(--white), transparent);
+            border-radius: 3px;
             animation: loadProgress 2s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 0 20px rgba(255,255,255,0.8);
+            box-shadow: 0 0 30px rgba(255,255,255,0.9);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .loader-progress::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: linear-gradient(90deg, transparent, rgba(255,255,255,0.6), transparent);
+            animation: shimmer 1s linear infinite;
         }
 
         @keyframes loadProgress {
@@ -227,22 +334,55 @@
             100% { width: 100%; }
         }
 
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
         /* Enhanced Navigation */
         nav {
             position: fixed;
             width: 100%;
-            background: rgba(255, 255, 255, 0.9);
+            background: rgba(255, 255, 255, 0.7);
             backdrop-filter: blur(20px) saturate(180%);
+            -webkit-backdrop-filter: blur(20px) saturate(180%);
             z-index: 1000;
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-            box-shadow: 0 0 0 rgba(0,0,0,0.1);
+            box-shadow: 0 1px 0 rgba(232, 165, 183, 0.1);
             border-bottom: 1px solid rgba(232, 165, 183, 0.1);
+        }
+
+        nav::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                rgba(232, 165, 183, 0.1) 0%,
+                rgba(232, 165, 183, 0.05) 50%,
+                rgba(232, 165, 183, 0.1) 100%);
+            opacity: 0;
+            transition: opacity 0.4s ease;
+            pointer-events: none;
+        }
+
+        nav:hover::before {
+            opacity: 1;
         }
 
         nav.scrolled {
             padding: 10px 0;
-            box-shadow: 0 10px 60px rgba(212, 127, 153, 0.15);
-            background: rgba(255, 255, 255, 0.95);
+            box-shadow: 
+                0 10px 30px rgba(212, 127, 153, 0.1),
+                0 1px 0 rgba(232, 165, 183, 0.2);
+            background: rgba(255, 255, 255, 0.85);
+        }
+
+        nav.hidden {
+            transform: translateY(-100%);
+            box-shadow: none;
         }
 
         .nav-container {
@@ -252,6 +392,7 @@
             display: flex;
             justify-content: space-between;
             align-items: center;
+            position: relative;
         }
 
         .logo {
@@ -260,6 +401,7 @@
             background: var(--gradient);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
+            background-clip: text;
             cursor: none;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
@@ -267,9 +409,28 @@
             text-transform: lowercase;
         }
 
+        .logo::before {
+            content: 'refit';
+            position: absolute;
+            top: 0;
+            left: 0;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            opacity: 0;
+            transform: translateY(100%);
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
         .logo:hover {
             transform: scale(1.05) translateY(-2px);
             filter: drop-shadow(0 5px 15px rgba(232, 165, 183, 0.4));
+        }
+
+        .logo:hover::before {
+            opacity: 0.5;
+            transform: translateY(-5px);
         }
 
         .nav-links {
@@ -359,26 +520,50 @@
             animation: floatPattern 20s ease-in-out infinite;
         }
 
+        .hero::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: 
+                linear-gradient(45deg, transparent 30%, rgba(255,255,255,0.05) 50%, transparent 70%),
+                linear-gradient(-45deg, transparent 30%, rgba(255,255,255,0.05) 50%, transparent 70%);
+            animation: shimmerHero 3s linear infinite;
+        }
+
+        @keyframes shimmerHero {
+            0% { transform: translateX(-100%) translateY(-100%); }
+            100% { transform: translateX(100%) translateY(100%); }
+        }
+
         @keyframes floatPattern {
-            0%, 100% { transform: translate(0, 0) rotate(0deg); }
-            33% { transform: translate(-50px, -50px) rotate(120deg); }
-            66% { transform: translate(50px, -100px) rotate(240deg); }
+            0%, 100% { transform: translate(0, 0) rotate(0deg) scale(1); }
+            33% { transform: translate(-50px, -50px) rotate(120deg) scale(1.1); }
+            66% { transform: translate(50px, -100px) rotate(240deg) scale(0.9); }
         }
 
         .hero-content {
             text-align: center;
             z-index: 2;
             animation: heroEntry 1.5s cubic-bezier(0.23, 1, 0.32, 1);
+            position: relative;
         }
 
         @keyframes heroEntry {
             0% {
                 opacity: 0;
                 transform: translateY(100px) scale(0.8);
+                filter: blur(10px);
+            }
+            50% {
+                filter: blur(5px);
             }
             100% {
                 opacity: 1;
                 transform: translateY(0) scale(1);
+                filter: blur(0);
             }
         }
 
@@ -390,6 +575,28 @@
             line-height: 1.1;
             text-shadow: 0 20px 60px rgba(0,0,0,0.2);
             letter-spacing: -2px;
+            position: relative;
+        }
+
+        .hero h1::before {
+            content: attr(data-text);
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            color: transparent;
+            -webkit-text-stroke: 1px rgba(255,255,255,0.1);
+            animation: glitch 3s infinite;
+            z-index: -1;
+        }
+
+        @keyframes glitch {
+            0%, 100% { transform: translate(0); }
+            20% { transform: translate(-2px, 2px); }
+            40% { transform: translate(-2px, -2px); }
+            60% { transform: translate(2px, 2px); }
+            80% { transform: translate(2px, -2px); }
         }
 
         .hero h1 span {
@@ -399,9 +606,20 @@
             animation: wordGlow 3s ease-in-out infinite;
         }
 
+        .hero h1 span:nth-child(1) { animation-delay: 0s; }
+        .hero h1 span:nth-child(2) { animation-delay: 0.1s; }
+        .hero h1 span:nth-child(3) { animation-delay: 0.2s; }
+        .hero h1 span:nth-child(4) { animation-delay: 0.3s; }
+
         @keyframes wordGlow {
-            0%, 100% { filter: brightness(1); }
-            50% { filter: brightness(1.2) drop-shadow(0 0 20px rgba(255,255,255,0.5)); }
+            0%, 100% { 
+                filter: brightness(1);
+                transform: translateY(0);
+            }
+            50% { 
+                filter: brightness(1.3) drop-shadow(0 0 30px rgba(255,255,255,0.8));
+                transform: translateY(-5px);
+            }
         }
 
         .hero p {
@@ -636,6 +854,8 @@
             position: relative;
             overflow: hidden;
             cursor: none;
+            transform-style: preserve-3d;
+            perspective: 1000px;
         }
 
         .service-card::before {
@@ -649,6 +869,17 @@
             transform: rotate(45deg);
             opacity: 0;
             transition: all 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+            z-index: 0;
+        }
+
+        .service-card::after {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: linear-gradient(135deg, transparent 40%, rgba(255,255,255,0.2) 50%, transparent 60%);
+            opacity: 0;
+            transition: all 0.6s ease;
+            transform: translateX(-100%) translateY(-100%);
         }
 
         .service-card:hover::before {
@@ -657,9 +888,16 @@
             left: -50%;
         }
 
+        .service-card:hover::after {
+            opacity: 1;
+            transform: translateX(100%) translateY(100%);
+        }
+
         .service-card:hover {
-            transform: translateY(-20px) scale(1.02);
-            box-shadow: 0 40px 100px rgba(212, 127, 153, 0.25);
+            transform: translateY(-20px) rotateX(-5deg) scale(1.02);
+            box-shadow: 
+                0 40px 100px rgba(212, 127, 153, 0.25),
+                0 0 0 1px rgba(232, 165, 183, 0.1);
         }
 
         .service-icon {
@@ -676,12 +914,29 @@
             transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
             position: relative;
             box-shadow: 0 20px 40px rgba(232, 165, 183, 0.3);
+            z-index: 1;
+        }
+
+        .service-icon::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            background: var(--gradient);
+            border-radius: 40px;
+            opacity: 0;
+            transition: all 0.5s ease;
+            filter: blur(10px);
+            z-index: -1;
         }
 
         .service-card:hover .service-icon {
-            transform: rotate(15deg) scale(1.1);
+            transform: rotate(15deg) scale(1.1) translateZ(20px);
             border-radius: 50%;
             box-shadow: 0 30px 60px rgba(232, 165, 183, 0.5);
+        }
+
+        .service-card:hover .service-icon::before {
+            opacity: 0.8;
         }
 
         .service-card h3 {
@@ -690,12 +945,26 @@
             color: var(--dark-gray);
             font-weight: 600;
             letter-spacing: -0.5px;
+            position: relative;
+            z-index: 1;
+            transition: all 0.3s ease;
+        }
+
+        .service-card:hover h3 {
+            transform: translateZ(10px);
         }
 
         .service-card p {
             color: var(--light-gray);
             line-height: 1.8;
             font-size: 1.15rem;
+            position: relative;
+            z-index: 1;
+            transition: all 0.3s ease;
+        }
+
+        .service-card:hover p {
+            transform: translateZ(5px);
         }
 
         /* About Section Enhanced */
@@ -1351,474 +1620,6 @@
             line-height: 1.6;
         }
 
-        /* Enhanced Design Yourself Section */
-        .design-yourself {
-            padding: 150px 40px;
-            background: linear-gradient(135deg, #f8f8f8 0%, #ffffff 50%, #fafafa 100%);
-            position: relative;
-            overflow: hidden;
-        }
-
-        .design-yourself::before {
-            content: '';
-            position: absolute;
-            top: -50%;
-            right: -30%;
-            width: 80%;
-            height: 80%;
-            background: radial-gradient(circle, rgba(232, 165, 183, 0.1) 0%, transparent 70%);
-            pointer-events: none;
-            animation: floatPattern 30s linear infinite;
-        }
-
-        .design-container {
-            max-width: 1400px;
-            margin: 0 auto;
-            display: grid;
-            grid-template-columns: 1fr 1.5fr;
-            gap: 60px;
-            align-items: start;
-        }
-
-        .design-controls {
-            background: var(--white);
-            padding: 50px;
-            border-radius: 30px;
-            box-shadow: 0 30px 80px rgba(0,0,0,0.08);
-            position: sticky;
-            top: 100px;
-        }
-
-        .design-section {
-            margin-bottom: 40px;
-        }
-
-        .design-section h3 {
-            font-size: 1.4rem;
-            margin-bottom: 20px;
-            color: var(--dark-gray);
-            font-weight: 600;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .design-section h3::before {
-            content: '';
-            width: 30px;
-            height: 3px;
-            background: var(--gradient);
-            border-radius: 2px;
-        }
-
-        .room-types {
-            display: grid;
-            grid-template-columns: repeat(2, 1fr);
-            gap: 15px;
-        }
-
-        .room-btn {
-            padding: 15px 20px;
-            background: #f8f8f8;
-            border: 2px solid transparent;
-            border-radius: 15px;
-            cursor: none;
-            transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
-            font-size: 0.95rem;
-            font-weight: 500;
-            text-align: center;
-            color: var(--dark-gray);
-        }
-
-        .room-btn:hover {
-            border-color: var(--primary-pink);
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(232, 165, 183, 0.2);
-        }
-
-        .room-btn.active {
-            background: var(--gradient);
-            color: var(--white);
-            border-color: transparent;
-            box-shadow: 0 15px 40px rgba(232, 165, 183, 0.3);
-        }
-
-        .color-schemes {
-            display: flex;
-            gap: 15px;
-            flex-wrap: wrap;
-        }
-
-        .color-scheme {
-            width: 60px;
-            height: 60px;
-            border-radius: 15px;
-            cursor: none;
-            transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
-            border: 3px solid transparent;
-            position: relative;
-            overflow: hidden;
-            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
-        }
-
-        .color-scheme::before {
-            content: '✓';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%) scale(0);
-            color: var(--white);
-            font-size: 1.5rem;
-            font-weight: bold;
-            transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1);
-        }
-
-        .color-scheme:hover {
-            transform: scale(1.1);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
-        }
-
-        .color-scheme.active {
-            border-color: var(--dark-gray);
-            transform: scale(1.1);
-        }
-
-        .color-scheme.active::before {
-            transform: translate(-50%, -50%) scale(1);
-        }
-
-        .scheme-modern {
-            background: linear-gradient(135deg, #2c3e50 0%, #34495e 50%, #95a5a6 100%);
-        }
-
-        .scheme-warm {
-            background: linear-gradient(135deg, #e67e22 0%, #f39c12 50%, #f1c40f 100%);
-        }
-
-        .scheme-nature {
-            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 50%, #1abc9c 100%);
-        }
-
-        .scheme-luxury {
-            background: linear-gradient(135deg, #8e44ad 0%, #9b59b6 50%, #e8a5b7 100%);
-        }
-
-        /* New Design Options */
-        .style-options {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-            margin-top: 20px;
-        }
-
-        .style-btn {
-            padding: 12px;
-            background: #f8f8f8;
-            border: 2px solid transparent;
-            border-radius: 12px;
-            cursor: none;
-            transition: all 0.3s ease;
-            font-size: 0.85rem;
-            text-align: center;
-            color: var(--dark-gray);
-        }
-
-        .style-btn:hover {
-            border-color: var(--primary-pink);
-            transform: translateY(-2px);
-        }
-
-        .style-btn.active {
-            background: var(--light-pink);
-            border-color: var(--primary-pink);
-            color: var(--darker-pink);
-        }
-
-        .material-options {
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
-            margin-top: 20px;
-        }
-
-        .material-item {
-            width: 50px;
-            height: 50px;
-            border-radius: 10px;
-            cursor: none;
-            transition: all 0.3s ease;
-            position: relative;
-            overflow: hidden;
-            border: 2px solid transparent;
-        }
-
-        .material-wood {
-            background: linear-gradient(135deg, #8b6f47, #654321);
-        }
-
-        .material-marble {
-            background: linear-gradient(135deg, #f5f5f5, #e0e0e0);
-        }
-
-        .material-concrete {
-            background: linear-gradient(135deg, #9e9e9e, #616161);
-        }
-
-        .material-fabric {
-            background: linear-gradient(135deg, #ff6b6b, #ee5a24);
-        }
-
-        .material-item:hover {
-            transform: scale(1.1);
-            border-color: var(--primary-pink);
-        }
-
-        .material-item.active {
-            border-color: var(--dark-pink);
-            box-shadow: 0 5px 15px rgba(212, 127, 153, 0.3);
-        }
-
-        .lighting-controls {
-            margin-top: 20px;
-        }
-
-        .slider-container {
-            margin-top: 15px;
-        }
-
-        .slider-label {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-            font-size: 0.9rem;
-            color: var(--light-gray);
-        }
-
-        .slider {
-            width: 100%;
-            height: 6px;
-            border-radius: 3px;
-            background: #f0f0f0;
-            outline: none;
-            -webkit-appearance: none;
-        }
-
-        .slider::-webkit-slider-thumb {
-            -webkit-appearance: none;
-            appearance: none;
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: var(--gradient);
-            cursor: none;
-            transition: all 0.3s ease;
-        }
-
-        .slider::-webkit-slider-thumb:hover {
-            transform: scale(1.2);
-            box-shadow: 0 5px 15px rgba(212, 127, 153, 0.5);
-        }
-
-        .slider::-moz-range-thumb {
-            width: 20px;
-            height: 20px;
-            border-radius: 50%;
-            background: var(--gradient);
-            cursor: none;
-            transition: all 0.3s ease;
-        }
-
-        .furniture-options {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 15px;
-        }
-
-        .furniture-item {
-            padding: 20px;
-            background: #f8f8f8;
-            border-radius: 15px;
-            text-align: center;
-            cursor: none;
-            transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
-            border: 2px solid transparent;
-        }
-
-        .furniture-item:hover {
-            border-color: var(--primary-pink);
-            transform: translateY(-3px);
-            box-shadow: 0 10px 30px rgba(232, 165, 183, 0.2);
-        }
-
-        .furniture-item.active {
-            background: var(--gradient);
-            color: var(--white);
-            box-shadow: 0 15px 40px rgba(232, 165, 183, 0.3);
-        }
-
-        .furniture-item i {
-            font-size: 2rem;
-            margin-bottom: 10px;
-            display: block;
-        }
-
-        .design-preview {
-            background: var(--white);
-            border-radius: 30px;
-            overflow: hidden;
-            box-shadow: 0 40px 100px rgba(0,0,0,0.1);
-            position: relative;
-            height: 700px;
-        }
-
-        .preview-header {
-            background: var(--gradient);
-            padding: 30px 40px;
-            color: var(--white);
-        }
-
-        .preview-header h3 {
-            font-size: 1.8rem;
-            font-weight: 300;
-            margin-bottom: 10px;
-        }
-
-        .preview-info {
-            display: flex;
-            gap: 30px;
-            font-size: 0.95rem;
-            opacity: 0.9;
-        }
-
-        .preview-content {
-            height: calc(100% - 120px);
-            position: relative;
-            background: #f5f5f5;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            overflow: hidden;
-        }
-
-        .room-visualization {
-            width: 100%;
-            height: 100%;
-            position: relative;
-            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
-        }
-
-        .room-base {
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(to bottom, #ffffff 0%, #f5f5f5 100%);
-            position: relative;
-            display: flex;
-            align-items: flex-end;
-            justify-content: center;
-            padding: 40px;
-        }
-
-        .room-walls {
-            position: absolute;
-            inset: 0;
-            background: var(--selected-scheme, #ffffff);
-            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
-        }
-
-        .room-floor {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            right: 0;
-            height: 100px;
-            background: linear-gradient(to top, #8b7355 0%, #a0826d 100%);
-            transform: perspective(300px) rotateX(60deg);
-            transform-origin: bottom;
-        }
-
-        .furniture-container {
-            display: grid;
-            grid-template-columns: repeat(3, 1fr);
-            gap: 30px;
-            width: 100%;
-            max-width: 600px;
-            z-index: 10;
-        }
-
-        .furniture-placeholder {
-            width: 100%;
-            height: 120px;
-            background: rgba(255,255,255,0.3);
-            border: 2px dashed rgba(232, 165, 183, 0.5);
-            border-radius: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--primary-pink);
-            font-size: 3rem;
-            transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
-        }
-
-        .furniture-placeholder.filled {
-            background: rgba(255,255,255,0.8);
-            border-style: solid;
-            transform: scale(1.05);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
-        }
-
-        .design-actions {
-            margin-top: 40px;
-            display: flex;
-            gap: 20px;
-        }
-
-        .design-btn {
-            flex: 1;
-            padding: 18px 30px;
-            border: none;
-            border-radius: 25px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: none;
-            transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .save-design {
-            background: var(--gradient);
-            color: var(--white);
-            box-shadow: 0 15px 40px rgba(232, 165, 183, 0.3);
-        }
-
-        .save-design:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 20px 50px rgba(232, 165, 183, 0.4);
-        }
-
-        .share-design {
-            background: var(--dark-pink);
-            color: var(--white);
-            box-shadow: 0 15px 40px rgba(212, 127, 153, 0.3);
-        }
-
-        .share-design:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 20px 50px rgba(212, 127, 153, 0.4);
-        }
-
-        .reset-design {
-            background: #f8f8f8;
-            color: var(--dark-gray);
-            border: 2px solid #e0e0e0;
-        }
-
-        .reset-design:hover {
-            background: #f0f0f0;
-            border-color: var(--primary-pink);
-            transform: translateY(-2px);
-        }
-
         /* Process Section Enhanced */
         .process {
             padding: 150px 40px;
@@ -2341,8 +2142,161 @@
             background: var(--primary-pink);
         }
 
-        /* Enhanced Admin Settings Modal */
-        .admin-settings {
+        /* Admin Login Modal */
+        .admin-login-modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.5);
+            z-index: 10000;
+            justify-content: center;
+            align-items: center;
+        }
+
+        .admin-login-modal.active {
+            display: flex;
+        }
+
+        .admin-login-form {
+            background: var(--white);
+            padding: 60px;
+            border-radius: 30px;
+            width: 90%;
+            max-width: 450px;
+            box-shadow: 0 40px 100px rgba(0, 0, 0, 0.3);
+            position: relative;
+            animation: modalEntry 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        @keyframes modalEntry {
+            0% {
+                opacity: 0;
+                transform: scale(0.8) translateY(50px);
+            }
+            100% {
+                opacity: 1;
+                transform: scale(1) translateY(0);
+            }
+        }
+
+        .admin-login-form h2 {
+            font-size: 2.5rem;
+            margin-bottom: 40px;
+            color: var(--dark-gray);
+            text-align: center;
+            font-weight: 200;
+        }
+
+        .close-modal {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            width: 40px;
+            height: 40px;
+            background: var(--light-pink);
+            border: none;
+            border-radius: 50%;
+            font-size: 1.5rem;
+            cursor: none;
+            transition: all 0.3s ease;
+            color: var(--dark-pink);
+        }
+
+        .close-modal:hover {
+            background: var(--gradient);
+            color: var(--white);
+            transform: rotate(90deg);
+        }
+
+        .login-form {
+            display: flex;
+            flex-direction: column;
+            gap: 25px;
+        }
+
+        .login-btn {
+            padding: 18px;
+            background: var(--gradient);
+            color: var(--white);
+            border: none;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: none;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .login-btn:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 20px 50px rgba(232, 165, 183, 0.4);
+        }
+
+        /* Admin Panel */
+        .admin-panel {
+            display: none;
+            position: fixed;
+            top: 80px;
+            right: 20px;
+            background: var(--white);
+            padding: 30px;
+            border-radius: 25px;
+            box-shadow: 0 30px 80px rgba(0, 0, 0, 0.15);
+            z-index: 1000;
+            width: 350px;
+        }
+
+        .admin-panel.active {
+            display: block;
+        }
+
+        .admin-panel h3 {
+            font-size: 1.8rem;
+            margin-bottom: 25px;
+            color: var(--dark-gray);
+        }
+
+        .admin-option {
+            padding: 15px 25px;
+            background: var(--light-pink);
+            border-radius: 15px;
+            margin-bottom: 15px;
+            cursor: none;
+            transition: all 0.3s ease;
+            color: var(--dark-gray);
+            font-weight: 500;
+        }
+
+        .admin-option:hover {
+            background: var(--gradient);
+            color: var(--white);
+            transform: translateX(10px);
+        }
+
+        .logout-btn {
+            width: 100%;
+            padding: 15px;
+            background: var(--dark-pink);
+            color: var(--white);
+            border: none;
+            border-radius: 20px;
+            margin-top: 20px;
+            cursor: none;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
+
+        .logout-btn:hover {
+            background: var(--darker-pink);
+            transform: translateY(-2px);
+        }
+
+        /* Enhanced Admin Settings Button - Now Admin Login */
+        .admin-login-button {
             position: fixed;
             bottom: 30px;
             right: 30px;
@@ -2358,9 +2312,11 @@
             box-shadow: 0 10px 30px rgba(212, 127, 153, 0.3);
             transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
             z-index: 100;
+            border: none;
+            font-size: 1.5rem;
         }
 
-        .admin-settings:hover {
+        .admin-login-button:hover {
             transform: scale(1.1);
             box-shadow: 0 15px 40px rgba(212, 127, 153, 0.5);
         }
@@ -2394,15 +2350,6 @@
             .about-image {
                 height: 500px;
                 transform: none;
-            }
-
-            .design-container {
-                grid-template-columns: 1fr;
-            }
-
-            .design-controls {
-                position: relative;
-                top: 0;
             }
 
             .footer-grid {
@@ -2506,12 +2453,6 @@
             .section-title {
                 font-size: 3rem;
                 margin-bottom: 60px;
-            }
-
-            .room-types,
-            .style-options,
-            .furniture-options {
-                grid-template-columns: 1fr;
             }
 
             .footer-grid {
@@ -2654,7 +2595,6 @@
                 <li><a href="#services" data-translate="nav.services">Services</a></li>
                 <li><a href="#about" data-translate="nav.about">About</a></li>
                 <li><a href="#portfolio" data-translate="nav.portfolio">Portfolio</a></li>
-                <li><a href="#design-yourself" data-translate="nav.design">Design</a></li>
                 <li><a href="#team" data-translate="nav.team">Team</a></li>
                 <li><a href="#contact" class="nav-cta" data-translate="nav.contact">Get Quote</a></li>
             </ul>
@@ -2880,138 +2820,6 @@
                 <div class="portfolio-overlay">
                     <h3>Topshop & Topman</h3>
                     <p data-translate="portfolio.maintenance.desc">Retail Maintenance Excellence</p>
-                </div>
-            </div>
-        </div>
-    </section>
-
-    <!-- Design Yourself Section -->
-    <section id="design-yourself" class="design-yourself">
-        <h2 class="section-title reveal fade-bottom" data-translate="design.title">Design Your Space</h2>
-        
-        <div class="design-container">
-            <div class="design-controls reveal fade-left">
-                <div class="design-section">
-                    <h3 data-translate="design.room.title">Choose Room Type</h3>
-                    <div class="room-types">
-                        <button class="room-btn active" data-room="living" data-translate="design.room.living">Living Room</button>
-                        <button class="room-btn" data-room="bedroom" data-translate="design.room.bedroom">Bedroom</button>
-                        <button class="room-btn" data-room="kitchen" data-translate="design.room.kitchen">Kitchen</button>
-                        <button class="room-btn" data-room="office" data-translate="design.room.office">Office</button>
-                        <button class="room-btn" data-room="bathroom" data-translate="design.room.bathroom">Bathroom</button>
-                        <button class="room-btn" data-room="dining" data-translate="design.room.dining">Dining Room</button>
-                    </div>
-                </div>
-
-                <div class="design-section">
-                    <h3 data-translate="design.style.title">Interior Style</h3>
-                    <div class="style-options">
-                        <button class="style-btn active" data-style="modern" data-translate="design.style.modern">Modern</button>
-                        <button class="style-btn" data-style="minimalist" data-translate="design.style.minimalist">Minimalist</button>
-                        <button class="style-btn" data-style="industrial" data-translate="design.style.industrial">Industrial</button>
-                        <button class="style-btn" data-style="scandinavian" data-translate="design.style.scandinavian">Scandinavian</button>
-                        <button class="style-btn" data-style="traditional" data-translate="design.style.traditional">Traditional</button>
-                        <button class="style-btn" data-style="contemporary" data-translate="design.style.contemporary">Contemporary</button>
-                    </div>
-                </div>
-
-                <div class="design-section">
-                    <h3 data-translate="design.color.title">Select Color Scheme</h3>
-                    <div class="color-schemes">
-                        <div class="color-scheme scheme-modern active" data-scheme="modern"></div>
-                        <div class="color-scheme scheme-warm" data-scheme="warm"></div>
-                        <div class="color-scheme scheme-nature" data-scheme="nature"></div>
-                        <div class="color-scheme scheme-luxury" data-scheme="luxury"></div>
-                    </div>
-                </div>
-
-                <div class="design-section">
-                    <h3 data-translate="design.material.title">Materials & Finishes</h3>
-                    <div class="material-options">
-                        <div class="material-item material-wood" data-material="wood" title="Wood"></div>
-                        <div class="material-item material-marble" data-material="marble" title="Marble"></div>
-                        <div class="material-item material-concrete" data-material="concrete" title="Concrete"></div>
-                        <div class="material-item material-fabric" data-material="fabric" title="Fabric"></div>
-                    </div>
-                </div>
-
-                <div class="design-section">
-                    <h3 data-translate="design.lighting.title">Lighting Settings</h3>
-                    <div class="lighting-controls">
-                        <div class="slider-container">
-                            <div class="slider-label">
-                                <span data-translate="design.lighting.brightness">Brightness</span>
-                                <span id="brightness-value">70%</span>
-                            </div>
-                            <input type="range" min="0" max="100" value="70" class="slider" id="brightness-slider">
-                        </div>
-                        <div class="slider-container">
-                            <div class="slider-label">
-                                <span data-translate="design.lighting.warmth">Warmth</span>
-                                <span id="warmth-value">50%</span>
-                            </div>
-                            <input type="range" min="0" max="100" value="50" class="slider" id="warmth-slider">
-                        </div>
-                    </div>
-                </div>
-
-                <div class="design-section">
-                    <h3 data-translate="design.furniture.title">Add Furniture</h3>
-                    <div class="furniture-options">
-                        <div class="furniture-item" data-furniture="sofa">
-                            <i>🛋️</i>
-                            <span data-translate="design.furniture.sofa">Sofa</span>
-                        </div>
-                        <div class="furniture-item" data-furniture="table">
-                            <i>🪑</i>
-                            <span data-translate="design.furniture.table">Table</span>
-                        </div>
-                        <div class="furniture-item" data-furniture="storage">
-                            <i>🗄️</i>
-                            <span data-translate="design.furniture.storage">Storage</span>
-                        </div>
-                        <div class="furniture-item" data-furniture="lighting">
-                            <i>💡</i>
-                            <span data-translate="design.furniture.lighting">Lighting</span>
-                        </div>
-                        <div class="furniture-item" data-furniture="decor">
-                            <i>🖼️</i>
-                            <span data-translate="design.furniture.decor">Decor</span>
-                        </div>
-                        <div class="furniture-item" data-furniture="plants">
-                            <i>🪴</i>
-                            <span data-translate="design.furniture.plants">Plants</span>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="design-actions">
-                    <button class="design-btn save-design" data-translate="design.action.save">Save Design</button>
-                    <button class="design-btn share-design" data-translate="design.action.share">Share</button>
-                    <button class="design-btn reset-design" data-translate="design.action.reset">Reset</button>
-                </div>
-            </div>
-
-            <div class="design-preview reveal fade-right">
-                <div class="preview-header">
-                    <h3 data-translate="design.preview.title">Your Custom Space</h3>
-                    <div class="preview-info">
-                        <span data-translate="design.preview.room">Room: <strong id="selected-room">Living Room</strong></span>
-                        <span data-translate="design.preview.style">Style: <strong id="selected-style">Modern</strong></span>
-                    </div>
-                </div>
-                <div class="preview-content">
-                    <div class="room-visualization">
-                        <div class="room-base">
-                            <div class="room-walls"></div>
-                            <div class="room-floor"></div>
-                            <div class="furniture-container">
-                                <div class="furniture-placeholder" data-slot="1">+</div>
-                                <div class="furniture-placeholder" data-slot="2">+</div>
-                                <div class="furniture-placeholder" data-slot="3">+</div>
-                            </div>
-                        </div>
-                    </div>
                 </div>
             </div>
         </div>
@@ -3302,6 +3110,16 @@
         <div class="footer-content">
             <div class="footer-grid">
                 <div class="footer-column">
+                    <h4>About Refit</h4>
+                    <p>Professional maintenance, interior construction & renovation services in Malaysia. From concept to completion, we transform spaces with excellence.</p>
+                    <div class="social-links">
+                        <a href="#" aria-label="Facebook">f</a>
+                        <a href="#" aria-label="LinkedIn">in</a>
+                        <a href="#" aria-label="Instagram">ig</a>
+                        <a href="#" aria-label="Twitter">tw</a>
+                    </div>
+                </div>
+                <div class="footer-column">
                     <h4>Quick Links</h4>
                     <ul>
                         <li><a href="#services">Services</a></li>
@@ -3342,8 +3160,35 @@
         </div>
     </footer>
 
-    <!-- Admin Settings Button -->
-    <button class="admin-settings" id="adminSettings" aria-label="Admin Settings">⚙️</button>
+    <!-- Admin Login Button -->
+    <button class="admin-login-button" id="adminLoginBtn" aria-label="Admin Login">🔐</button>
+
+    <!-- Admin Login Modal -->
+    <div class="admin-login-modal" id="adminLoginModal">
+        <div class="admin-login-form">
+            <button class="close-modal" id="closeModal">&times;</button>
+            <h2>Admin Login</h2>
+            <form class="login-form" id="adminLoginForm">
+                <div class="form-group">
+                    <input type="text" id="adminUsername" placeholder="Username" required>
+                </div>
+                <div class="form-group">
+                    <input type="password" id="adminPassword" placeholder="Password" required>
+                </div>
+                <button type="submit" class="login-btn">Login</button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Admin Panel -->
+    <div class="admin-panel" id="adminPanel">
+        <h3>Admin Dashboard</h3>
+        <div class="admin-option" onclick="alert('Content Management System would open here')">Manage Content</div>
+        <div class="admin-option" onclick="alert('Portfolio Editor would open here')">Edit Portfolio</div>
+        <div class="admin-option" onclick="alert('Settings page would open here')">Website Settings</div>
+        <div class="admin-option" onclick="alert('Analytics dashboard would open here')">View Analytics</div>
+        <button class="logout-btn" id="logoutBtn">Logout</button>
+    </div>
 
     <script>
         // Translations object
@@ -3354,7 +3199,6 @@
                     services: "Services",
                     about: "About",
                     portfolio: "Portfolio",
-                    design: "Design",
                     process: "Process",
                     contact: "Get Quote",
                     team: "Team"
@@ -3429,57 +3273,6 @@
                         desc: "Retail Maintenance Excellence"
                     }
                 },
-                design: {
-                    title: "Design Your Space",
-                    room: {
-                        title: "Choose Room Type",
-                        living: "Living Room",
-                        bedroom: "Bedroom",
-                        kitchen: "Kitchen",
-                        office: "Office",
-                        bathroom: "Bathroom",
-                        dining: "Dining Room"
-                    },
-                    style: {
-                        title: "Interior Style",
-                        modern: "Modern",
-                        minimalist: "Minimalist",
-                        industrial: "Industrial",
-                        scandinavian: "Scandinavian",
-                        traditional: "Traditional",
-                        contemporary: "Contemporary"
-                    },
-                    color: {
-                        title: "Select Color Scheme"
-                    },
-                    material: {
-                        title: "Materials & Finishes"
-                    },
-                    lighting: {
-                        title: "Lighting Settings",
-                        brightness: "Brightness",
-                        warmth: "Warmth"
-                    },
-                    furniture: {
-                        title: "Add Furniture",
-                        sofa: "Sofa",
-                        table: "Table",
-                        storage: "Storage",
-                        lighting: "Lighting",
-                        decor: "Decor",
-                        plants: "Plants"
-                    },
-                    preview: {
-                        title: "Your Custom Space",
-                        room: "Room:",
-                        style: "Style:"
-                    },
-                    action: {
-                        save: "Save Design",
-                        share: "Share",
-                        reset: "Reset"
-                    }
-                },
                 process: {
                     title: "Our Process",
                     planning: {
@@ -3527,7 +3320,6 @@
                     services: "Perkhidmatan",
                     about: "Tentang Kami",
                     portfolio: "Portfolio",
-                    design: "Reka Bentuk",
                     process: "Proses",
                     contact: "Dapatkan Sebut Harga",
                     team: "Pasukan"
@@ -3565,7 +3357,6 @@
                     services: "服务",
                     about: "关于我们",
                     portfolio: "作品集",
-                    design: "设计",
                     process: "流程",
                     contact: "获取报价",
                     team: "团队"
@@ -3637,15 +3428,45 @@
             });
         });
 
-        // Enhanced Loading Screen
+        // Enhanced Loading Screen with Progress
         window.addEventListener('load', () => {
-            setTimeout(() => {
-                document.querySelector('.loader-wrapper').classList.add('loaded');
-                document.body.style.cursor = 'none';
-            }, 2500);
+            let progress = 0;
+            const progressBar = document.querySelector('.loader-progress');
+            const loaderWrapper = document.querySelector('.loader-wrapper');
+            
+            const progressInterval = setInterval(() => {
+                progress += Math.random() * 30;
+                if (progress > 100) progress = 100;
+                
+                progressBar.style.width = progress + '%';
+                
+                if (progress === 100) {
+                    clearInterval(progressInterval);
+                    setTimeout(() => {
+                        loaderWrapper.classList.add('loaded');
+                        document.body.style.cursor = 'none';
+                        initPageAnimations();
+                    }, 500);
+                }
+            }, 200);
         });
 
-        // Enhanced Custom Cursor
+        // Initialize page animations after loading
+        function initPageAnimations() {
+            // Animate hero content on load
+            const heroElements = document.querySelectorAll('.hero h1 span, .hero p, .cta-button');
+            heroElements.forEach((el, index) => {
+                el.style.opacity = '0';
+                el.style.transform = 'translateY(30px)';
+                setTimeout(() => {
+                    el.style.transition = 'all 0.8s cubic-bezier(0.23, 1, 0.32, 1)';
+                    el.style.opacity = '1';
+                    el.style.transform = 'translateY(0)';
+                }, 100 + index * 100);
+            });
+        }
+
+        // Enhanced Custom Cursor with Click Effects
         const cursor = document.querySelector('.cursor');
         const cursorFollower = document.querySelector('.cursor-follower');
         let mouseX = 0;
@@ -3660,17 +3481,38 @@
             mouseY = e.clientY;
         });
 
-        // Smooth cursor animation
+        // Add click effect
+        document.addEventListener('click', (e) => {
+            cursor.classList.add('click');
+            
+            // Create ripple effect
+            const ripple = document.createElement('div');
+            ripple.className = 'cursor-ripple';
+            ripple.style.left = e.clientX + 'px';
+            ripple.style.top = e.clientY + 'px';
+            document.body.appendChild(ripple);
+            
+            setTimeout(() => {
+                cursor.classList.remove('click');
+                ripple.remove();
+            }, 500);
+        });
+
+        // Smooth cursor animation with physics
         function animateCursor() {
-            // Main cursor
-            cursorX += (mouseX - cursorX) * 0.2;
-            cursorY += (mouseY - cursorY) * 0.2;
+            // Main cursor with spring physics
+            const dx = mouseX - cursorX;
+            const dy = mouseY - cursorY;
+            cursorX += dx * 0.2;
+            cursorY += dy * 0.2;
             cursor.style.left = cursorX + 'px';
             cursor.style.top = cursorY + 'px';
             
-            // Follower
-            followerX += (mouseX - followerX) * 0.1;
-            followerY += (mouseY - followerY) * 0.1;
+            // Follower with more lag
+            const fdx = mouseX - followerX;
+            const fdy = mouseY - followerY;
+            followerX += fdx * 0.08;
+            followerY += fdy * 0.08;
             cursorFollower.style.left = followerX - 10 + 'px';
             cursorFollower.style.top = followerY - 10 + 'px';
             
@@ -3678,58 +3520,146 @@
         }
         animateCursor();
 
-        // Cursor hover effects
-        const hoverElements = document.querySelectorAll('a, button, .service-card, .portfolio-item, .value-item, .contact-item, input, textarea, .room-btn, .style-btn, .color-scheme, .material-item, .furniture-item, .team-member, .project-card, .blog-card');
+        // Enhanced hover effects with magnetic pull
+        const hoverElements = document.querySelectorAll('a, button, .service-card, .portfolio-item, .value-item, .contact-item, input, textarea, .team-member, .project-card, .blog-card');
+        
         hoverElements.forEach(element => {
-            element.addEventListener('mouseenter', () => {
+            element.addEventListener('mouseenter', function(e) {
                 cursor.classList.add('hover');
                 cursorFollower.style.transform = 'scale(1.5)';
+                
+                // Magnetic effect
+                const rect = this.getBoundingClientRect();
+                const centerX = rect.left + rect.width / 2;
+                const centerY = rect.top + rect.height / 2;
+                
+                const magnetEffect = (e) => {
+                    const deltaX = (e.clientX - centerX) * 0.2;
+                    const deltaY = (e.clientY - centerY) * 0.2;
+                    this.style.transform = `translate(${deltaX}px, ${deltaY}px) ${this.style.transform || ''}`;
+                };
+                
+                this.addEventListener('mousemove', magnetEffect);
+                this.magnetEffect = magnetEffect;
             });
-            element.addEventListener('mouseleave', () => {
+            
+            element.addEventListener('mouseleave', function() {
                 cursor.classList.remove('hover');
                 cursorFollower.style.transform = 'scale(1)';
+                this.style.transform = this.style.transform.replace(/translate\([^)]*\)/, '');
+                if (this.magnetEffect) {
+                    this.removeEventListener('mousemove', this.magnetEffect);
+                }
             });
         });
 
-        // Enhanced Scroll Progress Bar
-        window.addEventListener('scroll', () => {
-            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
-            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-            const scrolled = (winScroll / height) * 100;
-            document.getElementById('scrollProgress').style.width = scrolled + '%';
-        });
-
-        // Enhanced Navigation scroll effect
+        // Enhanced Navigation with Hide/Show on Scroll
         const nav = document.querySelector('nav');
         let lastScroll = 0;
+        let scrollTimer = null;
 
         window.addEventListener('scroll', () => {
             const currentScroll = window.pageYOffset;
             
+            // Clear existing timer
+            clearTimeout(scrollTimer);
+            
+            // Add scrolled class
             if (currentScroll > 100) {
                 nav.classList.add('scrolled');
             } else {
                 nav.classList.remove('scrolled');
             }
 
-            // Hide/show nav on scroll
+            // Hide/show nav based on scroll direction
             if (currentScroll > lastScroll && currentScroll > 500) {
-                nav.style.transform = 'translateY(-100%)';
+                nav.classList.add('hidden');
             } else {
-                nav.style.transform = 'translateY(0)';
+                nav.classList.remove('hidden');
             }
+            
+            // Show nav after scroll stops
+            scrollTimer = setTimeout(() => {
+                nav.classList.remove('hidden');
+            }, 150);
             
             lastScroll = currentScroll;
         });
 
-        // Mobile menu toggle with animation
+        // Enhanced Parallax Effects with Multiple Layers
+        window.addEventListener('scroll', () => {
+            const scrolled = window.pageYOffset;
+            
+            // Hero parallax
+            const heroContent = document.querySelector('.hero-content');
+            if (heroContent) {
+                heroContent.style.transform = `translateY(${scrolled * 0.4}px)`;
+                heroContent.style.opacity = 1 - (scrolled * 0.001);
+            }
+            
+            // Shapes parallax with rotation
+            document.querySelectorAll('.shape').forEach((shape, index) => {
+                const speed = 0.5 + (index * 0.1);
+                const rotation = scrolled * 0.02 * (index + 1);
+                shape.style.transform = `translateY(${scrolled * speed}px) rotate(${rotation}deg)`;
+            });
+            
+            // Section elements parallax
+            document.querySelectorAll('.parallax-element').forEach(element => {
+                const rect = element.getBoundingClientRect();
+                const speed = element.dataset.speed || 0.5;
+                const yPos = -(rect.top * speed);
+                element.style.transform = `translateY(${yPos}px)`;
+            });
+        });
+
+        // Add glitch effect to hero text
+        const heroTitle = document.querySelector('.hero h1');
+        if (heroTitle) {
+            heroTitle.setAttribute('data-text', heroTitle.textContent);
+        }
+
+        // Enhanced Mobile Menu with Smooth Animations
         const menuToggle = document.querySelector('.menu-toggle');
         const navLinks = document.querySelector('.nav-links');
+        const menuItems = document.querySelectorAll('.nav-links li');
 
         menuToggle.addEventListener('click', () => {
             navLinks.classList.toggle('active');
             menuToggle.classList.toggle('active');
             document.body.style.overflow = navLinks.classList.contains('active') ? 'hidden' : '';
+            
+            // Animate menu items
+            if (navLinks.classList.contains('active')) {
+                menuItems.forEach((item, index) => {
+                    item.style.opacity = '0';
+                    item.style.transform = 'translateX(-20px)';
+                    setTimeout(() => {
+                        item.style.transition = 'all 0.3s ease';
+                        item.style.opacity = '1';
+                        item.style.transform = 'translateX(0)';
+                    }, 100 + index * 50);
+                });
+            }
+        });
+
+        // Enhanced Scroll Progress Bar
+        const scrollProgress = document.getElementById('scrollProgress');
+        
+        window.addEventListener('scroll', () => {
+            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (winScroll / height) * 100;
+            scrollProgress.style.width = scrolled + '%';
+            
+            // Change color based on scroll position
+            if (scrolled < 33) {
+                scrollProgress.style.background = 'var(--gradient)';
+            } else if (scrolled < 66) {
+                scrollProgress.style.background = 'var(--primary-pink)';
+            } else {
+                scrollProgress.style.background = 'var(--dark-pink)';
+            }
         });
 
         // Smooth scrolling with offset
@@ -3843,14 +3773,67 @@
             });
         });
 
-        // Enhanced Reveal on scroll with stagger
+        // Enhanced Contact Form
+        const contactForm = document.getElementById('contactForm');
+        contactForm.addEventListener('submit', (e) => {
+            e.preventDefault();
+            
+            // Animate form submission
+            const submitBtn = contactForm.querySelector('.submit-btn');
+            const originalText = submitBtn.textContent;
+            
+            submitBtn.innerHTML = '<span style="display: inline-block; animation: spin 1s linear infinite;">⟳</span> Sending...';
+            submitBtn.disabled = true;
+            
+            // Simulate form submission
+            setTimeout(() => {
+                submitBtn.innerHTML = '✓ Message Sent!';
+                submitBtn.style.background = '#4CAF50';
+                
+                // Reset form
+                setTimeout(() => {
+                    contactForm.reset();
+                    submitBtn.textContent = originalText;
+                    submitBtn.style.background = '';
+                    submitBtn.disabled = false;
+                }, 3000);
+            }, 2000);
+        });
+
+        // Enhanced Appointment Form
+        const appointmentForm = document.querySelector('.appointment-form');
+        if (appointmentForm) {
+            appointmentForm.addEventListener('submit', (e) => {
+                e.preventDefault();
+                
+                const submitBtn = appointmentForm.querySelector('.submit-btn');
+                const originalText = submitBtn.textContent;
+                
+                submitBtn.innerHTML = '<span style="display: inline-block; animation: spin 1s linear infinite;">⟳</span> Scheduling...';
+                submitBtn.disabled = true;
+                
+                setTimeout(() => {
+                    submitBtn.innerHTML = '✓ Appointment Scheduled!';
+                    submitBtn.style.background = '#4CAF50';
+                    
+                    setTimeout(() => {
+                        appointmentForm.reset();
+                        submitBtn.textContent = originalText;
+                        submitBtn.style.background = '';
+                        submitBtn.disabled = false;
+                    }, 3000);
+                }, 2000);
+            });
+        }
+
+        // Enhanced Scroll Reveal
         function reveal() {
             const reveals = document.querySelectorAll('.reveal');
             
             reveals.forEach((element, index) => {
                 const windowHeight = window.innerHeight;
                 const elementTop = element.getBoundingClientRect().top;
-                const elementVisible = 100;
+                const elementVisible = 150;
                 
                 if (elementTop < windowHeight - elementVisible) {
                     setTimeout(() => {
@@ -3861,694 +3844,221 @@
         }
 
         window.addEventListener('scroll', reveal);
-        reveal();
+        reveal(); // Check on load
 
-        // Enhanced Form submission with backend integration
-        document.querySelector('.contact-form').addEventListener('submit', async (e) => {
-            e.preventDefault();
-            
-            const btn = e.target.querySelector('.submit-btn');
-            const originalText = btn.textContent;
-            
-            // Button animation
-            btn.style.width = btn.offsetWidth + 'px';
-            btn.textContent = 'Sending...';
-            btn.style.background = 'linear-gradient(135deg, #3498db, #2980b9)';
-            
-            // Collect form data
-            const formData = new FormData(e.target);
-            const data = Object.fromEntries(formData);
-            
-            try {
-                // Simulate API call
-                await new Promise(resolve => setTimeout(resolve, 2000));
-                
-                btn.textContent = '✓ Message Sent!';
-                btn.style.background = 'linear-gradient(135deg, #27ae60, #2ecc71)';
-                
-                setTimeout(() => {
-                    alert('Thank you for your message! We will get back to you soon.');
-                    e.target.reset();
-                    btn.textContent = originalText;
-                    btn.style.background = '';
-                    btn.style.width = '';
-                }, 1500);
-            } catch (error) {
-                console.error('Error:', error);
-                btn.textContent = 'Error';
-                btn.style.background = 'linear-gradient(135deg, #e74c3c, #c0392b)';
-                setTimeout(() => {
-                    btn.textContent = originalText;
-                    btn.style.background = '';
-                    btn.style.width = '';
-                }, 2000);
+        // Enhanced Admin Login Functionality
+        const adminLoginBtn = document.getElementById('adminLoginBtn');
+        const adminLoginModal = document.getElementById('adminLoginModal');
+        const closeModal = document.getElementById('closeModal');
+        const adminLoginForm = document.getElementById('adminLoginForm');
+        const adminPanel = document.getElementById('adminPanel');
+        const logoutBtn = document.getElementById('logoutBtn');
+
+        // Show login modal
+        adminLoginBtn.addEventListener('click', () => {
+            adminLoginModal.classList.add('active');
+        });
+
+        // Close modal
+        closeModal.addEventListener('click', () => {
+            adminLoginModal.classList.remove('active');
+        });
+
+        // Close modal on outside click
+        adminLoginModal.addEventListener('click', (e) => {
+            if (e.target === adminLoginModal) {
+                adminLoginModal.classList.remove('active');
             }
         });
 
-        // Appointment form submission
-        document.querySelector('.appointment-form').addEventListener('submit', async (e) => {
+        // Handle admin login
+        adminLoginForm.addEventListener('submit', (e) => {
             e.preventDefault();
             
-            const btn = e.target.querySelector('.submit-btn');
-            const originalText = btn.textContent;
+            const username = document.getElementById('adminUsername').value;
+            const password = document.getElementById('adminPassword').value;
             
-            btn.textContent = 'Scheduling...';
-            
-            // Simulate API call
-            await new Promise(resolve => setTimeout(resolve, 2000));
-            
-            btn.textContent = '✓ Appointment Scheduled!';
-            
-            setTimeout(() => {
-                alert('Your consultation has been scheduled! We will contact you shortly with confirmation details.');
-                e.target.reset();
-                btn.textContent = originalText;
-            }, 1500);
-        });
-
-        // Enhanced Parallax effect
-        window.addEventListener('scroll', () => {
-            const scrolled = window.pageYOffset;
-            
-            // Hero parallax
-            const hero = document.querySelector('.hero');
-            const heroContent = document.querySelector('.hero-content');
-            const shapes = document.querySelectorAll('.shape');
-            
-            if (hero) {
-                hero.style.transform = `translateY(${scrolled * 0.5}px)`;
-                heroContent.style.transform = `translateY(${scrolled * 0.3}px)`;
-                
-                shapes.forEach((shape, index) => {
-                    const speed = 0.2 * (index + 1);
-                    shape.style.transform = `translateY(${scrolled * speed}px) rotate(${scrolled * 0.1}deg)`;
-                });
+            // Simple authentication (in real app, this would be server-side)
+            if (username === 'admin' && password === 'refit2024') {
+                adminLoginModal.classList.remove('active');
+                adminPanel.classList.add('active');
+                adminLoginForm.reset();
+            } else {
+                alert('Invalid credentials. Please try again.');
             }
         });
 
-        // Magnetic buttons effect
-        const magneticElements = document.querySelectorAll('.cta-button, .submit-btn, .filter-btn, .category-btn');
-        
-        magneticElements.forEach(elem => {
-            elem.addEventListener('mousemove', (e) => {
-                const rect = elem.getBoundingClientRect();
-                const x = e.clientX - rect.left - rect.width / 2;
-                const y = e.clientY - rect.top - rect.height / 2;
+        // Handle logout
+        logoutBtn.addEventListener('click', () => {
+            adminPanel.classList.remove('active');
+        });
+
+        // Enhanced Interactive Badge
+        const interactiveBadge = document.querySelector('.interactive-badge');
+        let badgeClicks = 0;
+
+        interactiveBadge.addEventListener('click', () => {
+            badgeClicks++;
+            
+            if (badgeClicks === 3) {
+                interactiveBadge.style.background = 'linear-gradient(135deg, #FFD700, #FFA500)';
+                interactiveBadge.textContent = 'Gold Mode Activated! ⭐';
                 
-                elem.style.transform = `translate(${x * 0.3}px, ${y * 0.3}px)`;
-            });
-            
-            elem.addEventListener('mouseleave', () => {
-                elem.style.transform = '';
+                setTimeout(() => {
+                    interactiveBadge.style.background = '';
+                    interactiveBadge.textContent = 'Interactive Mode ✨';
+                    badgeClicks = 0;
+                }, 3000);
+            }
+        });
+
+        // Enhanced Testimonial Slider
+        const testimonialDots = document.querySelectorAll('.nav-dot');
+        let currentTestimonial = 0;
+
+        testimonialDots.forEach((dot, index) => {
+            dot.addEventListener('click', () => {
+                testimonialDots.forEach(d => d.classList.remove('active'));
+                dot.classList.add('active');
+                currentTestimonial = index;
+                // In a real implementation, this would slide to the corresponding testimonial
             });
         });
 
-        // Add ripple effect to buttons
-        function createRipple(event) {
-            const button = event.currentTarget;
-            const ripple = document.createElement('span');
-            const rect = button.getBoundingClientRect();
-            const size = Math.max(rect.width, rect.height);
-            const x = event.clientX - rect.left - size / 2;
-            const y = event.clientY - rect.top - size / 2;
-            
-            ripple.style.width = ripple.style.height = size + 'px';
-            ripple.style.left = x + 'px';
-            ripple.style.top = y + 'px';
-            ripple.classList.add('ripple');
-            
-            button.appendChild(ripple);
-            
-            setTimeout(() => {
-                ripple.remove();
-            }, 600);
-        }
+        // Auto-advance testimonials
+        setInterval(() => {
+            currentTestimonial = (currentTestimonial + 1) % testimonialDots.length;
+            testimonialDots.forEach(d => d.classList.remove('active'));
+            testimonialDots[currentTestimonial].classList.add('active');
+        }, 5000);
 
-        const buttons = document.querySelectorAll('button, .cta-button');
-        buttons.forEach(button => {
-            button.addEventListener('click', createRipple);
+        // Enhanced WhatsApp Button
+        const whatsappButton = document.querySelector('.whatsapp-button');
+        whatsappButton.addEventListener('mouseenter', () => {
+            whatsappButton.style.transform = 'scale(1.2) rotate(360deg)';
         });
 
-        // Add ripple styles
+        whatsappButton.addEventListener('mouseleave', () => {
+            whatsappButton.style.transform = 'scale(1)';
+        });
+
+        // Add CSS for cursor ripple and animations
         const style = document.createElement('style');
         style.textContent = `
-            .ripple {
-                position: absolute;
-                border-radius: 50%;
-                background: rgba(255, 255, 255, 0.5);
-                transform: scale(0);
-                animation: ripple-animation 0.6s ease-out;
-                pointer-events: none;
+            @keyframes spin {
+                from { transform: rotate(0deg); }
+                to { transform: rotate(360deg); }
             }
             
-            @keyframes ripple-animation {
-                to {
-                    transform: scale(4);
+            .cursor-ripple {
+                position: fixed;
+                width: 20px;
+                height: 20px;
+                background: var(--primary-pink);
+                border-radius: 50%;
+                pointer-events: none;
+                transform: translate(-50%, -50%);
+                animation: rippleExpand 0.5s ease-out;
+                z-index: 9996;
+            }
+            
+            @keyframes rippleExpand {
+                0% {
+                    width: 20px;
+                    height: 20px;
+                    opacity: 1;
+                }
+                100% {
+                    width: 100px;
+                    height: 100px;
                     opacity: 0;
                 }
+            }
+            
+            .parallax-element {
+                will-change: transform;
             }
         `;
         document.head.appendChild(style);
 
-        // Enhanced Design Yourself Functionality
-        const designSection = {
-            selectedRoom: 'living',
-            selectedStyle: 'modern',
-            selectedScheme: 'modern',
-            selectedMaterials: [],
-            selectedFurniture: [],
-            lightingSettings: {
-                brightness: 70,
-                warmth: 50
-            },
+        // Smooth Page Transitions
+        document.addEventListener('DOMContentLoaded', () => {
+            document.body.style.opacity = '0';
             
-            init() {
-                this.setupRoomButtons();
-                this.setupStyleButtons();
-                this.setupColorSchemes();
-                this.setupMaterials();
-                this.setupLighting();
-                this.setupFurniture();
-                this.setupActions();
-                this.updatePreview();
-            },
+            setTimeout(() => {
+                document.body.style.transition = 'opacity 0.5s ease';
+                document.body.style.opacity = '1';
+            }, 100);
+        });
 
-            setupRoomButtons() {
-                const roomBtns = document.querySelectorAll('.room-btn');
-                roomBtns.forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        roomBtns.forEach(b => b.classList.remove('active'));
-                        btn.classList.add('active');
-                        this.selectedRoom = btn.dataset.room;
-                        this.updatePreview();
-                    });
-                });
-            },
-
-            setupStyleButtons() {
-                const styleBtns = document.querySelectorAll('.style-btn');
-                styleBtns.forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        styleBtns.forEach(b => b.classList.remove('active'));
-                        btn.classList.add('active');
-                        this.selectedStyle = btn.dataset.style;
-                        this.updatePreview();
-                    });
-                });
-            },
-
-            setupColorSchemes() {
-                const colorSchemes = document.querySelectorAll('.color-scheme');
-                const schemeColors = {
-                    modern: 'linear-gradient(135deg, #2c3e50 0%, #34495e 50%, #95a5a6 100%)',
-                    warm: 'linear-gradient(135deg, #e67e22 0%, #f39c12 50%, #f1c40f 100%)',
-                    nature: 'linear-gradient(135deg, #27ae60 0%, #2ecc71 50%, #1abc9c 100%)',
-                    luxury: 'linear-gradient(135deg, #8e44ad 0%, #9b59b6 50%, #e8a5b7 100%)'
-                };
-
-                colorSchemes.forEach(scheme => {
-                    scheme.addEventListener('click', () => {
-                        colorSchemes.forEach(s => s.classList.remove('active'));
-                        scheme.classList.add('active');
-                        this.selectedScheme = scheme.dataset.scheme;
-                        
-                        // Update room walls color
-                        const roomWalls = document.querySelector('.room-walls');
-                        roomWalls.style.background = schemeColors[this.selectedScheme];
-                        
-                        this.updatePreview();
-                    });
-                });
-            },
-
-            setupMaterials() {
-                const materialItems = document.querySelectorAll('.material-item');
-                materialItems.forEach(item => {
-                    item.addEventListener('click', () => {
-                        item.classList.toggle('active');
-                        const material = item.dataset.material;
-                        
-                        if (item.classList.contains('active')) {
-                            this.selectedMaterials.push(material);
-                        } else {
-                            this.selectedMaterials = this.selectedMaterials.filter(m => m !== material);
-                        }
-                    });
-                });
-            },
-
-            setupLighting() {
-                const brightnessSlider = document.getElementById('brightness-slider');
-                const warmthSlider = document.getElementById('warmth-slider');
-                const brightnessValue = document.getElementById('brightness-value');
-                const warmthValue = document.getElementById('warmth-value');
-
-                brightnessSlider.addEventListener('input', (e) => {
-                    this.lightingSettings.brightness = e.target.value;
-                    brightnessValue.textContent = `${e.target.value}%`;
-                    this.updateLighting();
-                });
-
-                warmthSlider.addEventListener('input', (e) => {
-                    this.lightingSettings.warmth = e.target.value;
-                    warmthValue.textContent = `${e.target.value}%`;
-                    this.updateLighting();
-                });
-            },
-
-            updateLighting() {
-                const roomBase = document.querySelector('.room-base');
-                const brightness = this.lightingSettings.brightness / 100;
-                const warmth = this.lightingSettings.warmth / 100;
-                
-                // Apply lighting effects
-                roomBase.style.filter = `brightness(${0.5 + brightness * 0.7}) sepia(${warmth * 0.3})`;
-            },
-
-            setupFurniture() {
-                const furnitureItems = document.querySelectorAll('.furniture-item');
-                const furniturePlaceholders = document.querySelectorAll('.furniture-placeholder');
-                
-                furnitureItems.forEach(item => {
-                    item.addEventListener('click', () => {
-                        item.classList.toggle('active');
-                        const furniture = item.dataset.furniture;
-                        const icon = item.querySelector('i').textContent;
-                        
-                        if (item.classList.contains('active')) {
-                            // Add to first empty slot
-                            const emptySlot = Array.from(furniturePlaceholders).find(
-                                slot => !slot.classList.contains('filled')
-                            );
-                            
-                            if (emptySlot) {
-                                emptySlot.textContent = icon;
-                                emptySlot.classList.add('filled');
-                                emptySlot.dataset.furniture = furniture;
-                                this.selectedFurniture.push(furniture);
-                            } else {
-                                item.classList.remove('active');
-                                alert('All furniture slots are filled!');
-                            }
-                        } else {
-                            // Remove from slots
-                            furniturePlaceholders.forEach(slot => {
-                                if (slot.dataset.furniture === furniture) {
-                                    slot.textContent = '+';
-                                    slot.classList.remove('filled');
-                                    delete slot.dataset.furniture;
-                                }
-                            });
-                            this.selectedFurniture = this.selectedFurniture.filter(f => f !== furniture);
-                        }
-                    });
-                });
-
-                // Allow removing furniture by clicking on slots
-                furniturePlaceholders.forEach(slot => {
-                    slot.addEventListener('click', () => {
-                        if (slot.classList.contains('filled')) {
-                            const furniture = slot.dataset.furniture;
-                            slot.textContent = '+';
-                            slot.classList.remove('filled');
-                            delete slot.dataset.furniture;
-                            
-                            // Deactivate corresponding furniture item
-                            const furnitureItem = document.querySelector(`.furniture-item[data-furniture="${furniture}"]`);
-                            if (furnitureItem) {
-                                furnitureItem.classList.remove('active');
-                            }
-                            
-                            this.selectedFurniture = this.selectedFurniture.filter(f => f !== furniture);
-                        }
-                    });
-                });
-            },
-
-            setupActions() {
-                const saveBtn = document.querySelector('.save-design');
-                const shareBtn = document.querySelector('.share-design');
-                const resetBtn = document.querySelector('.reset-design');
-
-                saveBtn.addEventListener('click', () => {
-                    const design = {
-                        room: this.selectedRoom,
-                        style: this.selectedStyle,
-                        scheme: this.selectedScheme,
-                        materials: this.selectedMaterials,
-                        furniture: this.selectedFurniture,
-                        lighting: this.lightingSettings,
-                        timestamp: new Date().toISOString()
-                    };
-
-                    // Save to backend
-                    this.saveDesign(design);
-                });
-
-                shareBtn.addEventListener('click', () => {
-                    const design = {
-                        room: this.selectedRoom,
-                        style: this.selectedStyle,
-                        scheme: this.selectedScheme,
-                        materials: this.selectedMaterials,
-                        furniture: this.selectedFurniture,
-                        lighting: this.lightingSettings
-                    };
-
-                    this.shareDesign(design);
-                });
-
-                resetBtn.addEventListener('click', () => {
-                    if (confirm('Are you sure you want to reset your design?')) {
-                        this.resetDesign();
-                    }
-                });
-            },
-
-            async saveDesign(design) {
-                const saveBtn = document.querySelector('.save-design');
-                const originalText = saveBtn.textContent;
-                
-                try {
-                    // Show loading state
-                    saveBtn.textContent = 'Saving...';
-                    saveBtn.disabled = true;
-
-                    // Simulate API call
-                    await new Promise(resolve => setTimeout(resolve, 2000));
-
-                    // Success animation
-                    saveBtn.textContent = 'Design Saved! ✓';
-                    saveBtn.style.background = 'linear-gradient(135deg, #27ae60, #2ecc71)';
-                    
-                    setTimeout(() => {
-                        saveBtn.textContent = originalText;
-                        saveBtn.style.background = '';
-                        saveBtn.disabled = false;
-                        
-                        // Also offer to download design
-                        const download = confirm('Design saved! Would you like to download a copy?');
-                        if (download) {
-                            this.downloadDesign(design);
-                        }
-                    }, 2000);
-                } catch (error) {
-                    console.error('Error saving design:', error);
-                    saveBtn.textContent = 'Save Failed';
-                    saveBtn.style.background = '#e74c3c';
-                    
-                    setTimeout(() => {
-                        saveBtn.textContent = originalText;
-                        saveBtn.style.background = '';
-                        saveBtn.disabled = false;
-                    }, 2000);
-                }
-            },
-
-            shareDesign(design) {
-                // Generate shareable link
-                const shareData = btoa(JSON.stringify(design));
-                const shareUrl = `${window.location.origin}?design=${shareData}`;
-                
-                // Create share modal
-                const modal = document.createElement('div');
-                modal.style.cssText = `
-                    position: fixed;
-                    top: 50%;
-                    left: 50%;
-                    transform: translate(-50%, -50%);
-                    background: white;
-                    padding: 40px;
-                    border-radius: 20px;
-                    box-shadow: 0 30px 60px rgba(0,0,0,0.3);
-                    z-index: 1000;
-                    max-width: 500px;
-                    width: 90%;
-                `;
-                
-                modal.innerHTML = `
-                    <h3 style="margin-bottom: 20px; color: var(--dark-gray);">Share Your Design</h3>
-                    <input type="text" value="${shareUrl}" readonly style="width: 100%; padding: 15px; border: 2px solid #e0e0e0; border-radius: 10px; margin-bottom: 20px;">
-                    <div style="display: flex; gap: 15px;">
-                        <button onclick="navigator.clipboard.writeText('${shareUrl}'); this.textContent='Copied!'; setTimeout(() => this.textContent='Copy Link', 2000)" style="flex: 1; padding: 15px; background: var(--gradient); color: white; border: none; border-radius: 10px; cursor: pointer;">Copy Link</button>
-                        <button onclick="this.parentElement.parentElement.remove(); document.querySelector('.modal-overlay').remove()" style="flex: 1; padding: 15px; background: #f0f0f0; border: none; border-radius: 10px; cursor: pointer;">Close</button>
-                    </div>
-                `;
-                
-                // Create overlay
-                const overlay = document.createElement('div');
-                overlay.className = 'modal-overlay';
-                overlay.style.cssText = `
-                    position: fixed;
-                    top: 0;
-                    left: 0;
-                    width: 100%;
-                    height: 100%;
-                    background: rgba(0,0,0,0.5);
-                    z-index: 999;
-                `;
-                overlay.onclick = () => {
-                    modal.remove();
-                    overlay.remove();
-                };
-                
-                document.body.appendChild(overlay);
-                document.body.appendChild(modal);
-            },
-
-            downloadDesign(design) {
-                const dataStr = JSON.stringify(design, null, 2);
-                const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
-                
-                const exportFileDefaultName = `refit-design-${this.selectedRoom}-${Date.now()}.json`;
-                
-                const linkElement = document.createElement('a');
-                linkElement.setAttribute('href', dataUri);
-                linkElement.setAttribute('download', exportFileDefaultName);
-                linkElement.click();
-            },
-
-            resetDesign() {
-                // Reset selections
-                this.selectedRoom = 'living';
-                this.selectedStyle = 'modern';
-                this.selectedScheme = 'modern';
-                this.selectedMaterials = [];
-                this.selectedFurniture = [];
-                this.lightingSettings = {
-                    brightness: 70,
-                    warmth: 50
-                };
-
-                // Reset UI
-                document.querySelectorAll('.room-btn').forEach(btn => {
-                    btn.classList.toggle('active', btn.dataset.room === 'living');
-                });
-
-                document.querySelectorAll('.style-btn').forEach(btn => {
-                    btn.classList.toggle('active', btn.dataset.style === 'modern');
-                });
-
-                document.querySelectorAll('.color-scheme').forEach(scheme => {
-                    scheme.classList.toggle('active', scheme.dataset.scheme === 'modern');
-                });
-
-                document.querySelectorAll('.material-item').forEach(item => {
-                    item.classList.remove('active');
-                });
-
-                document.querySelectorAll('.furniture-item').forEach(item => {
-                    item.classList.remove('active');
-                });
-
-                document.querySelectorAll('.furniture-placeholder').forEach(slot => {
-                    slot.textContent = '+';
-                    slot.classList.remove('filled');
-                    delete slot.dataset.furniture;
-                });
-
-                // Reset sliders
-                document.getElementById('brightness-slider').value = 70;
-                document.getElementById('warmth-slider').value = 50;
-                document.getElementById('brightness-value').textContent = '70%';
-                document.getElementById('warmth-value').textContent = '50%';
-
-                // Reset room walls
-                const roomWalls = document.querySelector('.room-walls');
-                roomWalls.style.background = 'linear-gradient(135deg, #2c3e50 0%, #34495e 50%, #95a5a6 100%)';
-
-                this.updatePreview();
-                this.updateLighting();
-            },
-
-            updatePreview() {
-                const roomText = document.getElementById('selected-room');
-                const styleText = document.getElementById('selected-style');
-                
-                const roomNames = {
-                    living: 'Living Room',
-                    bedroom: 'Bedroom',
-                    kitchen: 'Kitchen',
-                    office: 'Office',
-                    bathroom: 'Bathroom',
-                    dining: 'Dining Room'
-                };
-
-                const styleNames = {
-                    modern: 'Modern',
-                    minimalist: 'Minimalist',
-                    industrial: 'Industrial',
-                    scandinavian: 'Scandinavian',
-                    traditional: 'Traditional',
-                    contemporary: 'Contemporary'
-                };
-
-                roomText.textContent = roomNames[this.selectedRoom];
-                styleText.textContent = styleNames[this.selectedStyle];
-
-                // Animate preview update
-                const visualization = document.querySelector('.room-visualization');
-                visualization.style.opacity = '0.7';
-                setTimeout(() => {
-                    visualization.style.opacity = '1';
-                }, 300);
-            }
-        };
-
-        // Initialize design tool when DOM is ready
-        if (document.querySelector('.design-yourself')) {
-            designSection.init();
+        // Dynamic Year in Footer
+        const currentYear = new Date().getFullYear();
+        const footerYear = document.querySelector('.footer-bottom p');
+        if (footerYear) {
+            footerYear.innerHTML = footerYear.innerHTML.replace('2024', currentYear);
         }
 
-        // Load design from URL if shared
-        const urlParams = new URLSearchParams(window.location.search);
-        const sharedDesign = urlParams.get('design');
-        if (sharedDesign) {
-            try {
-                const design = JSON.parse(atob(sharedDesign));
-                // Apply shared design
-                setTimeout(() => {
-                    // Apply room
-                    document.querySelector(`.room-btn[data-room="${design.room}"]`)?.click();
-                    // Apply style
-                    document.querySelector(`.style-btn[data-style="${design.style}"]`)?.click();
-                    // Apply color scheme
-                    document.querySelector(`.color-scheme[data-scheme="${design.scheme}"]`)?.click();
-                    // Apply materials
-                    design.materials?.forEach(material => {
-                        document.querySelector(`.material-item[data-material="${material}"]`)?.click();
-                    });
-                    // Apply furniture
-                    design.furniture?.forEach(furniture => {
-                        document.querySelector(`.furniture-item[data-furniture="${furniture}"]`)?.click();
-                    });
-                    // Apply lighting
-                    if (design.lighting) {
-                        document.getElementById('brightness-slider').value = design.lighting.brightness;
-                        document.getElementById('warmth-slider').value = design.lighting.warmth;
-                        document.getElementById('brightness-value').textContent = `${design.lighting.brightness}%`;
-                        document.getElementById('warmth-value').textContent = `${design.lighting.warmth}%`;
-                    }
-                }, 1000);
-            } catch (error) {
-                console.error('Error loading shared design:', error);
+        // Performance optimization - Debounce scroll events
+        function debounce(func, wait) {
+            let timeout;
+            return function executedFunction(...args) {
+                const later = () => {
+                    clearTimeout(timeout);
+                    func(...args);
+                };
+                clearTimeout(timeout);
+                timeout = setTimeout(later, wait);
+            };
+        }
+
+        // Apply debounce to scroll-based functions
+        window.addEventListener('scroll', debounce(() => {
+            reveal();
+        }, 100));
+
+        // Initialize all interactive elements
+        function initializeInteractiveElements() {
+            // Add hover effects to all cards
+            const cards = document.querySelectorAll('.service-card, .portfolio-item, .blog-card, .team-member, .project-card');
+            cards.forEach(card => {
+                card.addEventListener('mouseenter', function() {
+                    this.style.transform = `${this.style.transform || ''} scale(1.02)`;
+                });
+                
+                card.addEventListener('mouseleave', function() {
+                    this.style.transform = this.style.transform.replace('scale(1.02)', '');
+                });
+            });
+        }
+
+        initializeInteractiveElements();
+
+        // Mobile Touch Support
+        let touchStartX = 0;
+        let touchEndX = 0;
+
+        document.addEventListener('touchstart', (e) => {
+            touchStartX = e.changedTouches[0].screenX;
+        });
+
+        document.addEventListener('touchend', (e) => {
+            touchEndX = e.changedTouches[0].screenX;
+            handleSwipe();
+        });
+
+        function handleSwipe() {
+            if (touchEndX < touchStartX - 50) {
+                // Swipe left - could be used for navigation
+                console.log('Swiped left');
+            }
+            if (touchEndX > touchStartX + 50) {
+                // Swipe right - could be used for navigation
+                console.log('Swiped right');
             }
         }
 
-        // Testimonial Slider
-        let currentTestimonial = 0;
-        const testimonialDots = document.querySelectorAll('.nav-dot');
-        
-        testimonialDots.forEach((dot, index) => {
-            dot.addEventListener('click', () => {
-                currentTestimonial = index;
-                updateTestimonialSlider();
-            });
-        });
-
-        function updateTestimonialSlider() {
-            testimonialDots.forEach((dot, index) => {
-                dot.classList.toggle('active', index === currentTestimonial);
-            });
-        }
-
-        // Auto-rotate testimonials
-        setInterval(() => {
-            currentTestimonial = (currentTestimonial + 1) % testimonialDots.length;
-            updateTestimonialSlider();
-        }, 5000);
-
-        // Interactive badge animation
-        const interactiveBadge = document.querySelector('.interactive-badge');
-        let badgeTimeout;
-
-        function showInteractiveBadge() {
-            interactiveBadge.style.transform = 'translateX(0)';
-            clearTimeout(badgeTimeout);
-            badgeTimeout = setTimeout(() => {
-                interactiveBadge.style.transform = 'translateX(-120%)';
-            }, 5000);
-        }
-
-        // Show badge initially
-        setTimeout(showInteractiveBadge, 3000);
-
-        // Show badge on hover over interactive elements
-        document.querySelectorAll('.service-card, .portfolio-item, .value-item').forEach(element => {
-            element.addEventListener('mouseenter', showInteractiveBadge);
-        });
-
-        // Initialize AOS-like animations
-        const animateOnScroll = () => {
-            const elements = document.querySelectorAll('.stat-number');
-            elements.forEach(element => {
-                const elementTop = element.getBoundingClientRect().top;
-                const elementBottom = element.getBoundingClientRect().bottom;
-                
-                if (elementTop < window.innerHeight && elementBottom > 0 && !element.classList.contains('animated')) {
-                    element.classList.add('animated');
-                    const target = parseInt(element.textContent);
-                    let current = 0;
-                    const increment = target / 50;
-                    const timer = setInterval(() => {
-                        current += increment;
-                        if (current >= target) {
-                            element.textContent = element.textContent.includes('+') ? target + '+' : target;
-                            clearInterval(timer);
-                        } else {
-                            element.textContent = Math.floor(current) + (element.textContent.includes('+') ? '+' : '');
-                        }
-                    }, 30);
-                }
-            });
-        };
-
-        window.addEventListener('scroll', animateOnScroll);
-        animateOnScroll();
-
-        // Admin Settings Placeholder
-        document.getElementById('adminSettings').addEventListener('click', () => {
-            alert('Admin panel would be integrated here with backend authentication');
-        });
-
-        // Add console styling for development
-        console.log(
-            '%cRefit Maintenance Services',
-            'color: #E8A5B7; font-size: 24px; font-weight: bold; text-shadow: 2px 2px 4px rgba(0,0,0,0.2);'
-        );
-        console.log(
-            '%cFrom Concept to Completion',
-            'color: #D47F99; font-size: 16px; font-style: italic;'
-        );
+        // Final initialization
+        console.log('Refit website initialized successfully!');
     </script>
 </body>
-</html><h4>About Refit</h4>
-                    <p>Professional maintenance, interior construction & renovation services in Malaysia. From concept to completion, we transform spaces with excellence.</p>
-                    <div class="social-links">
-                        <a href="#" aria-label="Facebook">f</a>
-                        <a href="#" aria-label="LinkedIn">in</a>
-                        <a href="#" aria-label="Instagram">ig</a>
-                        <a href="#" aria-label="Twitter">tw</a>
-                    </div>
-                </div>
-                <div class="footer-column">
+</html>
