@@ -179,29 +179,21 @@
         }
 
         .logo {
-            font-size: 2.8rem;
-            font-weight: 300;
+            font-size: 3.5rem;
+            font-weight: 200;
             background: var(--gradient);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             cursor: none;
             transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
             position: relative;
-            letter-spacing: 2px;
+            letter-spacing: 4px;
+            text-transform: lowercase;
         }
 
         .logo:hover {
             transform: scale(1.05) translateY(-2px);
             filter: drop-shadow(0 5px 15px rgba(232, 165, 183, 0.4));
-        }
-
-        .logo span {
-            font-size: 0.7rem;
-            display: block;
-            letter-spacing: 4px;
-            -webkit-text-fill-color: var(--light-gray);
-            text-transform: uppercase;
-            margin-top: -5px;
         }
 
         .nav-links {
@@ -842,6 +834,338 @@
             line-height: 1.6;
         }
 
+        /* Design Yourself Section */
+        .design-yourself {
+            padding: 150px 40px;
+            background: linear-gradient(135deg, #f8f8f8 0%, #ffffff 50%, #fafafa 100%);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .design-yourself::before {
+            content: '';
+            position: absolute;
+            top: -50%;
+            right: -30%;
+            width: 80%;
+            height: 80%;
+            background: radial-gradient(circle, rgba(232, 165, 183, 0.1) 0%, transparent 70%);
+            pointer-events: none;
+            animation: floatPattern 30s linear infinite;
+        }
+
+        .design-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            display: grid;
+            grid-template-columns: 1fr 1.5fr;
+            gap: 60px;
+            align-items: start;
+        }
+
+        .design-controls {
+            background: var(--white);
+            padding: 50px;
+            border-radius: 30px;
+            box-shadow: 0 30px 80px rgba(0,0,0,0.08);
+            position: sticky;
+            top: 100px;
+        }
+
+        .design-section {
+            margin-bottom: 40px;
+        }
+
+        .design-section h3 {
+            font-size: 1.4rem;
+            margin-bottom: 20px;
+            color: var(--dark-gray);
+            font-weight: 600;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .design-section h3::before {
+            content: '';
+            width: 30px;
+            height: 3px;
+            background: var(--gradient);
+            border-radius: 2px;
+        }
+
+        .room-types {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+        }
+
+        .room-btn {
+            padding: 15px 20px;
+            background: #f8f8f8;
+            border: 2px solid transparent;
+            border-radius: 15px;
+            cursor: none;
+            transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+            font-size: 0.95rem;
+            font-weight: 500;
+            text-align: center;
+            color: var(--dark-gray);
+        }
+
+        .room-btn:hover {
+            border-color: var(--primary-pink);
+            transform: translateY(-2px);
+            box-shadow: 0 10px 30px rgba(232, 165, 183, 0.2);
+        }
+
+        .room-btn.active {
+            background: var(--gradient);
+            color: var(--white);
+            border-color: transparent;
+            box-shadow: 0 15px 40px rgba(232, 165, 183, 0.3);
+        }
+
+        .color-schemes {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+
+        .color-scheme {
+            width: 60px;
+            height: 60px;
+            border-radius: 15px;
+            cursor: none;
+            transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+            border: 3px solid transparent;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 5px 20px rgba(0,0,0,0.1);
+        }
+
+        .color-scheme::before {
+            content: '✓';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            color: var(--white);
+            font-size: 1.5rem;
+            font-weight: bold;
+            transition: transform 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .color-scheme:hover {
+            transform: scale(1.1);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+        }
+
+        .color-scheme.active {
+            border-color: var(--dark-gray);
+            transform: scale(1.1);
+        }
+
+        .color-scheme.active::before {
+            transform: translate(-50%, -50%) scale(1);
+        }
+
+        .scheme-modern {
+            background: linear-gradient(135deg, #2c3e50 0%, #34495e 50%, #95a5a6 100%);
+        }
+
+        .scheme-warm {
+            background: linear-gradient(135deg, #e67e22 0%, #f39c12 50%, #f1c40f 100%);
+        }
+
+        .scheme-nature {
+            background: linear-gradient(135deg, #27ae60 0%, #2ecc71 50%, #1abc9c 100%);
+        }
+
+        .scheme-luxury {
+            background: linear-gradient(135deg, #8e44ad 0%, #9b59b6 50%, #e8a5b7 100%);
+        }
+
+        .furniture-options {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .furniture-item {
+            padding: 20px;
+            background: #f8f8f8;
+            border-radius: 15px;
+            text-align: center;
+            cursor: none;
+            transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+            border: 2px solid transparent;
+        }
+
+        .furniture-item:hover {
+            border-color: var(--primary-pink);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(232, 165, 183, 0.2);
+        }
+
+        .furniture-item.active {
+            background: var(--gradient);
+            color: var(--white);
+            box-shadow: 0 15px 40px rgba(232, 165, 183, 0.3);
+        }
+
+        .furniture-item i {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            display: block;
+        }
+
+        .design-preview {
+            background: var(--white);
+            border-radius: 30px;
+            overflow: hidden;
+            box-shadow: 0 40px 100px rgba(0,0,0,0.1);
+            position: relative;
+            height: 700px;
+        }
+
+        .preview-header {
+            background: var(--gradient);
+            padding: 30px 40px;
+            color: var(--white);
+        }
+
+        .preview-header h3 {
+            font-size: 1.8rem;
+            font-weight: 300;
+            margin-bottom: 10px;
+        }
+
+        .preview-info {
+            display: flex;
+            gap: 30px;
+            font-size: 0.95rem;
+            opacity: 0.9;
+        }
+
+        .preview-content {
+            height: calc(100% - 120px);
+            position: relative;
+            background: #f5f5f5;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+        }
+
+        .room-visualization {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .room-base {
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(to bottom, #ffffff 0%, #f5f5f5 100%);
+            position: relative;
+            display: flex;
+            align-items: flex-end;
+            justify-content: center;
+            padding: 40px;
+        }
+
+        .room-walls {
+            position: absolute;
+            inset: 0;
+            background: var(--selected-scheme, #ffffff);
+            transition: all 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .room-floor {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 100px;
+            background: linear-gradient(to top, #8b7355 0%, #a0826d 100%);
+            transform: perspective(300px) rotateX(60deg);
+            transform-origin: bottom;
+        }
+
+        .furniture-container {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 30px;
+            width: 100%;
+            max-width: 600px;
+            z-index: 10;
+        }
+
+        .furniture-placeholder {
+            width: 100%;
+            height: 120px;
+            background: rgba(255,255,255,0.3);
+            border: 2px dashed rgba(232, 165, 183, 0.5);
+            border-radius: 15px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--primary-pink);
+            font-size: 3rem;
+            transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        .furniture-placeholder.filled {
+            background: rgba(255,255,255,0.8);
+            border-style: solid;
+            transform: scale(1.05);
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+
+        .design-actions {
+            margin-top: 40px;
+            display: flex;
+            gap: 20px;
+        }
+
+        .design-btn {
+            flex: 1;
+            padding: 18px 30px;
+            border: none;
+            border-radius: 25px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: none;
+            transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
+            text-transform: uppercase;
+            letter-spacing: 1px;
+        }
+
+        .save-design {
+            background: var(--gradient);
+            color: var(--white);
+            box-shadow: 0 15px 40px rgba(232, 165, 183, 0.3);
+        }
+
+        .save-design:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 20px 50px rgba(232, 165, 183, 0.4);
+        }
+
+        .reset-design {
+            background: #f8f8f8;
+            color: var(--dark-gray);
+            border: 2px solid #e0e0e0;
+        }
+
+        .reset-design:hover {
+            background: #f0f0f0;
+            border-color: var(--primary-pink);
+            transform: translateY(-2px);
+        }
+
         /* Process Section Enhanced */
         .process {
             padding: 150px 40px;
@@ -1430,15 +1754,13 @@
     <!-- Navigation -->
     <nav>
         <div class="nav-container">
-            <div class="logo">
-                refit
-                <span>maintenance services</span>
-            </div>
+            <div class="logo">refit</div>
             <ul class="nav-links">
                 <li><a href="#home" class="active">Home</a></li>
                 <li><a href="#services">Services</a></li>
                 <li><a href="#about">About</a></li>
                 <li><a href="#portfolio">Portfolio</a></li>
+                <li><a href="#design-yourself">Design</a></li>
                 <li><a href="#process">Process</a></li>
                 <li><a href="#contact" class="nav-cta">Get Quote</a></li>
             </ul>
@@ -1564,6 +1886,92 @@
                 <div class="portfolio-overlay">
                     <h3>Topshop & Topman</h3>
                     <p>Retail Maintenance Excellence</p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Design Yourself Section -->
+    <section id="design-yourself" class="design-yourself">
+        <h2 class="section-title reveal fade-bottom">Design Your Space</h2>
+        <div class="design-container">
+            <div class="design-controls reveal fade-left">
+                <div class="design-section">
+                    <h3>Choose Room Type</h3>
+                    <div class="room-types">
+                        <button class="room-btn active" data-room="living">Living Room</button>
+                        <button class="room-btn" data-room="bedroom">Bedroom</button>
+                        <button class="room-btn" data-room="kitchen">Kitchen</button>
+                        <button class="room-btn" data-room="office">Office</button>
+                    </div>
+                </div>
+
+                <div class="design-section">
+                    <h3>Select Color Scheme</h3>
+                    <div class="color-schemes">
+                        <div class="color-scheme scheme-modern active" data-scheme="modern"></div>
+                        <div class="color-scheme scheme-warm" data-scheme="warm"></div>
+                        <div class="color-scheme scheme-nature" data-scheme="nature"></div>
+                        <div class="color-scheme scheme-luxury" data-scheme="luxury"></div>
+                    </div>
+                </div>
+
+                <div class="design-section">
+                    <h3>Add Furniture</h3>
+                    <div class="furniture-options">
+                        <div class="furniture-item" data-furniture="sofa">
+                            <i>🛋️</i>
+                            <span>Sofa</span>
+                        </div>
+                        <div class="furniture-item" data-furniture="table">
+                            <i>🪑</i>
+                            <span>Table</span>
+                        </div>
+                        <div class="furniture-item" data-furniture="storage">
+                            <i>🗄️</i>
+                            <span>Storage</span>
+                        </div>
+                        <div class="furniture-item" data-furniture="lighting">
+                            <i>💡</i>
+                            <span>Lighting</span>
+                        </div>
+                        <div class="furniture-item" data-furniture="decor">
+                            <i>🖼️</i>
+                            <span>Decor</span>
+                        </div>
+                        <div class="furniture-item" data-furniture="plants">
+                            <i>🪴</i>
+                            <span>Plants</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="design-actions">
+                    <button class="design-btn save-design">Save Design</button>
+                    <button class="design-btn reset-design">Reset</button>
+                </div>
+            </div>
+
+            <div class="design-preview reveal fade-right">
+                <div class="preview-header">
+                    <h3>Your Custom Space</h3>
+                    <div class="preview-info">
+                        <span>Room: <strong id="selected-room">Living Room</strong></span>
+                        <span>Style: <strong id="selected-style">Modern</strong></span>
+                    </div>
+                </div>
+                <div class="preview-content">
+                    <div class="room-visualization">
+                        <div class="room-base">
+                            <div class="room-walls"></div>
+                            <div class="room-floor"></div>
+                            <div class="furniture-container">
+                                <div class="furniture-placeholder" data-slot="1">+</div>
+                                <div class="furniture-placeholder" data-slot="2">+</div>
+                                <div class="furniture-placeholder" data-slot="3">+</div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -1982,6 +2390,223 @@
             }
         `;
         document.head.appendChild(style);
+
+        // Design Yourself Functionality
+        const designSection = {
+            selectedRoom: 'living',
+            selectedScheme: 'modern',
+            selectedFurniture: [],
+            
+            init() {
+                this.setupRoomButtons();
+                this.setupColorSchemes();
+                this.setupFurniture();
+                this.setupActions();
+                this.updatePreview();
+            },
+
+            setupRoomButtons() {
+                const roomBtns = document.querySelectorAll('.room-btn');
+                roomBtns.forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        roomBtns.forEach(b => b.classList.remove('active'));
+                        btn.classList.add('active');
+                        this.selectedRoom = btn.dataset.room;
+                        this.updatePreview();
+                    });
+                });
+            },
+
+            setupColorSchemes() {
+                const colorSchemes = document.querySelectorAll('.color-scheme');
+                const schemeColors = {
+                    modern: 'linear-gradient(135deg, #2c3e50 0%, #34495e 50%, #95a5a6 100%)',
+                    warm: 'linear-gradient(135deg, #e67e22 0%, #f39c12 50%, #f1c40f 100%)',
+                    nature: 'linear-gradient(135deg, #27ae60 0%, #2ecc71 50%, #1abc9c 100%)',
+                    luxury: 'linear-gradient(135deg, #8e44ad 0%, #9b59b6 50%, #e8a5b7 100%)'
+                };
+
+                colorSchemes.forEach(scheme => {
+                    scheme.addEventListener('click', () => {
+                        colorSchemes.forEach(s => s.classList.remove('active'));
+                        scheme.classList.add('active');
+                        this.selectedScheme = scheme.dataset.scheme;
+                        
+                        // Update room walls color
+                        const roomWalls = document.querySelector('.room-walls');
+                        roomWalls.style.background = schemeColors[this.selectedScheme];
+                        
+                        this.updatePreview();
+                    });
+                });
+            },
+
+            setupFurniture() {
+                const furnitureItems = document.querySelectorAll('.furniture-item');
+                const furniturePlaceholders = document.querySelectorAll('.furniture-placeholder');
+                
+                furnitureItems.forEach(item => {
+                    item.addEventListener('click', () => {
+                        item.classList.toggle('active');
+                        const furniture = item.dataset.furniture;
+                        const icon = item.querySelector('i').textContent;
+                        
+                        if (item.classList.contains('active')) {
+                            // Add to first empty slot
+                            const emptySlot = Array.from(furniturePlaceholders).find(
+                                slot => !slot.classList.contains('filled')
+                            );
+                            
+                            if (emptySlot) {
+                                emptySlot.textContent = icon;
+                                emptySlot.classList.add('filled');
+                                emptySlot.dataset.furniture = furniture;
+                                this.selectedFurniture.push(furniture);
+                            } else {
+                                item.classList.remove('active');
+                                alert('All furniture slots are filled!');
+                            }
+                        } else {
+                            // Remove from slots
+                            furniturePlaceholders.forEach(slot => {
+                                if (slot.dataset.furniture === furniture) {
+                                    slot.textContent = '+';
+                                    slot.classList.remove('filled');
+                                    delete slot.dataset.furniture;
+                                }
+                            });
+                            this.selectedFurniture = this.selectedFurniture.filter(f => f !== furniture);
+                        }
+                    });
+                });
+
+                // Allow removing furniture by clicking on slots
+                furniturePlaceholders.forEach(slot => {
+                    slot.addEventListener('click', () => {
+                        if (slot.classList.contains('filled')) {
+                            const furniture = slot.dataset.furniture;
+                            slot.textContent = '+';
+                            slot.classList.remove('filled');
+                            delete slot.dataset.furniture;
+                            
+                            // Deactivate corresponding furniture item
+                            const furnitureItem = document.querySelector(`.furniture-item[data-furniture="${furniture}"]`);
+                            if (furnitureItem) {
+                                furnitureItem.classList.remove('active');
+                            }
+                            
+                            this.selectedFurniture = this.selectedFurniture.filter(f => f !== furniture);
+                        }
+                    });
+                });
+            },
+
+            setupActions() {
+                const saveBtn = document.querySelector('.save-design');
+                const resetBtn = document.querySelector('.reset-design');
+
+                saveBtn.addEventListener('click', () => {
+                    const design = {
+                        room: this.selectedRoom,
+                        scheme: this.selectedScheme,
+                        furniture: this.selectedFurniture,
+                        timestamp: new Date().toISOString()
+                    };
+
+                    // Simulate saving
+                    console.log('Saving design:', design);
+                    
+                    // Show success message
+                    const originalText = saveBtn.textContent;
+                    saveBtn.textContent = 'Design Saved! ✓';
+                    saveBtn.style.background = 'linear-gradient(135deg, #27ae60, #2ecc71)';
+                    
+                    setTimeout(() => {
+                        saveBtn.textContent = originalText;
+                        saveBtn.style.background = '';
+                        
+                        // Download design as JSON
+                        const dataStr = JSON.stringify(design, null, 2);
+                        const dataUri = 'data:application/json;charset=utf-8,'+ encodeURIComponent(dataStr);
+                        
+                        const exportFileDefaultName = `refit-design-${this.selectedRoom}-${Date.now()}.json`;
+                        
+                        const linkElement = document.createElement('a');
+                        linkElement.setAttribute('href', dataUri);
+                        linkElement.setAttribute('download', exportFileDefaultName);
+                        linkElement.click();
+                    }, 2000);
+                });
+
+                resetBtn.addEventListener('click', () => {
+                    if (confirm('Are you sure you want to reset your design?')) {
+                        // Reset selections
+                        this.selectedRoom = 'living';
+                        this.selectedScheme = 'modern';
+                        this.selectedFurniture = [];
+
+                        // Reset UI
+                        document.querySelectorAll('.room-btn').forEach(btn => {
+                            btn.classList.toggle('active', btn.dataset.room === 'living');
+                        });
+
+                        document.querySelectorAll('.color-scheme').forEach(scheme => {
+                            scheme.classList.toggle('active', scheme.dataset.scheme === 'modern');
+                        });
+
+                        document.querySelectorAll('.furniture-item').forEach(item => {
+                            item.classList.remove('active');
+                        });
+
+                        document.querySelectorAll('.furniture-placeholder').forEach(slot => {
+                            slot.textContent = '+';
+                            slot.classList.remove('filled');
+                            delete slot.dataset.furniture;
+                        });
+
+                        // Reset room walls
+                        const roomWalls = document.querySelector('.room-walls');
+                        roomWalls.style.background = 'linear-gradient(135deg, #2c3e50 0%, #34495e 50%, #95a5a6 100%)';
+
+                        this.updatePreview();
+                    }
+                });
+            },
+
+            updatePreview() {
+                const roomText = document.getElementById('selected-room');
+                const styleText = document.getElementById('selected-style');
+                
+                const roomNames = {
+                    living: 'Living Room',
+                    bedroom: 'Bedroom',
+                    kitchen: 'Kitchen',
+                    office: 'Office'
+                };
+
+                const styleNames = {
+                    modern: 'Modern',
+                    warm: 'Warm & Cozy',
+                    nature: 'Natural',
+                    luxury: 'Luxury'
+                };
+
+                roomText.textContent = roomNames[this.selectedRoom];
+                styleText.textContent = styleNames[this.selectedScheme];
+
+                // Animate preview update
+                const visualization = document.querySelector('.room-visualization');
+                visualization.style.opacity = '0.7';
+                setTimeout(() => {
+                    visualization.style.opacity = '1';
+                }, 300);
+            }
+        };
+
+        // Initialize design tool when DOM is ready
+        if (document.querySelector('.design-yourself')) {
+            designSection.init();
+        }
     </script>
 </body>
 </html>
