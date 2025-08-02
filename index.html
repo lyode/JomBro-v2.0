@@ -44,6 +44,7 @@
             --text-primary: #1a1a1a;
             --text-secondary: #666666;
             --border-color: rgba(232, 165, 183, 0.1);
+            --whatsapp-green: #25D366;
         }
 
         /* Dark mode variables */
@@ -94,11 +95,42 @@
             transition: background-color 0.3s ease, color 0.3s ease;
         }
 
-        /* User Account Button */
+        /* WhatsApp Button */
+        .whatsapp-btn {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 60px;
+            height: 60px;
+            background: var(--whatsapp-green);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 2rem;
+            box-shadow: var(--shadow-lg);
+            z-index: 1000;
+            transition: all 0.3s ease;
+            text-decoration: none;
+        }
+
+        .whatsapp-btn:hover {
+            transform: scale(1.1);
+            box-shadow: var(--shadow-xl);
+        }
+
+        .whatsapp-btn svg {
+            width: 30px;
+            height: 30px;
+            fill: white;
+        }
+
+        /* User Account Button - Mobile Responsive */
         .user-account-btn {
             position: fixed;
             top: 20px;
-            right: 200px;
+            right: 80px;
             z-index: 1002;
             background: var(--gradient);
             color: var(--white);
@@ -117,10 +149,15 @@
             box-shadow: var(--shadow-lg);
         }
 
+        /* Hide Language Switcher */
+        .language-switcher {
+            display: none !important;
+        }
+
         /* Theme Toggle */
         .theme-toggle {
             position: fixed;
-            top: 70px;
+            top: 20px;
             right: 20px;
             z-index: 1002;
             background: var(--bg-primary);
@@ -376,8 +413,8 @@
         .master-panel {
             position: fixed;
             top: 0;
-            right: -400px;
-            width: 400px;
+            right: -500px;
+            width: 500px;
             height: 100vh;
             background: var(--bg-primary);
             box-shadow: -10px 0 30px rgba(0, 0, 0, 0.1);
@@ -391,13 +428,44 @@
             right: 0;
         }
 
+        .master-panel-nav {
+            position: sticky;
+            top: 0;
+            background: var(--bg-primary);
+            border-bottom: 1px solid var(--border-color);
+            padding: 15px 30px;
+            z-index: 101;
+        }
+
+        .master-nav-tabs {
+            display: flex;
+            gap: 10px;
+            overflow-x: auto;
+        }
+
+        .master-nav-tab {
+            padding: 10px 20px;
+            background: var(--bg-tertiary);
+            border: none;
+            border-radius: 20px;
+            cursor: pointer;
+            font-size: 0.9rem;
+            font-weight: 600;
+            white-space: nowrap;
+            transition: all 0.3s ease;
+            color: var(--text-primary);
+        }
+
+        .master-nav-tab.active {
+            background: var(--gradient);
+            color: var(--white);
+        }
+
         .master-panel-header {
             background: var(--gradient);
             color: var(--white);
             padding: 30px;
-            position: sticky;
-            top: 0;
-            z-index: 100;
+            position: relative;
         }
 
         .master-panel-header h2 {
@@ -424,6 +492,18 @@
         .master-close:hover {
             background: rgba(255, 255, 255, 0.3);
             transform: rotate(90deg);
+        }
+
+        .master-content {
+            padding: 20px;
+        }
+
+        .master-tab-content {
+            display: none;
+        }
+
+        .master-tab-content.active {
+            display: block;
         }
 
         .master-section {
@@ -455,6 +535,8 @@
         .master-control input[type="text"],
         .master-control input[type="number"],
         .master-control input[type="color"],
+        .master-control input[type="email"],
+        .master-control input[type="tel"],
         .master-control select,
         .master-control textarea {
             width: 100%;
@@ -465,6 +547,11 @@
             transition: all 0.3s ease;
             background: var(--bg-secondary);
             color: var(--text-primary);
+        }
+
+        .master-control textarea {
+            min-height: 100px;
+            resize: vertical;
         }
 
         .master-control input[type="color"] {
@@ -490,6 +577,101 @@
             margin-left: 10px;
             color: var(--primary-pink);
             font-weight: 600;
+        }
+
+        /* Button Style Preview */
+        .button-preview {
+            padding: 30px;
+            background: var(--bg-tertiary);
+            border-radius: 15px;
+            text-align: center;
+            margin-top: 20px;
+        }
+
+        .preview-button {
+            padding: 15px 40px;
+            font-size: 1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+
+        /* Style Options Grid */
+        .style-options {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .style-option {
+            padding: 20px;
+            background: var(--bg-tertiary);
+            border: 2px solid transparent;
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            text-align: center;
+        }
+
+        .style-option:hover {
+            border-color: var(--primary-pink);
+        }
+
+        .style-option.selected {
+            border-color: var(--primary-pink);
+            background: var(--light-pink);
+        }
+
+        /* Portfolio Manager */
+        .portfolio-manager {
+            margin-bottom: 30px;
+        }
+
+        .portfolio-item-edit {
+            background: var(--bg-tertiary);
+            padding: 20px;
+            border-radius: 15px;
+            margin-bottom: 20px;
+            position: relative;
+        }
+
+        .portfolio-item-edit img {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+            border-radius: 10px;
+            margin-bottom: 15px;
+        }
+
+        .portfolio-remove-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            background: red;
+            color: white;
+            border: none;
+            width: 30px;
+            height: 30px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.2rem;
+        }
+
+        .add-portfolio-btn {
+            width: 100%;
+            padding: 40px;
+            background: var(--bg-tertiary);
+            border: 2px dashed var(--primary-pink);
+            border-radius: 15px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            color: var(--primary-pink);
+            font-weight: 600;
+        }
+
+        .add-portfolio-btn:hover {
+            background: var(--light-pink);
         }
 
         .master-button-group {
@@ -599,7 +781,7 @@
             opacity: 1;
         }
 
-        /* Animation Controls */
+        /* Animation Preview */
         .animation-preview {
             background: var(--bg-tertiary);
             padding: 20px;
@@ -616,43 +798,25 @@
             border-radius: 10px;
         }
 
-        /* Language Switcher Enhanced */
-        .language-switcher {
+        /* Notification Toast */
+        .notification-toast {
             position: fixed;
-            top: 20px;
-            right: 20px;
-            z-index: 1002;
-            display: flex;
-            gap: 10px;
-            background: var(--bg-primary);
-            padding: 8px;
-            border-radius: 25px;
-            backdrop-filter: blur(10px);
-            box-shadow: var(--shadow-md);
-            border: 1px solid var(--border-color);
-        }
-
-        .lang-btn {
-            padding: 8px 16px;
-            background: transparent;
-            border: 2px solid transparent;
-            border-radius: 20px;
-            cursor: pointer;
-            font-size: 0.9rem;
-            font-weight: 600;
-            transition: all 0.3s cubic-bezier(0.23, 1, 0.32, 1);
-            color: var(--text-primary);
-        }
-
-        .lang-btn:hover {
-            background: var(--light-pink);
-            transform: translateY(-2px);
-        }
-
-        .lang-btn.active {
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%) translateY(100px);
             background: var(--gradient);
             color: var(--white);
-            border-color: transparent;
+            padding: 20px 40px;
+            border-radius: 50px;
+            box-shadow: var(--shadow-lg);
+            z-index: 10003;
+            opacity: 0;
+            transition: all 0.4s ease;
+        }
+
+        .notification-toast.show {
+            transform: translateX(-50%) translateY(0);
+            opacity: 1;
         }
 
         /* Loading Screen */
@@ -1191,6 +1355,12 @@
             background: var(--gradient);
         }
 
+        .portfolio-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
         .portfolio-item:hover {
             transform: scale(1.03) translateY(-10px);
             box-shadow: var(--shadow-xl);
@@ -1546,27 +1716,6 @@
         .menu-toggle.active span:nth-child(3) {
             transform: rotate(-45deg) translate(10px, -10px);
             background: var(--primary-pink);
-        }
-
-        /* Notification Toast */
-        .notification-toast {
-            position: fixed;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%) translateY(100px);
-            background: var(--gradient);
-            color: var(--white);
-            padding: 20px 40px;
-            border-radius: 50px;
-            box-shadow: var(--shadow-lg);
-            z-index: 10003;
-            opacity: 0;
-            transition: all 0.4s ease;
-        }
-
-        .notification-toast.show {
-            transform: translateX(-50%) translateY(0);
-            opacity: 1;
         }
 
         /* AI Design Button */
@@ -2553,18 +2702,21 @@
         @media (max-width: 768px) {
             .user-account-btn {
                 right: auto;
-                left: 20px;
+                left: 140px;
                 top: 80px;
             }
 
             .theme-toggle {
-                top: 130px;
+                top: 80px;
+                right: 20px;
             }
 
-            .language-switcher {
-                top: auto;
-                bottom: 100px;
+            .whatsapp-btn {
+                bottom: 20px;
                 right: 20px;
+                width: 50px;
+                height: 50px;
+                font-size: 1.5rem;
             }
 
             .nav-links {
@@ -2724,6 +2876,11 @@
     <!-- Scroll Progress Bar -->
     <div class="scroll-progress" id="scrollProgress"></div>
 
+    <!-- WhatsApp Button -->
+    <a href="https://wa.me/60122145922" target="_blank" class="whatsapp-btn" aria-label="Chat on WhatsApp">
+        <svg viewBox="0 0 448 512"><path d="M380.9 97.1C339 55.1 283.2 32 223.9 32c-122.4 0-222 99.6-222 222 0 39.1 10.2 77.3 29.6 111L0 480l117.7-30.9c32.4 17.7 68.9 27 106.1 27h.1c122.3 0 224.1-99.6 224.1-222 0-59.3-25.2-115-67.1-157zm-157 341.6c-33.2 0-65.7-8.9-94-25.7l-6.7-4-69.8 18.3L72 359.2l-4.4-7c-18.5-29.4-28.2-63.3-28.2-98.2 0-101.7 82.8-184.5 184.6-184.5 49.3 0 95.6 19.2 130.4 54.1 34.8 34.9 56.2 81.2 56.1 130.5 0 101.8-84.9 184.6-186.6 184.6zm101.2-138.2c-5.5-2.8-32.8-16.2-37.9-18-5.1-1.9-8.8-2.8-12.5 2.8-3.7 5.6-14.3 18-17.6 21.8-3.2 3.7-6.5 4.2-12 1.4-32.6-16.3-54-29.1-75.5-66-5.7-9.8 5.7-9.1 16.3-30.3 1.8-3.7.9-6.9-.5-9.7-1.4-2.8-12.5-30.1-17.1-41.2-4.5-10.8-9.1-9.3-12.5-9.5-3.2-.2-6.9-.2-10.6-.2-3.7 0-9.7 1.4-14.8 6.9-5.1 5.6-19.4 19-19.4 46.3 0 27.3 19.9 53.7 22.6 57.4 2.8 3.7 39.1 59.7 94.8 83.8 35.2 15.2 49 16.5 66.6 13.9 10.7-1.6 32.8-13.4 37.4-26.4 4.6-13 4.6-24.1 3.2-26.4-1.3-2.5-5-3.9-10.5-6.6z"/></svg>
+    </a>
+
     <!-- User Account Button -->
     <button class="user-account-btn" id="userAccountBtn">
         <span id="userButtonText">Login / Register</span>
@@ -2733,13 +2890,6 @@
     <div class="theme-toggle">
         <button class="theme-toggle-btn active" data-theme="light">☀️</button>
         <button class="theme-toggle-btn" data-theme="dark">🌙</button>
-    </div>
-
-    <!-- Language Switcher -->
-    <div class="language-switcher">
-        <button class="lang-btn active" data-lang="en">EN</button>
-        <button class="lang-btn" data-lang="ms">MS</button>
-        <button class="lang-btn" data-lang="zh">中文</button>
     </div>
 
     <!-- User Modal -->
@@ -2784,14 +2934,6 @@
                     <label for="registerPhone">Phone Number</label>
                     <input type="tel" id="registerPhone" required>
                 </div>
-                <div class="form-group">
-                    <label for="registerLanguage">Preferred Language</label>
-                    <select id="registerLanguage">
-                        <option value="en">English</option>
-                        <option value="ms">Bahasa Malaysia</option>
-                        <option value="zh">中文</option>
-                    </select>
-                </div>
                 <button type="submit" class="form-button">Register</button>
             </form>
 
@@ -2802,7 +2944,6 @@
                     <h3 id="userName">User Name</h3>
                     <p id="userEmail">user@email.com</p>
                     <p id="userPhone">+60 12-345 6789</p>
-                    <p id="userLanguagePref">Language: English</p>
                 </div>
                 <button class="logout-button" id="logoutBtn">Logout</button>
             </div>
@@ -2817,135 +2958,353 @@
             <button class="master-close" id="masterClose">&times;</button>
         </div>
 
-        <!-- Color Palette Section -->
-        <div class="master-section">
-            <h3>Color Palette</h3>
-            <div class="master-control">
-                <label for="primaryColor">Primary Color</label>
-                <input type="color" id="primaryColor" value="#E8A5B7">
-            </div>
-            <div class="master-control">
-                <label for="darkColor">Dark Color</label>
-                <input type="color" id="darkColor" value="#D47F99">
-            </div>
-            <div class="master-control">
-                <label for="lightColor">Light Color</label>
-                <input type="color" id="lightColor" value="#F5E6EA">
+        <div class="master-panel-nav">
+            <div class="master-nav-tabs">
+                <button class="master-nav-tab active" data-tab="colors">Colors</button>
+                <button class="master-nav-tab" data-tab="typography">Typography</button>
+                <button class="master-nav-tab" data-tab="buttons">Buttons</button>
+                <button class="master-nav-tab" data-tab="content">Content</button>
+                <button class="master-nav-tab" data-tab="portfolio">Portfolio</button>
+                <button class="master-nav-tab" data-tab="about">About</button>
+                <button class="master-nav-tab" data-tab="contact">Contact</button>
+                <button class="master-nav-tab" data-tab="animations">Animations</button>
+                <button class="master-nav-tab" data-tab="layout">Layout</button>
+                <button class="master-nav-tab" data-tab="images">Images</button>
             </div>
         </div>
 
-        <!-- Typography Section -->
-        <div class="master-section">
-            <h3>Typography</h3>
-            <div class="master-control">
-                <label for="fontFamily">Font Family</label>
-                <select id="fontFamily">
-                    <option value="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">System Font</option>
-                    <option value="'Arial', sans-serif">Arial</option>
-                    <option value="'Georgia', serif">Georgia</option>
-                    <option value="'Courier New', monospace">Courier New</option>
-                    <option value="'Times New Roman', serif">Times New Roman</option>
-                </select>
-            </div>
-            <div class="master-control">
-                <label for="fontSize">Base Font Size</label>
-                <input type="range" id="fontSize" min="14" max="20" value="16">
-                <span class="range-value">16px</span>
-            </div>
-            <div class="master-control">
-                <label for="lineHeight">Line Height</label>
-                <input type="range" id="lineHeight" min="1.2" max="2" step="0.1" value="1.6">
-                <span class="range-value">1.6</span>
-            </div>
-        </div>
-
-        <!-- Content Section -->
-        <div class="master-section">
-            <h3>Hero Content</h3>
-            <div class="master-control">
-                <label for="heroTitle">Hero Title</label>
-                <input type="text" id="heroTitle" value="From Concept to Completion">
-            </div>
-            <div class="master-control">
-                <label for="heroSubtitle">Hero Subtitle</label>
-                <input type="text" id="heroSubtitle" value="Transforming Spaces, Creating Excellence">
-            </div>
-            <div class="master-control">
-                <label for="ctaText">CTA Button Text</label>
-                <input type="text" id="ctaText" value="Explore Our Work">
-            </div>
-        </div>
-
-        <!-- Animation Section -->
-        <div class="master-section">
-            <h3>Animations</h3>
-            <div class="master-control">
-                <label for="animationSpeed">Animation Speed</label>
-                <input type="range" id="animationSpeed" min="0.5" max="3" step="0.1" value="1">
-                <span class="range-value">1x</span>
-            </div>
-            <div class="master-control">
-                <label for="animationType">Animation Type</label>
-                <select id="animationType">
-                    <option value="ease">Ease</option>
-                    <option value="ease-in">Ease In</option>
-                    <option value="ease-out">Ease Out</option>
-                    <option value="ease-in-out">Ease In Out</option>
-                    <option value="linear">Linear</option>
-                </select>
-            </div>
-            <div class="animation-preview">
-                <p>Animation Preview</p>
-                <div class="preview-box"></div>
-            </div>
-        </div>
-
-        <!-- Layout Section -->
-        <div class="master-section">
-            <h3>Layout & Spacing</h3>
-            <div class="master-control">
-                <label for="borderRadius">Border Radius</label>
-                <input type="range" id="borderRadius" min="0" max="50" value="25">
-                <span class="range-value">25px</span>
-            </div>
-            <div class="master-control">
-                <label for="sectionPadding">Section Padding</label>
-                <input type="range" id="sectionPadding" min="50" max="200" value="150">
-                <span class="range-value">150px</span>
-            </div>
-            <div class="master-control">
-                <label for="boxShadow">Shadow Intensity</label>
-                <input type="range" id="boxShadow" min="0" max="100" value="50">
-                <span class="range-value">50%</span>
-            </div>
-        </div>
-
-        <!-- Image Upload Section -->
-        <div class="master-section">
-            <h3>Images</h3>
-            <div class="master-control">
-                <label>Logo Image</label>
-                <div class="image-upload-area" id="logoUpload">
-                    <div class="upload-icon">📷</div>
-                    <p class="upload-text">Click or drag to upload logo</p>
-                    <input type="file" accept="image/*" hidden>
+        <div class="master-content">
+            <!-- Colors Tab -->
+            <div class="master-tab-content active" id="colorsTab">
+                <div class="master-section">
+                    <h3>Theme Colors</h3>
+                    <div class="master-control">
+                        <label for="primaryColor">Primary Color</label>
+                        <input type="color" id="primaryColor" value="#E8A5B7">
+                    </div>
+                    <div class="master-control">
+                        <label for="darkColor">Dark Color</label>
+                        <input type="color" id="darkColor" value="#D47F99">
+                    </div>
+                    <div class="master-control">
+                        <label for="lightColor">Light Color</label>
+                        <input type="color" id="lightColor" value="#F5E6EA">
+                    </div>
+                    <div class="master-control">
+                        <label for="accentColor">Accent Color</label>
+                        <input type="color" id="accentColor" value="#C05478">
+                    </div>
                 </div>
             </div>
-            <div class="master-control">
-                <label>Portfolio Images</label>
-                <div class="image-upload-area" id="portfolioUpload">
-                    <div class="upload-icon">🖼️</div>
-                    <p class="upload-text">Click or drag to upload portfolio images</p>
-                    <input type="file" accept="image/*" multiple hidden>
+
+            <!-- Typography Tab -->
+            <div class="master-tab-content" id="typographyTab">
+                <div class="master-section">
+                    <h3>Typography Settings</h3>
+                    <div class="master-control">
+                        <label for="fontFamily">Font Family</label>
+                        <select id="fontFamily">
+                            <option value="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">System Font</option>
+                            <option value="'Arial', sans-serif">Arial</option>
+                            <option value="'Georgia', serif">Georgia</option>
+                            <option value="'Courier New', monospace">Courier New</option>
+                            <option value="'Times New Roman', serif">Times New Roman</option>
+                        </select>
+                    </div>
+                    <div class="master-control">
+                        <label for="fontSize">Base Font Size</label>
+                        <input type="range" id="fontSize" min="14" max="20" value="16">
+                        <span class="range-value">16px</span>
+                    </div>
+                    <div class="master-control">
+                        <label for="lineHeight">Line Height</label>
+                        <input type="range" id="lineHeight" min="1.2" max="2" step="0.1" value="1.6">
+                        <span class="range-value">1.6</span>
+                    </div>
                 </div>
-                <div class="image-gallery" id="portfolioGallery"></div>
+            </div>
+
+            <!-- Buttons Tab -->
+            <div class="master-tab-content" id="buttonsTab">
+                <div class="master-section">
+                    <h3>Button Design</h3>
+                    <div class="master-control">
+                        <label>Button Style</label>
+                        <div class="style-options">
+                            <div class="style-option selected" data-style="filled">
+                                <span>Filled</span>
+                            </div>
+                            <div class="style-option" data-style="outline">
+                                <span>Outline</span>
+                            </div>
+                            <div class="style-option" data-style="ghost">
+                                <span>Ghost</span>
+                            </div>
+                            <div class="style-option" data-style="3d">
+                                <span>3D</span>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="master-control">
+                        <label for="buttonRadius">Button Border Radius</label>
+                        <input type="range" id="buttonRadius" min="0" max="50" value="25">
+                        <span class="range-value">25px</span>
+                    </div>
+                    <div class="master-control">
+                        <label>Button Shadow</label>
+                        <select id="buttonShadow">
+                            <option value="none">None</option>
+                            <option value="small">Small</option>
+                            <option value="medium" selected>Medium</option>
+                            <option value="large">Large</option>
+                            <option value="floating">Floating</option>
+                        </select>
+                    </div>
+                    <div class="master-control">
+                        <label>Button Animation</label>
+                        <select id="buttonAnimation">
+                            <option value="none">None</option>
+                            <option value="scale" selected>Scale</option>
+                            <option value="bounce">Bounce</option>
+                            <option value="pulse">Pulse</option>
+                            <option value="shake">Shake</option>
+                        </select>
+                    </div>
+                    <div class="button-preview">
+                        <button class="preview-button">Preview Button</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Content Tab -->
+            <div class="master-tab-content" id="contentTab">
+                <div class="master-section">
+                    <h3>Hero Content</h3>
+                    <div class="master-control">
+                        <label for="heroTitle">Hero Title</label>
+                        <input type="text" id="heroTitle" value="From Concept to Completion">
+                    </div>
+                    <div class="master-control">
+                        <label for="heroSubtitle">Hero Subtitle</label>
+                        <input type="text" id="heroSubtitle" value="Transforming Spaces, Creating Excellence">
+                    </div>
+                    <div class="master-control">
+                        <label for="ctaText">CTA Button Text</label>
+                        <input type="text" id="ctaText" value="Explore Our Work">
+                    </div>
+                </div>
+                <div class="master-section">
+                    <h3>Service Cards</h3>
+                    <div class="master-control">
+                        <label for="service1Title">Service 1 Title</label>
+                        <input type="text" id="service1Title" value="Maintenance Services">
+                    </div>
+                    <div class="master-control">
+                        <label for="service1Desc">Service 1 Description</label>
+                        <textarea id="service1Desc">Professional maintenance solutions to keep your spaces functioning perfectly and looking their best year-round.</textarea>
+                    </div>
+                    <div class="master-control">
+                        <label for="service2Title">Service 2 Title</label>
+                        <input type="text" id="service2Title" value="Interior Construction">
+                    </div>
+                    <div class="master-control">
+                        <label for="service2Desc">Service 2 Description</label>
+                        <textarea id="service2Desc">Expert architectural construction and renovation services that transform your vision into stunning reality.</textarea>
+                    </div>
+                    <div class="master-control">
+                        <label for="service3Title">Service 3 Title</label>
+                        <input type="text" id="service3Title" value="Design & Illustration">
+                    </div>
+                    <div class="master-control">
+                        <label for="service3Desc">Service 3 Description</label>
+                        <textarea id="service3Desc">Creative interior design and 3D illustration services to visualize and plan your perfect space with precision.</textarea>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Portfolio Tab -->
+            <div class="master-tab-content" id="portfolioTab">
+                <div class="master-section">
+                    <h3>Portfolio Management</h3>
+                    <div class="portfolio-manager">
+                        <div class="portfolio-item-edit">
+                            <button class="portfolio-remove-btn">&times;</button>
+                            <img src="" alt="Portfolio placeholder">
+                            <input type="text" placeholder="Project Title" value="Cath Kidston">
+                            <input type="text" placeholder="Project Description" value="Premium Retail Store Design">
+                        </div>
+                        <div class="portfolio-item-edit">
+                            <button class="portfolio-remove-btn">&times;</button>
+                            <img src="" alt="Portfolio placeholder">
+                            <input type="text" placeholder="Project Title" value="Tusan Ice Cream">
+                            <input type="text" placeholder="Project Description" value="Modern F&B Outlet Design">
+                        </div>
+                        <button class="add-portfolio-btn">+ Add New Portfolio Item</button>
+                    </div>
+                </div>
+            </div>
+
+            <!-- About Tab -->
+            <div class="master-tab-content" id="aboutTab">
+                <div class="master-section">
+                    <h3>About Section</h3>
+                    <div class="master-control">
+                        <label for="aboutTitle">About Title</label>
+                        <input type="text" id="aboutTitle" value="About Refit">
+                    </div>
+                    <div class="master-control">
+                        <label for="missionText">Mission Statement</label>
+                        <textarea id="missionText">To provide responsible and professional quality services as well as components and materials sale, lease, exchange and building management by constantly improving and ensuring business growth.</textarea>
+                    </div>
+                    <div class="master-control">
+                        <label for="visionText">Vision Statement</label>
+                        <textarea id="visionText">To gain customer trust and become a leading and competitive business aviation service provider in East and West Malaysia by offering innovative micro solutions team work management.</textarea>
+                    </div>
+                    <div class="master-control">
+                        <label>Company Values</label>
+                        <input type="text" placeholder="Value 1" value="Passion">
+                        <input type="text" placeholder="Value 1 Description" value="Continuous learning and innovation">
+                        <input type="text" placeholder="Value 2" value="Responsibility">
+                        <input type="text" placeholder="Value 2 Description" value="Honest and respectful service">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Contact Tab -->
+            <div class="master-tab-content" id="contactTab">
+                <div class="master-section">
+                    <h3>Contact Information</h3>
+                    <div class="master-control">
+                        <label for="companyAddress">Company Address</label>
+                        <textarea id="companyAddress">C-08-34, Centum @ Oasis Corporate Park,
+Oasis Damansara, No.2 Jalan PJU 1A/2,
+Ara Damansara, 47301 Petaling Jaya,
+Selangor, Malaysia</textarea>
+                    </div>
+                    <div class="master-control">
+                        <label for="companyEmail">Email</label>
+                        <input type="email" id="companyEmail" value="info@refitservices.com">
+                    </div>
+                    <div class="master-control">
+                        <label for="companyPhone">Phone</label>
+                        <input type="tel" id="companyPhone" value="+60 3-1234 5678">
+                    </div>
+                    <div class="master-control">
+                        <label for="whatsappNumber">WhatsApp Number</label>
+                        <input type="tel" id="whatsappNumber" value="+60122145922">
+                    </div>
+                </div>
+            </div>
+
+            <!-- Animations Tab -->
+            <div class="master-tab-content" id="animationsTab">
+                <div class="master-section">
+                    <h3>Animation Settings</h3>
+                    <div class="master-control">
+                        <label for="animationSpeed">Animation Speed</label>
+                        <input type="range" id="animationSpeed" min="0.5" max="3" step="0.1" value="1">
+                        <span class="range-value">1x</span>
+                    </div>
+                    <div class="master-control">
+                        <label for="animationType">Animation Type</label>
+                        <select id="animationType">
+                            <option value="ease">Ease</option>
+                            <option value="ease-in">Ease In</option>
+                            <option value="ease-out">Ease Out</option>
+                            <option value="ease-in-out">Ease In Out</option>
+                            <option value="linear">Linear</option>
+                        </select>
+                    </div>
+                    <div class="master-control">
+                        <label>Enable/Disable Animations</label>
+                        <select id="animationToggle">
+                            <option value="enabled">Enabled</option>
+                            <option value="disabled">Disabled</option>
+                        </select>
+                    </div>
+                    <div class="animation-preview">
+                        <p>Animation Preview</p>
+                        <div class="preview-box"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Layout Tab -->
+            <div class="master-tab-content" id="layoutTab">
+                <div class="master-section">
+                    <h3>Layout & Spacing</h3>
+                    <div class="master-control">
+                        <label for="borderRadius">Global Border Radius</label>
+                        <input type="range" id="borderRadius" min="0" max="50" value="25">
+                        <span class="range-value">25px</span>
+                    </div>
+                    <div class="master-control">
+                        <label for="sectionPadding">Section Padding</label>
+                        <input type="range" id="sectionPadding" min="50" max="200" value="150">
+                        <span class="range-value">150px</span>
+                    </div>
+                    <div class="master-control">
+                        <label for="boxShadow">Shadow Intensity</label>
+                        <input type="range" id="boxShadow" min="0" max="100" value="50">
+                        <span class="range-value">50%</span>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Images Tab -->
+            <div class="master-tab-content" id="imagesTab">
+                <div class="master-section">
+                    <h3>Logo & Branding</h3>
+                    <div class="master-control">
+                        <label>Logo Image</label>
+                        <div class="image-upload-area" id="logoUpload">
+                            <div class="upload-icon">📷</div>
+                            <p class="upload-text">Click or drag to upload logo</p>
+                            <input type="file" accept="image/*" hidden>
+                        </div>
+                    </div>
+                    <div class="master-control">
+                        <label>Favicon</label>
+                        <div class="image-upload-area" id="faviconUpload">
+                            <div class="upload-icon">🌟</div>
+                            <p class="upload-text">Upload favicon (32x32)</p>
+                            <input type="file" accept="image/*" hidden>
+                        </div>
+                    </div>
+                </div>
+                <div class="master-section">
+                    <h3>Service Icons</h3>
+                    <div class="master-control">
+                        <label>Service 1 Icon</label>
+                        <div class="image-upload-area" id="service1Icon">
+                            <div class="upload-icon">🔧</div>
+                            <p class="upload-text">Upload or choose icon</p>
+                            <input type="file" accept="image/*" hidden>
+                        </div>
+                    </div>
+                    <div class="master-control">
+                        <label>Service 2 Icon</label>
+                        <div class="image-upload-area" id="service2Icon">
+                            <div class="upload-icon">🏗️</div>
+                            <p class="upload-text">Upload or choose icon</p>
+                            <input type="file" accept="image/*" hidden>
+                        </div>
+                    </div>
+                    <div class="master-control">
+                        <label>Service 3 Icon</label>
+                        <div class="image-upload-area" id="service3Icon">
+                            <div class="upload-icon">🎨</div>
+                            <p class="upload-text">Upload or choose icon</p>
+                            <input type="file" accept="image/*" hidden>
+                        </div>
+                    </div>
+                </div>
             </div>
         </div>
 
-        <!-- Master Controls -->
         <div class="master-section">
             <div class="master-button-group">
-                <button class="master-button save" id="masterSave">Save Changes</button>
+                <button class="master-button save" id="masterSave">Save All Changes</button>
                 <button class="master-button reset" id="masterReset">Reset to Default</button>
             </div>
         </div>
@@ -2969,12 +3328,12 @@
         <div class="nav-container">
             <div class="logo">refit</div>
             <ul class="nav-links">
-                <li><a href="#home" class="active" data-translate="nav.home">Home</a></li>
-                <li><a href="#services" data-translate="nav.services">Services</a></li>
-                <li><a href="#about" data-translate="nav.about">About</a></li>
-                <li><a href="#portfolio" data-translate="nav.portfolio">Portfolio</a></li>
-                <li><a href="#process" data-translate="nav.process">Process</a></li>
-                <li><a href="#contact" data-translate="nav.contact">Contact</a></li>
+                <li><a href="#home" class="active">Home</a></li>
+                <li><a href="#services">Services</a></li>
+                <li><a href="#about">About</a></li>
+                <li><a href="#portfolio">Portfolio</a></li>
+                <li><a href="#process">Process</a></li>
+                <li><a href="#contact">Contact</a></li>
             </ul>
             <div class="menu-toggle">
                 <span></span>
@@ -2987,9 +3346,9 @@
     <!-- Hero Section -->
     <section id="home" class="hero">
         <div class="hero-content">
-            <h1><span data-translate="hero.from">From</span> <span data-translate="hero.concept">Concept</span> <span data-translate="hero.to">to</span> <span data-translate="hero.completion">Completion</span></h1>
-            <p data-translate="hero.subtitle">Transforming Spaces, Creating Excellence</p>
-            <a href="#portfolio" class="cta-button"><span data-translate="hero.cta">Explore Our Work</span></a>
+            <h1><span>From</span> <span>Concept</span> <span>to</span> <span>Completion</span></h1>
+            <p>Transforming Spaces, Creating Excellence</p>
+            <a href="#portfolio" class="cta-button"><span>Explore Our Work</span></a>
             <button class="ai-design-button" onclick="openAIDesigner()">
                 <span class="ai-icon">🤖</span>
                 <span>Try Our AI Home Designer</span>
@@ -2999,22 +3358,22 @@
 
     <!-- Services Section -->
     <section id="services" class="services">
-        <h2 class="section-title" data-translate="services.title">What We Do</h2>
+        <h2 class="section-title">What We Do</h2>
         <div class="services-grid">
             <div class="service-card">
                 <div class="service-icon">🔧</div>
-                <h3 data-translate="services.maintenance.title">Maintenance Services</h3>
-                <p data-translate="services.maintenance.desc">Professional maintenance solutions to keep your spaces functioning perfectly and looking their best year-round.</p>
+                <h3>Maintenance Services</h3>
+                <p>Professional maintenance solutions to keep your spaces functioning perfectly and looking their best year-round.</p>
             </div>
             <div class="service-card">
                 <div class="service-icon">🏗️</div>
-                <h3 data-translate="services.construction.title">Interior Construction</h3>
-                <p data-translate="services.construction.desc">Expert architectural construction and renovation services that transform your vision into stunning reality.</p>
+                <h3>Interior Construction</h3>
+                <p>Expert architectural construction and renovation services that transform your vision into stunning reality.</p>
             </div>
             <div class="service-card">
                 <div class="service-icon">🎨</div>
-                <h3 data-translate="services.design.title">Design & Illustration</h3>
-                <p data-translate="services.design.desc">Creative interior design and 3D illustration services to visualize and plan your perfect space with precision.</p>
+                <h3>Design & Illustration</h3>
+                <p>Creative interior design and 3D illustration services to visualize and plan your perfect space with precision.</p>
             </div>
         </div>
     </section>
@@ -3023,30 +3382,30 @@
     <section id="about" class="about">
         <div class="about-content">
             <div class="about-text">
-                <h2 data-translate="about.title">About <span>Refit</span></h2>
-                <p data-translate="about.mission"><strong>Our Mission:</strong> To provide responsible and professional quality services as well as components and materials sale, lease, exchange and building management by constantly improving and ensuring business growth.</p>
-                <p data-translate="about.vision"><strong>Our Vision:</strong> To gain customer trust and become a leading and competitive business aviation service provider in East and West Malaysia by offering innovative micro solutions team work management.</p>
+                <h2>About <span>Refit</span></h2>
+                <p><strong>Our Mission:</strong> To provide responsible and professional quality services as well as components and materials sale, lease, exchange and building management by constantly improving and ensuring business growth.</p>
+                <p><strong>Our Vision:</strong> To gain customer trust and become a leading and competitive business aviation service provider in East and West Malaysia by offering innovative micro solutions team work management.</p>
                 <div class="values-grid">
                     <div class="value-item">
-                        <h4 data-translate="values.passion.title">Passion</h4>
-                        <p data-translate="values.passion.desc">Continuous learning and innovation</p>
+                        <h4>Passion</h4>
+                        <p>Continuous learning and innovation</p>
                     </div>
                     <div class="value-item">
-                        <h4 data-translate="values.responsibility.title">Responsibility</h4>
-                        <p data-translate="values.responsibility.desc">Honest and respectful service</p>
+                        <h4>Responsibility</h4>
+                        <p>Honest and respectful service</p>
                     </div>
                     <div class="value-item">
-                        <h4 data-translate="values.innovative.title">Innovative</h4>
-                        <p data-translate="values.innovative.desc">Constant improvement</p>
+                        <h4>Innovative</h4>
+                        <p>Constant improvement</p>
                     </div>
                     <div class="value-item">
-                        <h4 data-translate="values.respect.title">Respect</h4>
-                        <p data-translate="values.respect.desc">Valuing relationships</p>
+                        <h4>Respect</h4>
+                        <p>Valuing relationships</p>
                     </div>
                 </div>
             </div>
             <div class="about-image">
-                <div class="about-image-content" data-translate="about.excellence">
+                <div class="about-image-content">
                     Excellence in Every Detail
                 </div>
             </div>
@@ -3077,48 +3436,48 @@
 
     <!-- Portfolio Section -->
     <section id="portfolio" class="portfolio">
-        <h2 class="section-title" data-translate="portfolio.title">Our Portfolio</h2>
+        <h2 class="section-title">Our Portfolio</h2>
         <div class="filter-buttons">
-            <button class="filter-btn active" data-filter="all"><span data-translate="portfolio.filter.all">All Projects</span></button>
-            <button class="filter-btn" data-filter="commercial"><span data-translate="portfolio.filter.commercial">Commercial</span></button>
-            <button class="filter-btn" data-filter="residential"><span data-translate="portfolio.filter.residential">Residential</span></button>
-            <button class="filter-btn" data-filter="maintenance"><span data-translate="portfolio.filter.maintenance">Maintenance</span></button>
+            <button class="filter-btn active" data-filter="all"><span>All Projects</span></button>
+            <button class="filter-btn" data-filter="commercial"><span>Commercial</span></button>
+            <button class="filter-btn" data-filter="residential"><span>Residential</span></button>
+            <button class="filter-btn" data-filter="maintenance"><span>Maintenance</span></button>
         </div>
         <div class="portfolio-grid">
             <div class="portfolio-item" data-category="commercial">
                 <div class="portfolio-overlay">
                     <h3>Cath Kidston</h3>
-                    <p data-translate="portfolio.retail">Premium Retail Store Design</p>
+                    <p>Premium Retail Store Design</p>
                 </div>
             </div>
             <div class="portfolio-item" data-category="commercial">
                 <div class="portfolio-overlay">
                     <h3>Tusan Ice Cream</h3>
-                    <p data-translate="portfolio.fnb">Modern F&B Outlet Design</p>
+                    <p>Modern F&B Outlet Design</p>
                 </div>
             </div>
             <div class="portfolio-item" data-category="commercial">
                 <div class="portfolio-overlay">
                     <h3>Bungkus Kaw Kaw</h3>
-                    <p data-translate="portfolio.restaurant">Contemporary Restaurant Interior</p>
+                    <p>Contemporary Restaurant Interior</p>
                 </div>
             </div>
             <div class="portfolio-item" data-category="residential">
                 <div class="portfolio-overlay">
-                    <h3 data-translate="portfolio.apartment.title">Luxury Apartment</h3>
-                    <p data-translate="portfolio.apartment.desc">Modern Residential Design</p>
+                    <h3>Luxury Apartment</h3>
+                    <p>Modern Residential Design</p>
                 </div>
             </div>
             <div class="portfolio-item" data-category="commercial">
                 <div class="portfolio-overlay">
-                    <h3 data-translate="portfolio.office.title">Corporate Office</h3>
-                    <p data-translate="portfolio.office.desc">Professional Workspace Interior</p>
+                    <h3>Corporate Office</h3>
+                    <p>Professional Workspace Interior</p>
                 </div>
             </div>
             <div class="portfolio-item" data-category="maintenance">
                 <div class="portfolio-overlay">
                     <h3>Topshop & Topman</h3>
-                    <p data-translate="portfolio.maintenance.desc">Retail Maintenance Excellence</p>
+                    <p>Retail Maintenance Excellence</p>
                 </div>
             </div>
         </div>
@@ -3126,42 +3485,42 @@
 
     <!-- Process Section -->
     <section id="process" class="process">
-        <h2 class="section-title" data-translate="process.title">Our Process</h2>
+        <h2 class="section-title">Our Process</h2>
         <div class="process-timeline">
             <div class="process-item">
                 <div class="process-number">1</div>
-                <h3 data-translate="process.planning.title">Planning</h3>
-                <p data-translate="process.planning.desc">Setting performance objectives & developing strategic decisions on how to achieve them</p>
+                <h3>Planning</h3>
+                <p>Setting performance objectives & developing strategic decisions on how to achieve them</p>
             </div>
             <div class="process-item">
                 <div class="process-number">2</div>
-                <h3 data-translate="process.organizing.title">Organizing</h3>
-                <p data-translate="process.organizing.desc">Creating structure: Setting tasks, arranging resources & coordinating activities</p>
+                <h3>Organizing</h3>
+                <p>Creating structure: Setting tasks, arranging resources & coordinating activities</p>
             </div>
             <div class="process-item">
                 <div class="process-number">3</div>
-                <h3 data-translate="process.implementing.title">Implementing</h3>
-                <p data-translate="process.implementing.desc">Executing the plans to meet the set performance objectives with precision</p>
+                <h3>Implementing</h3>
+                <p>Executing the plans to meet the set performance objectives with precision</p>
             </div>
             <div class="process-item">
                 <div class="process-number">4</div>
-                <h3 data-translate="process.controlling.title">Controlling</h3>
-                <p data-translate="process.controlling.desc">Measuring performance & taking corrective actions to restore specifications</p>
+                <h3>Controlling</h3>
+                <p>Measuring performance & taking corrective actions to restore specifications</p>
             </div>
         </div>
     </section>
 
     <!-- Contact Section -->
     <section id="contact" class="contact">
-        <h2 class="section-title" data-translate="contact.title">Get In Touch</h2>
+        <h2 class="section-title">Get In Touch</h2>
         <div class="contact-content">
             <div class="contact-info">
-                <h3 data-translate="contact.subtitle">Let's Create Something <span>Amazing</span> Together</h3>
+                <h3>Let's Create Something <span>Amazing</span> Together</h3>
                 <div class="contact-item">
                     <i>📍</i>
                     <div>
-                        <p><strong data-translate="contact.address.label">Address:</strong></p>
-                        <p>C-08-34, Centum @ Oasis Corporate Park,<br>
+                        <p><strong>Address:</strong></p>
+                        <p id="contactAddress">C-08-34, Centum @ Oasis Corporate Park,<br>
                         Oasis Damansara, No.2 Jalan PJU 1A/2,<br>
                         Ara Damansara, 47301 Petaling Jaya,<br>
                         Selangor, Malaysia</p>
@@ -3169,27 +3528,27 @@
                 </div>
                 <div class="contact-item">
                     <i>📧</i>
-                    <p>info@refitservices.com</p>
+                    <p id="contactEmail">info@refitservices.com</p>
                 </div>
                 <div class="contact-item">
                     <i>📞</i>
-                    <p>+60 3-1234 5678</p>
+                    <p id="contactPhone">+60 3-1234 5678</p>
                 </div>
             </div>
             <form class="contact-form" id="contactForm">
                 <div class="form-group">
-                    <input type="text" placeholder="Your Name" required data-translate-placeholder="contact.form.name">
+                    <input type="text" placeholder="Your Name" required>
                 </div>
                 <div class="form-group">
-                    <input type="email" placeholder="Your Email" required data-translate-placeholder="contact.form.email">
+                    <input type="email" placeholder="Your Email" required>
                 </div>
                 <div class="form-group">
-                    <input type="text" placeholder="Subject" data-translate-placeholder="contact.form.subject">
+                    <input type="text" placeholder="Subject">
                 </div>
                 <div class="form-group">
-                    <textarea rows="5" placeholder="Your Message" required data-translate-placeholder="contact.form.message"></textarea>
+                    <textarea rows="5" placeholder="Your Message" required></textarea>
                 </div>
-                <button type="submit" class="submit-btn" data-translate="contact.form.submit">Send Message</button>
+                <button type="submit" class="submit-btn">Send Message</button>
             </form>
         </div>
     </section>
@@ -3242,7 +3601,9 @@
                         <button class="change-photo" onclick="changePhoto()">Change Photo</button>
                     </div>
                 </div>
-                <button class="ai-next-btn" onclick="nextStep()" disabled>Next Step</button>
+                <div class="ai-nav-buttons">
+                    <button class="ai-next-btn" onclick="nextStep()" disabled>Next Step</button>
+                </div>
             </div>
 
             <!-- Step 2: Select Room/Area -->
@@ -3267,7 +3628,7 @@
                     </div>
                     <div class="room-option" data-room="office">
                         <div class="room-icon">💼</div>
-                        <span>Office</span>
+                        <span>Home Office</span>
                     </div>
                     <div class="room-option" data-room="dining">
                         <div class="room-icon">🍽️</div>
@@ -3280,7 +3641,7 @@
                 </div>
             </div>
 
-            <!-- Step 3: Select Style -->
+            <!-- Step 3: Choose Style -->
             <div class="ai-step" id="step3">
                 <h3>Choose Your Design Style</h3>
                 <div class="style-grid">
@@ -3315,224 +3676,223 @@
                 </div>
             </div>
 
-            <!-- Step 4: Select Color Theme -->
+            <!-- Step 4: Color Theme -->
             <div class="ai-step" id="step4">
-                <h3>Select Color Theme</h3>
+                <h3>Select Your Color Theme</h3>
                 <div class="color-grid">
-                    <div class="color-option" data-theme="neutral">
+                    <div class="color-option" data-colors="warm">
                         <div class="color-palette">
-                            <div class="color-swatch" style="background: #F5F5F5"></div>
-                            <div class="color-swatch" style="background: #E0E0E0"></div>
-                            <div class="color-swatch" style="background: #9E9E9E"></div>
-                            <div class="color-swatch" style="background: #424242"></div>
+                            <div class="color-swatch" style="background: #D4A574;"></div>
+                            <div class="color-swatch" style="background: #E7BC91;"></div>
+                            <div class="color-swatch" style="background: #FFF8E7;"></div>
                         </div>
-                        <span>Neutral Tones</span>
+                        <span>Warm & Cozy</span>
                     </div>
-                    <div class="color-option" data-theme="warm">
+                    <div class="color-option" data-colors="cool">
                         <div class="color-palette">
-                            <div class="color-swatch" style="background: #FFF3E0"></div>
-                            <div class="color-swatch" style="background: #FFB74D"></div>
-                            <div class="color-swatch" style="background: #F57C00"></div>
-                            <div class="color-swatch" style="background: #BF360C"></div>
+                            <div class="color-swatch" style="background: #5B8C9E;"></div>
+                            <div class="color-swatch" style="background: #8BBBD3;"></div>
+                            <div class="color-swatch" style="background: #E8F3F8;"></div>
                         </div>
-                        <span>Warm Palette</span>
+                        <span>Cool & Calm</span>
                     </div>
-                    <div class="color-option" data-theme="cool">
+                    <div class="color-option" data-colors="neutral">
                         <div class="color-palette">
-                            <div class="color-swatch" style="background: #E3F2FD"></div>
-                            <div class="color-swatch" style="background: #64B5F6"></div>
-                            <div class="color-swatch" style="background: #1976D2"></div>
-                            <div class="color-swatch" style="background: #0D47A1"></div>
+                            <div class="color-swatch" style="background: #A8A8A8;"></div>
+                            <div class="color-swatch" style="background: #D3D3D3;"></div>
+                            <div class="color-swatch" style="background: #F5F5F5;"></div>
                         </div>
-                        <span>Cool Blues</span>
+                        <span>Neutral & Timeless</span>
                     </div>
-                    <div class="color-option" data-theme="earth">
+                    <div class="color-option" data-colors="monochrome">
                         <div class="color-palette">
-                            <div class="color-swatch" style="background: #EFEBE9"></div>
-                            <div class="color-swatch" style="background: #A1887F"></div>
-                            <div class="color-swatch" style="background: #6D4C41"></div>
-                            <div class="color-swatch" style="background: #3E2723"></div>
-                        </div>
-                        <span>Earth Tones</span>
-                    </div>
-                    <div class="color-option" data-theme="monochrome">
-                        <div class="color-palette">
-                            <div class="color-swatch" style="background: #FFFFFF"></div>
-                            <div class="color-swatch" style="background: #BDBDBD"></div>
-                            <div class="color-swatch" style="background: #616161"></div>
-                            <div class="color-swatch" style="background: #000000"></div>
+                            <div class="color-swatch" style="background: #2C2C2C;"></div>
+                            <div class="color-swatch" style="background: #6B6B6B;"></div>
+                            <div class="color-swatch" style="background: #FFFFFF;"></div>
                         </div>
                         <span>Monochrome</span>
                     </div>
-                    <div class="color-option" data-theme="vibrant">
+                    <div class="color-option" data-colors="earthy">
                         <div class="color-palette">
-                            <div class="color-swatch" style="background: #FF6B6B"></div>
-                            <div class="color-swatch" style="background: #4ECDC4"></div>
-                            <div class="color-swatch" style="background: #45B7D1"></div>
-                            <div class="color-swatch" style="background: #F7DC6F"></div>
+                            <div class="color-swatch" style="background: #8B6B47;"></div>
+                            <div class="color-swatch" style="background: #A0826D;"></div>
+                            <div class="color-swatch" style="background: #FAF0E6;"></div>
                         </div>
-                        <span>Vibrant Mix</span>
+                        <span>Earthy & Natural</span>
+                    </div>
+                    <div class="color-option" data-colors="vibrant">
+                        <div class="color-palette">
+                            <div class="color-swatch" style="background: #FF6B6B;"></div>
+                            <div class="color-swatch" style="background: #4ECDC4;"></div>
+                            <div class="color-swatch" style="background: #45B7D1;"></div>
+                        </div>
+                        <span>Vibrant & Bold</span>
                     </div>
                 </div>
                 <div class="ai-nav-buttons">
                     <button class="ai-back-btn" onclick="previousStep()">Back</button>
-                    <button class="ai-generate-btn" onclick="generateDesign()">
+                    <button class="ai-generate-btn" onclick="generateDesign()" disabled>
                         <span class="generate-icon">✨</span>
-                        Generate Design
+                        <span>Generate Design</span>
                     </button>
                 </div>
             </div>
 
-            <!-- AI Result Screen -->
+            <!-- AI Result -->
             <div class="ai-result" id="aiResult" style="display: none;">
                 <h3>Your AI-Generated Design</h3>
                 <div class="result-container">
                     <div class="before-after">
                         <div class="result-image">
-                            <h4>Before</h4>
-                            <img id="beforeImage" alt="Before">
+                            <h4>Original Room</h4>
+                            <img id="originalImage" alt="Original room">
                         </div>
                         <div class="result-image">
-                            <h4>After</h4>
-                            <img id="afterImage" alt="After">
+                            <h4>AI Design Suggestion</h4>
                             <div class="ai-loading" id="aiLoading">
                                 <div class="loading-spinner"></div>
-                                <p>AI is creating your design...</p>
+                                <p>Creating your dream space...</p>
                             </div>
+                            <img id="aiGeneratedImage" style="display: none;" alt="AI generated design">
                         </div>
                     </div>
-                    
+
                     <div class="result-actions">
                         <button class="action-btn regenerate" onclick="regenerateDesign()">
-                            <span>🔄</span> Regenerate Design
+                            <span>🔄</span>
+                            <span>Try Different Design</span>
                         </button>
-                        <button class="action-btn budget" onclick="generateBudget()">
-                            <span>💰</span> Get Budget Quote
+                        <button class="action-btn budget" onclick="showBudgetQuote()">
+                            <span>💰</span>
+                            <span>Get Budget Quote</span>
+                        </button>
+                        <button class="action-btn ok" onclick="confirmDesign()">
+                            <span>👍</span>
+                            <span>I Like This Design</span>
                         </button>
                     </div>
 
-                    <!-- Budget Quote -->
+                    <!-- Budget Quote Section -->
                     <div class="budget-quote" id="budgetQuote" style="display: none;">
                         <h4>Estimated Budget Quote</h4>
                         <div class="quote-details">
                             <div class="quote-item">
                                 <span>Design & Planning</span>
-                                <span class="price">RM <span id="designPrice">2,500</span></span>
+                                <span class="price">RM 2,500</span>
                             </div>
                             <div class="quote-item">
-                                <span>Materials</span>
-                                <span class="price">RM <span id="materialsPrice">8,000</span></span>
+                                <span>Materials & Furnishing</span>
+                                <span class="price">RM 15,000</span>
                             </div>
                             <div class="quote-item">
                                 <span>Labor & Installation</span>
-                                <span class="price">RM <span id="laborPrice">4,500</span></span>
+                                <span class="price">RM 8,000</span>
+                            </div>
+                            <div class="quote-item">
+                                <span>Miscellaneous</span>
+                                <span class="price">RM 2,000</span>
                             </div>
                             <div class="quote-item total">
-                                <span>Total Estimate</span>
-                                <span class="price">RM <span id="totalPrice">15,000</span></span>
+                                <span>Total Estimated Cost</span>
+                                <span class="price">RM 27,500</span>
                             </div>
                         </div>
                         <div class="deposit-info">
-                            <p>Required Deposit (30%): <strong>RM <span id="depositAmount">4,500</span></strong></p>
+                            <p>Required Deposit: <strong>RM 5,500</strong> (20%)</p>
                         </div>
-                        <button class="action-btn ok" onclick="acceptBudget()">
-                            <span>👍</span> OK with Budget
+                        <button class="action-btn agree" onclick="agreeToQuote()">
+                            <span>✅</span>
+                            <span>Agree & Proceed</span>
                         </button>
                     </div>
 
                     <!-- Agreement Section -->
                     <div class="agreement-section" id="agreementSection" style="display: none;">
-                        <h4>Terms & Agreement</h4>
+                        <h4>Service Agreement</h4>
                         <div class="agreement-box">
-                            <p>By clicking "Agree", you confirm that:</p>
+                            <p><strong>Terms & Conditions:</strong></p>
                             <ul>
-                                <li>You accept the estimated budget quote</li>
-                                <li>You authorize Refit to proceed with the design</li>
-                                <li>You agree to pay 30% deposit to initiate the project</li>
-                                <li>Final costs may vary based on actual requirements</li>
+                                <li>20% deposit required upon agreement</li>
+                                <li>Balance payment in 3 installments</li>
+                                <li>Project duration: 6-8 weeks</li>
+                                <li>Includes 1 year warranty on workmanship</li>
+                                <li>Material warranty as per manufacturer</li>
                             </ul>
                         </div>
                         <div class="remarks-section">
-                            <label for="remarks">Additional Remarks (Optional):</label>
-                            <textarea id="remarks" placeholder="Any special requirements or notes..."></textarea>
+                            <label for="remarks">Any Special Remarks?</label>
+                            <textarea id="remarks" placeholder="Enter any special requirements or remarks..."></textarea>
                         </div>
-                        <button class="action-btn agree" onclick="agreeToTerms()">
-                            <span>✔️</span> Agree & Proceed
+                        <button class="action-btn pay-deposit" onclick="proceedToPayment()">
+                            <span>💳</span>
+                            <span>Pay Deposit</span>
                         </button>
                     </div>
 
                     <!-- Payment Section -->
                     <div class="payment-section" id="paymentSection" style="display: none;">
-                        <h4>Payment Details</h4>
                         <div class="payment-info">
-                            <p>Deposit Amount: <strong>RM <span class="deposit-display">4,500</span></strong></p>
-                            <p>Pay to: <strong>Refit Maintenance Services</strong></p>
-                            <p>Bank: <strong>RHB Bank</strong></p>
-                            <p>Account: <strong>21261100023558</strong></p>
+                            <p><strong>Deposit Amount:</strong> RM 5,500</p>
+                            <p><strong>Payment Reference:</strong> REF-2025-08-0001</p>
                         </div>
-                        
                         <div class="payment-methods">
                             <h5>Select Payment Method:</h5>
                             <div class="payment-options">
-                                <button class="payment-option" onclick="selectPayment('bank')">
+                                <div class="payment-option" data-method="bank">
                                     <span>🏦</span>
-                                    <span>Online Banking</span>
-                                </button>
-                                <button class="payment-option" onclick="selectPayment('card')">
+                                    <span>Bank Transfer</span>
+                                </div>
+                                <div class="payment-option" data-method="card">
                                     <span>💳</span>
                                     <span>Credit/Debit Card</span>
-                                </button>
+                                </div>
                             </div>
                         </div>
-
-                        <button class="action-btn pay-deposit" onclick="proceedToPayment()">
-                            <span>💸</span> Pay Deposit (30%)
+                        <button class="action-btn send-confirmation" onclick="uploadPaymentSlip()">
+                            <span>📤</span>
+                            <span>Upload Payment Slip</span>
                         </button>
                     </div>
 
-                    <!-- Payment Upload Section -->
+                    <!-- Payment Upload -->
                     <div class="payment-upload" id="paymentUpload" style="display: none;">
                         <h4>Upload Payment Confirmation</h4>
-                        <div class="upload-slip">
-                            <div class="slip-upload-box" onclick="document.getElementById('slipInput').click()">
-                                <span>📄</span>
-                                <p>Click to upload payment slip</p>
-                                <input type="file" id="slipInput" accept="image/*,.pdf" hidden>
-                            </div>
-                            <div class="slip-preview" id="slipPreview" style="display: none;">
-                                <img id="slipImage" alt="Payment slip">
-                                <p id="slipFileName"></p>
-                            </div>
+                        <div class="slip-upload-box" onclick="document.getElementById('slipInput').click()">
+                            <span>📸</span>
+                            <p>Click to upload payment slip</p>
+                            <input type="file" id="slipInput" accept="image/*" hidden>
                         </div>
-                        <button class="action-btn send-confirmation" onclick="sendConfirmation()">
-                            <span>📧</span> Send to Refit
+                        <div class="slip-preview" id="slipPreview" style="display: none;">
+                            <img id="slipImage" alt="Payment slip">
+                        </div>
+                        <button class="action-btn done" onclick="completeProcess()">
+                            <span>✅</span>
+                            <span>Complete Process</span>
                         </button>
                     </div>
 
                     <!-- Completion Section -->
                     <div class="completion-section" id="completionSection" style="display: none;">
-                        <div class="success-icon">✅</div>
+                        <div class="success-icon">🎉</div>
                         <h4>Thank You!</h4>
-                        <p>Your design request has been submitted successfully.</p>
-                        
+                        <p>Your AI home design request has been successfully submitted.</p>
                         <div class="completion-details">
-                            <h5>What happens next:</h5>
+                            <h5>What Happens Next?</h5>
                             <ul>
-                                <li>✓ Invoice and receipt have been generated</li>
-                                <li>✓ Confirmation email sent to your address</li>
-                                <li>✓ Our team will contact you within 24 hours</li>
-                                <li>✓ Site visit will be scheduled at your convenience</li>
+                                <li data-prefix="📞">Our design team will contact you within 24 hours</li>
+                                <li data-prefix="📋">Detailed project plan will be shared</li>
+                                <li data-prefix="🏠">Site visit will be scheduled</li>
+                                <li data-prefix="🎨">Final design adjustments as needed</li>
                             </ul>
                         </div>
-
                         <div class="ai-message">
                             <div class="message-bubble">
-                                <p>Hi! This is an automated message from Refit. We've received your design request and payment confirmation. Our design specialist will contact you within 24 hours to schedule a site visit and discuss your project in detail. Thank you for choosing Refit!</p>
+                                <p>We're excited to transform your space! Our team will be in touch soon to discuss your project in detail.</p>
                             </div>
                         </div>
-
-                        <button class="action-btn done" onclick="completeProcess()">
-                            <span>🏠</span> Done
+                        <button class="action-btn done" onclick="closeAIDesigner()">
+                            <span>🏠</span>
+                            <span>Back to Home</span>
                         </button>
                     </div>
                 </div>
@@ -3546,982 +3906,350 @@
             <div class="footer-grid">
                 <div class="footer-column">
                     <h4>About Refit</h4>
-                    <p>Professional maintenance, interior construction & renovation services in Malaysia. From concept to completion, we transform spaces with excellence.</p>
+                    <p>Professional maintenance, interior construction & renovation, and design services. Transforming spaces with passion and precision since 2013.</p>
                     <div class="social-links">
-                        <a href="#" aria-label="Facebook">f</a>
-                        <a href="#" aria-label="LinkedIn">in</a>
-                        <a href="#" aria-label="Instagram">ig</a>
-                        <a href="#" aria-label="Twitter">tw</a>
+                        <a href="#" aria-label="Facebook"><i>f</i></a>
+                        <a href="#" aria-label="Instagram"><i>📷</i></a>
+                        <a href="#" aria-label="LinkedIn"><i>in</i></a>
+                        <a href="#" aria-label="WhatsApp"><i>📱</i></a>
                     </div>
-                </div>
-                <div class="footer-column">
-                    <h4>Quick Links</h4>
-                    <ul>
-                        <li><a href="#services">Services</a></li>
-                        <li><a href="#about">About Us</a></li>
-                        <li><a href="#portfolio">Portfolio</a></li>
-                        <li><a href="#contact">Contact</a></li>
-                    </ul>
                 </div>
                 <div class="footer-column">
                     <h4>Services</h4>
                     <ul>
-                        <li><a href="#">Maintenance Services</a></li>
-                        <li><a href="#">Interior Construction</a></li>
-                        <li><a href="#">Design & Illustration</a></li>
-                        <li><a href="#">3D Concept Drawing</a></li>
+                        <li><a href="#services">Maintenance</a></li>
+                        <li><a href="#services">Interior Construction</a></li>
+                        <li><a href="#services">Renovation</a></li>
+                        <li><a href="#services">3D Design</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="#about">About Us</a></li>
+                        <li><a href="#portfolio">Portfolio</a></li>
+                        <li><a href="#process">Our Process</a></li>
+                        <li><a href="#contact">Contact</a></li>
                     </ul>
                 </div>
                 <div class="footer-column">
                     <h4>Contact Info</h4>
-                    <ul>
-                        <li><a href="tel:+60312345678">+60 3-1234 5678</a></li>
-                        <li><a href="mailto:info@refitservices.com">info@refitservices.com</a></li>
-                        <li><a href="#">Get Directions</a></li>
-                    </ul>
+                    <p>📍 Petaling Jaya, Selangor</p>
+                    <p>📧 info@refitservices.com</p>
+                    <p>📞 +60 3-1234 5678</p>
+                    <p>📱 +60 12-214 5922</p>
                 </div>
             </div>
             <div class="footer-bottom">
-                <p>&copy; 2024 Refit Maintenance Services. All rights reserved.</p>
-                <div class="footer-links">
-                    <a href="#">Privacy Policy</a>
-                    <a href="#">Terms of Service</a>
-                </div>
+                <p>&copy; 2025 Refit Maintenance Services. All rights reserved.</p>
+                <p>Crafted with ❤️ in Malaysia</p>
             </div>
         </div>
     </footer>
 
     <script>
-        // Master Admin User Check
-        const MASTER_EMAIL = 'admin@refitservices.com';
-        const MASTER_PASSWORD = 'refit2024master';
-
-        // Initialize local storage keys
-        const STORAGE_KEYS = {
-            USERS: 'refit_users',
-            CURRENT_USER: 'refit_current_user',
-            THEME: 'refit_theme',
-            LANGUAGE: 'refit_language',
-            SETTINGS: 'refit_settings'
-        };
-
-        // Translations object
-        const translations = {
-            en: {
-                nav: {
-                    home: "Home",
-                    services: "Services",
-                    about: "About",
-                    portfolio: "Portfolio",
-                    process: "Process",
-                    contact: "Contact"
-                },
-                hero: {
-                    from: "From",
-                    concept: "Concept",
-                    to: "to",
-                    completion: "Completion",
-                    subtitle: "Transforming Spaces, Creating Excellence",
-                    cta: "Explore Our Work"
-                },
-                services: {
-                    title: "What We Do",
-                    maintenance: {
-                        title: "Maintenance Services",
-                        desc: "Professional maintenance solutions to keep your spaces functioning perfectly and looking their best year-round."
-                    },
-                    construction: {
-                        title: "Interior Construction",
-                        desc: "Expert architectural construction and renovation services that transform your vision into stunning reality."
-                    },
-                    design: {
-                        title: "Design & Illustration",
-                        desc: "Creative interior design and 3D illustration services to visualize and plan your perfect space with precision."
-                    }
-                },
-                about: {
-                    title: "About",
-                    mission: "<strong>Our Mission:</strong> To provide responsible and professional quality services as well as components and materials sale, lease, exchange and building management by constantly improving and ensuring business growth.",
-                    vision: "<strong>Our Vision:</strong> To gain customer trust and become a leading and competitive business aviation service provider in East and West Malaysia by offering innovative micro solutions team work management.",
-                    excellence: "Excellence in Every Detail"
-                },
-                values: {
-                    passion: {
-                        title: "Passion",
-                        desc: "Continuous learning and innovation"
-                    },
-                    responsibility: {
-                        title: "Responsibility",
-                        desc: "Honest and respectful service"
-                    },
-                    innovative: {
-                        title: "Innovative",
-                        desc: "Constant improvement"
-                    },
-                    respect: {
-                        title: "Respect",
-                        desc: "Valuing relationships"
-                    }
-                },
-                portfolio: {
-                    title: "Our Portfolio",
-                    filter: {
-                        all: "All Projects",
-                        commercial: "Commercial",
-                        residential: "Residential",
-                        maintenance: "Maintenance"
-                    },
-                    retail: "Premium Retail Store Design",
-                    fnb: "Modern F&B Outlet Design",
-                    restaurant: "Contemporary Restaurant Interior",
-                    apartment: {
-                        title: "Luxury Apartment",
-                        desc: "Modern Residential Design"
-                    },
-                    office: {
-                        title: "Corporate Office",
-                        desc: "Professional Workspace Interior"
-                    },
-                    maintenance: {
-                        desc: "Retail Maintenance Excellence"
-                    }
-                },
-                process: {
-                    title: "Our Process",
-                    planning: {
-                        title: "Planning",
-                        desc: "Setting performance objectives & developing strategic decisions on how to achieve them"
-                    },
-                    organizing: {
-                        title: "Organizing",
-                        desc: "Creating structure: Setting tasks, arranging resources & coordinating activities"
-                    },
-                    implementing: {
-                        title: "Implementing",
-                        desc: "Executing the plans to meet the set performance objectives with precision"
-                    },
-                    controlling: {
-                        title: "Controlling",
-                        desc: "Measuring performance & taking corrective actions to restore specifications"
-                    }
-                },
-                contact: {
-                    title: "Get In Touch",
-                    subtitle: "Let's Create Something <span>Amazing</span> Together",
-                    address: {
-                        label: "Address:"
-                    },
-                    form: {
-                        name: "Your Name",
-                        email: "Your Email",
-                        subject: "Subject",
-                        message: "Your Message",
-                        submit: "Send Message"
-                    }
-                }
-            },
-            ms: {
-                nav: {
-                    home: "Laman Utama",
-                    services: "Perkhidmatan",
-                    about: "Tentang Kami",
-                    portfolio: "Portfolio",
-                    process: "Proses",
-                    contact: "Hubungi"
-                },
-                hero: {
-                    from: "Dari",
-                    concept: "Konsep",
-                    to: "ke",
-                    completion: "Penyiapan",
-                    subtitle: "Mengubah Ruang, Mencipta Kecemerlangan",
-                    cta: "Terokai Kerja Kami"
-                },
-                services: {
-                    title: "Apa Yang Kami Lakukan",
-                    maintenance: {
-                        title: "Perkhidmatan Penyelenggaraan",
-                        desc: "Penyelesaian penyelenggaraan profesional untuk memastikan ruang anda berfungsi dengan sempurna dan kelihatan terbaik sepanjang tahun."
-                    },
-                    construction: {
-                        title: "Pembinaan Dalaman",
-                        desc: "Perkhidmatan pembinaan dan pengubahsuaian seni bina pakar yang mengubah visi anda menjadi realiti yang menakjubkan."
-                    },
-                    design: {
-                        title: "Reka Bentuk & Ilustrasi",
-                        desc: "Perkhidmatan reka bentuk dalaman kreatif dan ilustrasi 3D untuk memvisualisasikan dan merancang ruang sempurna anda dengan tepat."
-                    }
-                }
-            },
-            zh: {
-                nav: {
-                    home: "首页",
-                    services: "服务",
-                    about: "关于我们",
-                    portfolio: "作品集",
-                    process: "流程",
-                    contact: "联系"
-                },
-                hero: {
-                    from: "从",
-                    concept: "概念",
-                    to: "到",
-                    completion: "完成",
-                    subtitle: "改造空间，创造卓越",
-                    cta: "探索我们的作品"
-                }
-            }
-        };
-
-        // Get saved language or default to English
-        let currentLang = localStorage.getItem(STORAGE_KEYS.LANGUAGE) || 'en';
-
-        // Initialize settings
-        function initializeSettings() {
-            const savedSettings = localStorage.getItem(STORAGE_KEYS.SETTINGS);
-            if (savedSettings) {
-                applySettings(JSON.parse(savedSettings));
-            }
-        }
-
-        // Apply settings
-        function applySettings(settings) {
-            const root = document.documentElement;
-            
-            if (settings.colors) {
-                root.style.setProperty('--primary-pink', settings.colors.primary);
-                root.style.setProperty('--dark-pink', settings.colors.dark);
-                root.style.setProperty('--light-pink', settings.colors.light);
-                document.getElementById('primaryColor').value = settings.colors.primary;
-                document.getElementById('darkColor').value = settings.colors.dark;
-                document.getElementById('lightColor').value = settings.colors.light;
-            }
-            
-            if (settings.typography) {
-                document.body.style.fontFamily = settings.typography.fontFamily;
-                document.body.style.fontSize = settings.typography.fontSize + 'px';
-                document.body.style.lineHeight = settings.typography.lineHeight;
-                document.getElementById('fontFamily').value = settings.typography.fontFamily;
-                document.getElementById('fontSize').value = settings.typography.fontSize;
-                document.getElementById('lineHeight').value = settings.typography.lineHeight;
-            }
-            
-            if (settings.content) {
-                if (settings.content.heroTitle) {
-                    document.querySelector('.hero h1').innerHTML = settings.content.heroTitle;
-                    document.getElementById('heroTitle').value = settings.content.heroTitle;
-                }
-                if (settings.content.heroSubtitle) {
-                    document.querySelector('.hero p').textContent = settings.content.heroSubtitle;
-                    document.getElementById('heroSubtitle').value = settings.content.heroSubtitle;
-                }
-                if (settings.content.ctaText) {
-                    document.querySelector('.cta-button span').textContent = settings.content.ctaText;
-                    document.getElementById('ctaText').value = settings.content.ctaText;
-                }
-            }
-            
-            if (settings.layout) {
-                root.style.setProperty('--border-radius', settings.layout.borderRadius + 'px');
-                const sections = document.querySelectorAll('section');
-                sections.forEach(section => {
-                    section.style.padding = `${settings.layout.sectionPadding}px 40px`;
-                });
-            }
-        }
-
-        // Language switching functionality
-        function translatePage(lang) {
-            currentLang = lang;
-            localStorage.setItem(STORAGE_KEYS.LANGUAGE, lang);
-            
-            const elements = document.querySelectorAll('[data-translate]');
-            elements.forEach(element => {
-                const keys = element.getAttribute('data-translate').split('.');
-                let translation = translations[lang];
-                
-                for (const key of keys) {
-                    if (translation && translation[key]) {
-                        translation = translation[key];
-                    }
-                }
-                
-                if (translation && typeof translation === 'string') {
-                    element.innerHTML = translation;
-                }
-            });
-
-            // Update placeholders
-            const placeholderElements = document.querySelectorAll('[data-translate-placeholder]');
-            placeholderElements.forEach(element => {
-                const keys = element.getAttribute('data-translate-placeholder').split('.');
-                let translation = translations[lang];
-                
-                for (const key of keys) {
-                    if (translation && translation[key]) {
-                        translation = translation[key];
-                    }
-                }
-                
-                if (translation && typeof translation === 'string') {
-                    element.placeholder = translation;
-                }
-            });
-        }
-
-        // Theme switching functionality
-        function setTheme(theme) {
-            if (theme === 'dark') {
-                document.body.classList.add('dark-mode');
-            } else {
-                document.body.classList.remove('dark-mode');
-            }
-            localStorage.setItem(STORAGE_KEYS.THEME, theme);
-        }
-
-        // User management
-        function getUsers() {
-            const users = localStorage.getItem(STORAGE_KEYS.USERS);
-            return users ? JSON.parse(users) : [];
-        }
-
-        function saveUsers(users) {
-            localStorage.setItem(STORAGE_KEYS.USERS, JSON.stringify(users));
-        }
-
-        function getCurrentUser() {
-            const user = localStorage.getItem(STORAGE_KEYS.CURRENT_USER);
-            return user ? JSON.parse(user) : null;
-        }
-
-        function setCurrentUser(user) {
-            if (user) {
-                localStorage.setItem(STORAGE_KEYS.CURRENT_USER, JSON.stringify(user));
-            } else {
-                localStorage.removeItem(STORAGE_KEYS.CURRENT_USER);
-            }
-        }
-
-        // Show notification
-        function showNotification(message) {
-            const toast = document.getElementById('notificationToast');
-            const text = document.getElementById('notificationText');
-            text.textContent = message;
-            toast.classList.add('show');
-            
+        // Loading Screen
+        window.addEventListener('load', function() {
             setTimeout(() => {
-                toast.classList.remove('show');
-            }, 3000);
-        }
+                document.querySelector('.loader-wrapper').classList.add('loaded');
+            }, 2000);
+        });
 
-        // Initialize page
-        document.addEventListener('DOMContentLoaded', () => {
-            // Apply saved theme
-            const savedTheme = localStorage.getItem(STORAGE_KEYS.THEME) || 'light';
-            setTheme(savedTheme);
-            document.querySelector(`[data-theme="${savedTheme}"]`).classList.add('active');
+        // Scroll Progress
+        window.addEventListener('scroll', () => {
+            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
+            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+            const scrolled = (winScroll / height) * 100;
+            document.getElementById('scrollProgress').style.width = scrolled + '%';
 
-            // Apply saved language
-            translatePage(currentLang);
-            document.querySelector(`[data-lang="${currentLang}"]`).classList.add('active');
-
-            // Initialize settings
-            initializeSettings();
-
-            // Check if user is logged in
-            const currentUser = getCurrentUser();
-            if (currentUser) {
-                updateUserUI(currentUser);
+            // Nav scroll effect
+            const nav = document.querySelector('nav');
+            if (window.scrollY > 50) {
+                nav.classList.add('scrolled');
+            } else {
+                nav.classList.remove('scrolled');
             }
+        });
 
-            // Loading animation
-            window.addEventListener('load', () => {
-                setTimeout(() => {
-                    document.querySelector('.loader-wrapper').classList.add('loaded');
-                }, 1500);
+        // Mobile Menu Toggle
+        const menuToggle = document.querySelector('.menu-toggle');
+        const navLinks = document.querySelector('.nav-links');
+
+        menuToggle.addEventListener('click', () => {
+            menuToggle.classList.toggle('active');
+            navLinks.classList.toggle('active');
+        });
+
+        // Active nav link
+        const navLinksItems = document.querySelectorAll('.nav-links a');
+        navLinksItems.forEach(link => {
+            link.addEventListener('click', (e) => {
+                navLinksItems.forEach(l => l.classList.remove('active'));
+                link.classList.add('active');
+                navLinks.classList.remove('active');
+                menuToggle.classList.remove('active');
             });
         });
 
-        // User Account Button
+        // Theme Toggle
+        const themeButtons = document.querySelectorAll('.theme-toggle-btn');
+        const body = document.body;
+
+        themeButtons.forEach(btn => {
+            btn.addEventListener('click', () => {
+                const theme = btn.dataset.theme;
+                if (theme === 'dark') {
+                    body.classList.add('dark-mode');
+                } else {
+                    body.classList.remove('dark-mode');
+                }
+                themeButtons.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                localStorage.setItem('theme', theme);
+            });
+        });
+
+        // Load saved theme
+        const savedTheme = localStorage.getItem('theme');
+        if (savedTheme === 'dark') {
+            body.classList.add('dark-mode');
+            document.querySelector('[data-theme="dark"]').classList.add('active');
+            document.querySelector('[data-theme="light"]').classList.remove('active');
+        }
+
+        // User Account
         const userAccountBtn = document.getElementById('userAccountBtn');
         const userModal = document.getElementById('userModal');
         const modalClose = document.getElementById('modalClose');
         const modalTabs = document.querySelectorAll('.modal-tab');
         const modalForms = document.querySelectorAll('.modal-form');
+        const loginForm = document.getElementById('loginForm');
+        const registerForm = document.getElementById('registerForm');
         const userProfile = document.getElementById('userProfile');
+        const logoutBtn = document.getElementById('logoutBtn');
+
+        let isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
+        let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
+
+        // Check if admin
+        function checkAdmin() {
+            if (currentUser && currentUser.email === 'admin@refit.com') {
+                const masterBtn = document.createElement('button');
+                masterBtn.className = 'master-admin-btn';
+                masterBtn.textContent = 'Master Admin';
+                masterBtn.onclick = () => document.getElementById('masterPanel').classList.add('active');
+                document.body.appendChild(masterBtn);
+
+                const style = document.createElement('style');
+                style.textContent = `
+                    .master-admin-btn {
+                        position: fixed;
+                        bottom: 100px;
+                        right: 30px;
+                        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+                        color: white;
+                        padding: 15px 30px;
+                        border: none;
+                        border-radius: 50px;
+                        font-weight: 600;
+                        cursor: pointer;
+                        transition: all 0.3s ease;
+                        z-index: 999;
+                        box-shadow: 0 10px 30px rgba(102, 126, 234, 0.4);
+                    }
+                    .master-admin-btn:hover {
+                        transform: translateY(-3px);
+                        box-shadow: 0 15px 40px rgba(102, 126, 234, 0.6);
+                    }
+                `;
+                document.head.appendChild(style);
+            }
+        }
+
+        // Update UI based on login status
+        function updateUI() {
+            if (isLoggedIn && currentUser) {
+                document.getElementById('userButtonText').textContent = currentUser.name.split(' ')[0];
+                document.getElementById('userName').textContent = currentUser.name;
+                document.getElementById('userEmail').textContent = currentUser.email;
+                document.getElementById('userPhone').textContent = currentUser.phone;
+                document.getElementById('userAvatar').textContent = currentUser.name.charAt(0).toUpperCase();
+                checkAdmin();
+            } else {
+                document.getElementById('userButtonText').textContent = 'Login / Register';
+            }
+        }
+
+        updateUI();
 
         userAccountBtn.addEventListener('click', () => {
-            const currentUser = getCurrentUser();
-            if (currentUser) {
-                showUserProfile(currentUser);
-            }
             userModal.classList.add('active');
+            if (isLoggedIn) {
+                document.getElementById('modalTabs').style.display = 'none';
+                modalForms.forEach(f => f.style.display = 'none');
+                userProfile.style.display = 'block';
+            }
         });
 
         modalClose.addEventListener('click', () => {
             userModal.classList.remove('active');
         });
 
-        userModal.addEventListener('click', (e) => {
-            if (e.target === userModal) {
-                userModal.classList.remove('active');
-            }
-        });
-
-        // Tab switching
         modalTabs.forEach(tab => {
             tab.addEventListener('click', () => {
-                const tabName = tab.getAttribute('data-tab');
-                
+                const tabName = tab.dataset.tab;
                 modalTabs.forEach(t => t.classList.remove('active'));
                 modalForms.forEach(f => f.classList.remove('active'));
-                
                 tab.classList.add('active');
-                document.getElementById(`${tabName}Form`).classList.add('active');
+                document.getElementById(tabName + 'Form').classList.add('active');
             });
         });
 
-        // Login form
-        document.getElementById('loginForm').addEventListener('submit', (e) => {
+        loginForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPassword').value;
             
-            // Check for master admin
-            if (email === MASTER_EMAIL && password === MASTER_PASSWORD) {
-                const masterUser = {
-                    name: 'Master Admin',
+            // Simulate login
+            if (email && password) {
+                currentUser = {
+                    name: email === 'admin@refit.com' ? 'Admin User' : 'John Doe',
                     email: email,
-                    phone: 'Admin',
-                    language: 'en',
-                    isMaster: true
+                    phone: '+60 12-345 6789'
                 };
-                setCurrentUser(masterUser);
-                updateUserUI(masterUser);
+                isLoggedIn = true;
+                localStorage.setItem('isLoggedIn', 'true');
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                updateUI();
+                showNotification('Login successful!');
                 userModal.classList.remove('active');
-                showNotification('Welcome, Master Admin!');
-                showMasterPanel();
-                return;
-            }
-            
-            // Regular user login
-            const users = getUsers();
-            const user = users.find(u => u.email === email && u.password === password);
-            
-            if (user) {
-                setCurrentUser(user);
-                updateUserUI(user);
-                userModal.classList.remove('active');
-                showNotification(`Welcome back, ${user.name}!`);
-                
-                // Apply user's language preference
-                if (user.language) {
-                    translatePage(user.language);
-                    document.querySelectorAll('.lang-btn').forEach(btn => {
-                        btn.classList.remove('active');
-                        if (btn.getAttribute('data-lang') === user.language) {
-                            btn.classList.add('active');
-                        }
-                    });
-                }
-            } else {
-                showNotification('Invalid email or password');
             }
         });
 
-        // Register form
-        document.getElementById('registerForm').addEventListener('submit', (e) => {
+        registerForm.addEventListener('submit', (e) => {
             e.preventDefault();
-            
             const name = document.getElementById('registerName').value;
             const email = document.getElementById('registerEmail').value;
-            const password = document.getElementById('registerPassword').value;
             const phone = document.getElementById('registerPhone').value;
-            const language = document.getElementById('registerLanguage').value;
             
-            const users = getUsers();
-            
-            // Check if user already exists
-            if (users.find(u => u.email === email)) {
-                showNotification('Email already registered');
-                return;
+            if (name && email && phone) {
+                currentUser = { name, email, phone };
+                isLoggedIn = true;
+                localStorage.setItem('isLoggedIn', 'true');
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+                updateUI();
+                showNotification('Registration successful!');
+                userModal.classList.remove('active');
             }
-            
-            // Create new user
-            const newUser = {
-                id: Date.now(),
-                name,
-                email,
-                password,
-                phone,
-                language
-            };
-            
-            users.push(newUser);
-            saveUsers(users);
-            setCurrentUser(newUser);
-            updateUserUI(newUser);
+        });
+
+        logoutBtn.addEventListener('click', () => {
+            isLoggedIn = false;
+            currentUser = null;
+            localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('currentUser');
+            updateUI();
             userModal.classList.remove('active');
-            showNotification(`Welcome, ${name}!`);
-            
-            // Apply user's language preference
-            translatePage(language);
-            document.querySelectorAll('.lang-btn').forEach(btn => {
-                btn.classList.remove('active');
-                if (btn.getAttribute('data-lang') === language) {
-                    btn.classList.add('active');
-                }
-            });
+            location.reload();
         });
 
-        // Logout
-        document.getElementById('logoutBtn').addEventListener('click', () => {
-            setCurrentUser(null);
-            document.getElementById('userButtonText').textContent = 'Login / Register';
-            document.getElementById('modalTabs').style.display = 'flex';
-            modalForms.forEach(f => f.style.display = 'none');
-            document.getElementById('loginForm').style.display = 'block';
-            document.getElementById('loginForm').classList.add('active');
-            document.querySelector('[data-tab="login"]').classList.add('active');
-            document.querySelector('[data-tab="register"]').classList.remove('active');
-            userProfile.style.display = 'none';
-            userModal.classList.remove('active');
-            showNotification('Logged out successfully');
-            
-            // Hide master panel if open
-            document.getElementById('masterPanel').classList.remove('active');
-        });
-
-        // Update UI for logged in user
-        function updateUserUI(user) {
-            document.getElementById('userButtonText').textContent = user.name.split(' ')[0];
-            if (user.isMaster) {
-                userAccountBtn.style.background = 'linear-gradient(135deg, #FFD700, #FFA500)';
-            }
-        }
-
-        // Show user profile
-        function showUserProfile(user) {
-            document.getElementById('modalTabs').style.display = 'none';
-            modalForms.forEach(f => f.style.display = 'none');
-            userProfile.style.display = 'block';
-            
-            document.getElementById('userAvatar').textContent = user.name.charAt(0).toUpperCase();
-            document.getElementById('userName').textContent = user.name;
-            document.getElementById('userEmail').textContent = user.email;
-            document.getElementById('userPhone').textContent = user.phone;
-            
-            const langMap = { en: 'English', ms: 'Bahasa Malaysia', zh: '中文' };
-            document.getElementById('userLanguagePref').textContent = `Language: ${langMap[user.language] || 'English'}`;
-        }
-
-        // Show master panel
-        function showMasterPanel() {
-            document.getElementById('masterPanel').classList.add('active');
-        }
-
-        // Master Panel Controls
-        const masterPanel = document.getElementById('masterPanel');
-        const masterClose = document.getElementById('masterClose');
-
-        masterClose.addEventListener('click', () => {
-            masterPanel.classList.remove('active');
-        });
-
-        // Color controls
-        document.getElementById('primaryColor').addEventListener('change', (e) => {
-            document.documentElement.style.setProperty('--primary-pink', e.target.value);
-        });
-
-        document.getElementById('darkColor').addEventListener('change', (e) => {
-            document.documentElement.style.setProperty('--dark-pink', e.target.value);
-        });
-
-        document.getElementById('lightColor').addEventListener('change', (e) => {
-            document.documentElement.style.setProperty('--light-pink', e.target.value);
-        });
-
-        // Typography controls
-        document.getElementById('fontFamily').addEventListener('change', (e) => {
-            document.body.style.fontFamily = e.target.value;
-        });
-
-        document.getElementById('fontSize').addEventListener('input', (e) => {
-            document.body.style.fontSize = e.target.value + 'px';
-            e.target.nextElementSibling.textContent = e.target.value + 'px';
-        });
-
-        document.getElementById('lineHeight').addEventListener('input', (e) => {
-            document.body.style.lineHeight = e.target.value;
-            e.target.nextElementSibling.textContent = e.target.value;
-        });
-
-        // Content controls
-        document.getElementById('heroTitle').addEventListener('input', (e) => {
-            const heroTitle = document.querySelector('.hero h1');
-            const words = e.target.value.split(' ');
-            heroTitle.innerHTML = words.map(word => `<span>${word}</span>`).join(' ');
-        });
-
-        document.getElementById('heroSubtitle').addEventListener('input', (e) => {
-            document.querySelector('.hero p').textContent = e.target.value;
-        });
-
-        document.getElementById('ctaText').addEventListener('input', (e) => {
-            document.querySelector('.cta-button span').textContent = e.target.value;
-        });
-
-        // Animation controls
-        document.getElementById('animationSpeed').addEventListener('input', (e) => {
-            const speed = e.target.value;
-            document.documentElement.style.setProperty('--animation-speed', speed);
-            e.target.nextElementSibling.textContent = speed + 'x';
-            
-            // Update preview animation
-            const previewBox = document.querySelector('.preview-box');
-            previewBox.style.animation = `none`;
-            setTimeout(() => {
-                previewBox.style.animation = `pulse ${2 / speed}s ease-in-out infinite`;
-            }, 10);
-        });
-
-        // Layout controls
-        document.getElementById('borderRadius').addEventListener('input', (e) => {
-            const value = e.target.value;
-            document.documentElement.style.setProperty('--border-radius', value + 'px');
-            e.target.nextElementSibling.textContent = value + 'px';
-            
-            // Update all border radius
-            document.querySelectorAll('.service-card, .portfolio-item, .process-item, .contact-form').forEach(el => {
-                el.style.borderRadius = value + 'px';
-            });
-        });
-
-        document.getElementById('sectionPadding').addEventListener('input', (e) => {
-            const value = e.target.value;
-            e.target.nextElementSibling.textContent = value + 'px';
-            
-            document.querySelectorAll('section').forEach(section => {
-                section.style.padding = `${value}px 40px`;
-            });
-        });
-
-        document.getElementById('boxShadow').addEventListener('input', (e) => {
-            const value = e.target.value / 100;
-            e.target.nextElementSibling.textContent = e.target.value + '%';
-            
-            // Update shadow intensity
-            const shadowBase = `rgba(0,0,0,${0.15 * value})`;
-            document.documentElement.style.setProperty('--shadow-xl', `0 30px 80px ${shadowBase}`);
-        });
-
-        // Save settings
-        document.getElementById('masterSave').addEventListener('click', () => {
-            const settings = {
-                colors: {
-                    primary: document.getElementById('primaryColor').value,
-                    dark: document.getElementById('darkColor').value,
-                    light: document.getElementById('lightColor').value
-                },
-                typography: {
-                    fontFamily: document.getElementById('fontFamily').value,
-                    fontSize: document.getElementById('fontSize').value,
-                    lineHeight: document.getElementById('lineHeight').value
-                },
-                content: {
-                    heroTitle: document.getElementById('heroTitle').value,
-                    heroSubtitle: document.getElementById('heroSubtitle').value,
-                    ctaText: document.getElementById('ctaText').value
-                },
-                layout: {
-                    borderRadius: document.getElementById('borderRadius').value,
-                    sectionPadding: document.getElementById('sectionPadding').value,
-                    boxShadow: document.getElementById('boxShadow').value
-                },
-                animation: {
-                    speed: document.getElementById('animationSpeed').value,
-                    type: document.getElementById('animationType').value
-                }
-            };
-            
-            localStorage.setItem(STORAGE_KEYS.SETTINGS, JSON.stringify(settings));
-            showNotification('Settings saved successfully!');
-        });
-
-        // Reset settings
-        document.getElementById('masterReset').addEventListener('click', () => {
-            if (confirm('Are you sure you want to reset all settings to default?')) {
-                localStorage.removeItem(STORAGE_KEYS.SETTINGS);
-                location.reload();
-            }
-        });
-
-        // Image upload handling
-        const logoUpload = document.getElementById('logoUpload');
-        const portfolioUpload = document.getElementById('portfolioUpload');
-        
-        // Setup upload areas
-        [logoUpload, portfolioUpload].forEach(uploadArea => {
-            const input = uploadArea.querySelector('input[type="file"]');
-            
-            uploadArea.addEventListener('click', () => input.click());
-            
-            uploadArea.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                uploadArea.classList.add('dragover');
-            });
-            
-            uploadArea.addEventListener('dragleave', () => {
-                uploadArea.classList.remove('dragover');
-            });
-            
-            uploadArea.addEventListener('drop', (e) => {
-                e.preventDefault();
-                uploadArea.classList.remove('dragover');
-                handleFiles(e.dataTransfer.files, uploadArea === portfolioUpload);
-            });
-            
-            input.addEventListener('change', (e) => {
-                handleFiles(e.target.files, uploadArea === portfolioUpload);
-            });
-        });
-
-        function handleFiles(files, isPortfolio) {
-            if (isPortfolio) {
-                const gallery = document.getElementById('portfolioGallery');
-                
-                Array.from(files).forEach(file => {
-                    if (file.type.startsWith('image/')) {
-                        const reader = new FileReader();
-                        reader.onload = (e) => {
-                            const item = document.createElement('div');
-                            item.className = 'gallery-item';
-                            item.innerHTML = `
-                                <img src="${e.target.result}" alt="Portfolio">
-                                <button class="gallery-item-remove">&times;</button>
-                            `;
-                            
-                            item.querySelector('.gallery-item-remove').addEventListener('click', () => {
-                                item.remove();
-                            });
-                            
-                            gallery.appendChild(item);
-                        };
-                        reader.readAsDataURL(file);
-                    }
-                });
-            } else {
-                // Logo upload
-                if (files[0] && files[0].type.startsWith('image/')) {
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        // Here you would update the logo
-                        showNotification('Logo uploaded successfully!');
-                    };
-                    reader.readAsDataURL(files[0]);
-                }
-            }
-        }
-
-        // Theme toggle
-        document.querySelectorAll('.theme-toggle-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                const theme = btn.getAttribute('data-theme');
-                setTheme(theme);
-                
-                document.querySelectorAll('.theme-toggle-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-            });
-        });
-
-        // Language switcher
-        document.querySelectorAll('.lang-btn').forEach(btn => {
-            btn.addEventListener('click', () => {
-                document.querySelectorAll('.lang-btn').forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                translatePage(btn.getAttribute('data-lang'));
-                
-                // Update user's language preference if logged in
-                const currentUser = getCurrentUser();
-                if (currentUser) {
-                    currentUser.language = btn.getAttribute('data-lang');
-                    setCurrentUser(currentUser);
-                    
-                    // Update in users array
-                    const users = getUsers();
-                    const userIndex = users.findIndex(u => u.id === currentUser.id);
-                    if (userIndex !== -1) {
-                        users[userIndex].language = currentUser.language;
-                        saveUsers(users);
-                    }
-                }
-            });
-        });
-
-        // Navigation scroll effects
-        const nav = document.querySelector('nav');
-        let lastScroll = 0;
-
-        window.addEventListener('scroll', () => {
-            const currentScroll = window.pageYOffset;
-            
-            if (currentScroll > 100) {
-                nav.classList.add('scrolled');
-            } else {
-                nav.classList.remove('scrolled');
-            }
-            
-            lastScroll = currentScroll;
-        });
-
-        // Mobile menu
-        const menuToggle = document.querySelector('.menu-toggle');
-        const navLinks = document.querySelector('.nav-links');
-
-        menuToggle.addEventListener('click', () => {
-            navLinks.classList.toggle('active');
-            menuToggle.classList.toggle('active');
-            document.body.style.overflow = navLinks.classList.contains('active') ? 'hidden' : '';
-        });
-
-        // Scroll progress bar
-        const scrollProgress = document.getElementById('scrollProgress');
-        
-        window.addEventListener('scroll', () => {
-            const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
-            const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
-            const scrolled = (winScroll / height) * 100;
-            scrollProgress.style.width = scrolled + '%';
-        });
-
-        // Smooth scrolling
-        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
-            anchor.addEventListener('click', function (e) {
-                e.preventDefault();
-                const target = document.querySelector(this.getAttribute('href'));
-                if (target) {
-                    const offset = 80;
-                    const targetPosition = target.offsetTop - offset;
-                    
-                    window.scrollTo({
-                        top: targetPosition,
-                        behavior: 'smooth'
-                    });
-                    
-                    // Close mobile menu if open
-                    navLinks.classList.remove('active');
-                    menuToggle.classList.remove('active');
-                    document.body.style.overflow = '';
-                }
-            });
-        });
-
-        // Active nav link
-        const sections = document.querySelectorAll('section');
-        const navItems = document.querySelectorAll('.nav-links a');
-
-        const observerOptions = {
-            threshold: 0.3,
-            rootMargin: '-100px 0px -100px 0px'
-        };
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const current = entry.target.getAttribute('id');
-                    navItems.forEach(item => {
-                        item.classList.remove('active');
-                        if (item.getAttribute('href').includes(current)) {
-                            item.classList.add('active');
-                        }
-                    });
-                }
-            });
-        }, observerOptions);
-
-        sections.forEach(section => {
-            observer.observe(section);
-        });
-
-        // Portfolio filter
+        // Portfolio Filter
         const filterBtns = document.querySelectorAll('.filter-btn');
         const portfolioItems = document.querySelectorAll('.portfolio-item');
 
         filterBtns.forEach(btn => {
             btn.addEventListener('click', () => {
+                const filter = btn.dataset.filter;
                 filterBtns.forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
-
-                const filter = btn.getAttribute('data-filter');
                 
-                portfolioItems.forEach((item, index) => {
-                    setTimeout(() => {
-                        if (filter === 'all' || item.getAttribute('data-category') === filter) {
-                            item.style.display = 'block';
-                            setTimeout(() => {
-                                item.style.opacity = '1';
-                                item.style.transform = 'scale(1) translateY(0)';
-                            }, 50);
-                        } else {
-                            item.style.opacity = '0';
-                            item.style.transform = 'scale(0.8) translateY(20px)';
-                            setTimeout(() => {
-                                item.style.display = 'none';
-                            }, 300);
-                        }
-                    }, index * 50);
+                portfolioItems.forEach(item => {
+                    if (filter === 'all' || item.dataset.category === filter) {
+                        item.style.display = 'block';
+                    } else {
+                        item.style.display = 'none';
+                    }
                 });
             });
         });
 
-        // Contact form
-        const contactForm = document.getElementById('contactForm');
-        contactForm.addEventListener('submit', (e) => {
+        // Contact Form
+        document.getElementById('contactForm').addEventListener('submit', (e) => {
             e.preventDefault();
-            
-            const submitBtn = contactForm.querySelector('.submit-btn');
-            const originalText = submitBtn.textContent;
-            
-            submitBtn.innerHTML = 'Sending...';
-            submitBtn.disabled = true;
-            
-            setTimeout(() => {
-                submitBtn.innerHTML = '✓ Message Sent!';
-                submitBtn.style.background = '#4CAF50';
-                
-                setTimeout(() => {
-                    contactForm.reset();
-                    submitBtn.textContent = originalText;
-                    submitBtn.style.background = '';
-                    submitBtn.disabled = false;
-                }, 3000);
-            }, 2000);
+            showNotification('Message sent successfully!');
+            e.target.reset();
         });
 
-        // AI Designer functionality
+        // Notification
+        function showNotification(message) {
+            const toast = document.getElementById('notificationToast');
+            document.getElementById('notificationText').textContent = message;
+            toast.classList.add('show');
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
+        }
+
+        // Master Admin Panel
+        const masterClose = document.getElementById('masterClose');
+        const masterPanel = document.getElementById('masterPanel');
+        const masterNavTabs = document.querySelectorAll('.master-nav-tab');
+        const masterTabContents = document.querySelectorAll('.master-tab-content');
+
+        masterClose.addEventListener('click', () => {
+            masterPanel.classList.remove('active');
+        });
+
+        masterNavTabs.forEach(tab => {
+            tab.addEventListener('click', () => {
+                const tabName = tab.dataset.tab;
+                masterNavTabs.forEach(t => t.classList.remove('active'));
+                masterTabContents.forEach(c => c.classList.remove('active'));
+                tab.classList.add('active');
+                document.getElementById(tabName + 'Tab').classList.add('active');
+            });
+        });
+
+        // Master Save Changes
+        document.getElementById('masterSave').addEventListener('click', () => {
+            showNotification('Settings saved successfully!');
+            // Here you would normally save the settings
+        });
+
+        document.getElementById('masterReset').addEventListener('click', () => {
+            if (confirm('Reset all settings to default?')) {
+                showNotification('Settings reset to default!');
+                // Reset logic here
+            }
+        });
+
+        // AI Designer
         let currentStep = 1;
-        let aiDesignData = {
-            photo: null,
-            room: null,
-            style: null,
-            colorTheme: null
-        };
+        let selectedRoom = null;
+        let selectedStyle = null;
+        let selectedColors = null;
+        let uploadedImage = null;
 
         function openAIDesigner() {
+            if (!isLoggedIn) {
+                showNotification('Please login to use AI Designer');
+                document.getElementById('userAccountBtn').click();
+                return;
+            }
             document.getElementById('aiDesignerModal').classList.add('active');
         }
 
         function closeAIDesigner() {
             document.getElementById('aiDesignerModal').classList.remove('active');
-            // Reset the form
+            resetAIDesigner();
+        }
+
+        function resetAIDesigner() {
             currentStep = 1;
-            aiDesignData = {
-                photo: null,
-                room: null,
-                style: null,
-                colorTheme: null
-            };
+            selectedRoom = null;
+            selectedStyle = null;
+            selectedColors = null;
+            uploadedImage = null;
             updateProgressIndicator();
             showStep(1);
         }
@@ -4536,11 +4264,9 @@
             });
         }
 
-        function showStep(stepNumber) {
-            document.querySelectorAll('.ai-step').forEach(step => {
-                step.classList.remove('active');
-            });
-            document.getElementById(`step${stepNumber}`).classList.add('active');
+        function showStep(step) {
+            document.querySelectorAll('.ai-step').forEach(s => s.classList.remove('active'));
+            document.getElementById('step' + step).classList.add('active');
         }
 
         function nextStep() {
@@ -4559,32 +4285,48 @@
             }
         }
 
-        // Photo upload handling
+        // Upload functionality
         const uploadBox = document.getElementById('uploadBox');
         const roomPhotoInput = document.getElementById('roomPhotoInput');
+        const uploadedPreview = document.getElementById('uploadedPreview');
+        const previewImage = document.getElementById('previewImage');
 
         uploadBox.addEventListener('click', () => roomPhotoInput.click());
+        uploadBox.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadBox.classList.add('dragover');
+        });
+        uploadBox.addEventListener('dragleave', () => {
+            uploadBox.classList.remove('dragover');
+        });
+        uploadBox.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadBox.classList.remove('dragover');
+            handleFile(e.dataTransfer.files[0]);
+        });
 
         roomPhotoInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
+            handleFile(e.target.files[0]);
+        });
+
+        function handleFile(file) {
             if (file && file.type.startsWith('image/')) {
                 const reader = new FileReader();
                 reader.onload = (e) => {
-                    aiDesignData.photo = e.target.result;
-                    document.getElementById('previewImage').src = e.target.result;
-                    document.getElementById('uploadBox').style.display = 'none';
-                    document.getElementById('uploadedPreview').style.display = 'block';
+                    uploadedImage = e.target.result;
+                    previewImage.src = uploadedImage;
+                    uploadBox.parentElement.style.display = 'none';
+                    uploadedPreview.style.display = 'block';
                     document.querySelector('#step1 .ai-next-btn').disabled = false;
                 };
                 reader.readAsDataURL(file);
             }
-        });
+        }
 
         function changePhoto() {
-            document.getElementById('uploadBox').style.display = 'block';
-            document.getElementById('uploadedPreview').style.display = 'none';
+            uploadBox.parentElement.style.display = 'block';
+            uploadedPreview.style.display = 'none';
             document.querySelector('#step1 .ai-next-btn').disabled = true;
-            aiDesignData.photo = null;
         }
 
         // Room selection
@@ -4592,7 +4334,7 @@
             option.addEventListener('click', () => {
                 document.querySelectorAll('.room-option').forEach(o => o.classList.remove('selected'));
                 option.classList.add('selected');
-                aiDesignData.room = option.getAttribute('data-room');
+                selectedRoom = option.dataset.room;
                 document.querySelector('#step2 .ai-next-btn').disabled = false;
             });
         });
@@ -4602,141 +4344,128 @@
             option.addEventListener('click', () => {
                 document.querySelectorAll('.style-option').forEach(o => o.classList.remove('selected'));
                 option.classList.add('selected');
-                aiDesignData.style = option.getAttribute('data-style');
+                selectedStyle = option.dataset.style;
                 document.querySelector('#step3 .ai-next-btn').disabled = false;
             });
         });
 
-        // Color theme selection
+        // Color selection
         document.querySelectorAll('.color-option').forEach(option => {
             option.addEventListener('click', () => {
                 document.querySelectorAll('.color-option').forEach(o => o.classList.remove('selected'));
                 option.classList.add('selected');
-                aiDesignData.colorTheme = option.getAttribute('data-theme');
+                selectedColors = option.dataset.colors;
+                document.querySelector('.ai-generate-btn').disabled = false;
             });
         });
 
         // Generate design
         function generateDesign() {
-            document.querySelectorAll('.ai-step').forEach(step => {
-                step.style.display = 'none';
-            });
+            document.querySelectorAll('.ai-step').forEach(s => s.style.display = 'none');
             document.getElementById('aiResult').style.display = 'block';
+            document.getElementById('originalImage').src = uploadedImage;
             
-            // Set before image
-            document.getElementById('beforeImage').src = aiDesignData.photo;
-            
-            // Simulate AI processing
+            // Simulate AI generation
             setTimeout(() => {
-                // In a real implementation, this would call an AI API
-                document.getElementById('afterImage').src = aiDesignData.photo; // Placeholder
                 document.getElementById('aiLoading').style.display = 'none';
+                document.getElementById('aiGeneratedImage').style.display = 'block';
+                // In real implementation, this would be the AI-generated image
+                document.getElementById('aiGeneratedImage').src = uploadedImage;
+                showNotification('AI design generated successfully!');
             }, 3000);
         }
 
         function regenerateDesign() {
             document.getElementById('aiLoading').style.display = 'block';
+            document.getElementById('aiGeneratedImage').style.display = 'none';
             setTimeout(() => {
                 document.getElementById('aiLoading').style.display = 'none';
-                showNotification('Design regenerated successfully!');
-            }, 2000);
+                document.getElementById('aiGeneratedImage').style.display = 'block';
+                showNotification('New design generated!');
+            }, 3000);
         }
 
-        function generateBudget() {
-            // Generate random budget based on room type and style
-            const basePrice = {
-                living: 15000,
-                bedroom: 12000,
-                kitchen: 20000,
-                bathroom: 10000,
-                office: 8000,
-                dining: 10000
-            };
-            
-            const styleMultiplier = {
-                modern: 1.2,
-                minimalist: 0.9,
-                industrial: 1.1,
-                scandinavian: 1.0,
-                traditional: 1.3,
-                contemporary: 1.15
-            };
-            
-            const base = basePrice[aiDesignData.room] || 15000;
-            const multiplier = styleMultiplier[aiDesignData.style] || 1.0;
-            const total = Math.round(base * multiplier);
-            
-            const design = Math.round(total * 0.15);
-            const materials = Math.round(total * 0.55);
-            const labor = Math.round(total * 0.30);
-            const deposit = Math.round(total * 0.30);
-            
-            document.getElementById('designPrice').textContent = design.toLocaleString();
-            document.getElementById('materialsPrice').textContent = materials.toLocaleString();
-            document.getElementById('laborPrice').textContent = labor.toLocaleString();
-            document.getElementById('totalPrice').textContent = total.toLocaleString();
-            document.getElementById('depositAmount').textContent = deposit.toLocaleString();
-            document.querySelectorAll('.deposit-display').forEach(el => {
-                el.textContent = deposit.toLocaleString();
-            });
-            
+        function showBudgetQuote() {
             document.getElementById('budgetQuote').style.display = 'block';
         }
 
-        function acceptBudget() {
+        function confirmDesign() {
+            showBudgetQuote();
+        }
+
+        function agreeToQuote() {
             document.getElementById('agreementSection').style.display = 'block';
         }
 
-        function agreeToTerms() {
+        function proceedToPayment() {
             document.getElementById('paymentSection').style.display = 'block';
         }
 
-        function selectPayment(method) {
-            document.querySelectorAll('.payment-option').forEach(option => {
-                option.classList.remove('selected');
+        // Payment method selection
+        document.querySelectorAll('.payment-option').forEach(option => {
+            option.addEventListener('click', () => {
+                document.querySelectorAll('.payment-option').forEach(o => o.classList.remove('selected'));
+                option.classList.add('selected');
             });
-            event.target.closest('.payment-option').classList.add('selected');
-        }
+        });
 
-        function proceedToPayment() {
+        function uploadPaymentSlip() {
             document.getElementById('paymentUpload').style.display = 'block';
         }
 
         // Payment slip upload
         document.getElementById('slipInput').addEventListener('change', (e) => {
             const file = e.target.files[0];
-            if (file) {
+            if (file && file.type.startsWith('image/')) {
                 const reader = new FileReader();
                 reader.onload = (e) => {
-                    if (file.type.startsWith('image/')) {
-                        document.getElementById('slipImage').src = e.target.result;
-                        document.getElementById('slipImage').style.display = 'block';
-                    } else {
-                        document.getElementById('slipImage').style.display = 'none';
-                    }
-                    document.getElementById('slipFileName').textContent = file.name;
+                    document.getElementById('slipImage').src = e.target.result;
                     document.getElementById('slipPreview').style.display = 'block';
                 };
                 reader.readAsDataURL(file);
             }
         });
 
-        function sendConfirmation() {
-            // Simulate sending confirmation
-            setTimeout(() => {
-                document.getElementById('completionSection').style.display = 'block';
-                document.getElementById('paymentUpload').style.display = 'none';
-                document.getElementById('paymentSection').style.display = 'none';
-                document.getElementById('agreementSection').style.display = 'none';
-                document.getElementById('budgetQuote').style.display = 'none';
-                document.querySelector('.result-actions').style.display = 'none';
-            }, 1500);
+        function completeProcess() {
+            document.getElementById('completionSection').style.display = 'block';
+            document.getElementById('paymentUpload').style.display = 'none';
+            document.getElementById('paymentSection').style.display = 'none';
+            document.getElementById('agreementSection').style.display = 'none';
+            document.getElementById('budgetQuote').style.display = 'none';
         }
 
-        function completeProcess() {
-            closeAIDesigner();
-            showNotification('Thank you for choosing Refit! We will contact you soon.');
-        }
+        // Range input value display
+        document.querySelectorAll('input[type="range"]').forEach(input => {
+            const valueDisplay = input.nextElementSibling;
+            if (valueDisplay && valueDisplay.classList.contains('range-value')) {
+                input.addEventListener('input', () => {
+                    valueDisplay.textContent = input.value + (input.id.includes('px') ? 'px' : '');
+                });
+            }
+        });
+
+        // Smooth scroll for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({ behavior: 'smooth' });
+                }
+            });
+        });
+
+        // Initialize AOS (if needed for scroll animations)
+        window.addEventListener('scroll', () => {
+            const elements = document.querySelectorAll('.service-card, .portfolio-item, .process-item');
+            elements.forEach(el => {
+                const rect = el.getBoundingClientRect();
+                if (rect.top < window.innerHeight && rect.bottom > 0) {
+                    el.style.opacity = '1';
+                    el.style.transform = 'translateY(0)';
+                }
+            });
+        });
     </script>
 </body>
 </html>
