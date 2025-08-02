@@ -56,6 +56,7 @@
             --button-animation-duration: 0.3s;
             --button-border-width: 0;
             --button-border-color: transparent;
+            --button-border-style: solid;
             --button-font-size: 1.1rem;
         }
 
@@ -222,7 +223,7 @@
             fill: white;
         }
 
-        /* User Account Button - Fixed for mobile */
+        /* User Account Button */
         .user-account-btn {
             position: fixed;
             top: 20px;
@@ -243,6 +244,35 @@
         .user-account-btn:hover {
             transform: translateY(-2px);
             box-shadow: var(--shadow-lg);
+        }
+
+        /* Additional button effect classes */
+        .btn-effect-glow {
+            animation: glowPulse 2s ease-in-out infinite;
+        }
+
+        @keyframes glowPulse {
+            0%, 100% { box-shadow: 0 0 20px rgba(232, 165, 183, 0.5); }
+            50% { box-shadow: 0 0 40px rgba(232, 165, 183, 0.8); }
+        }
+
+        .btn-effect-shake {
+            animation: shake 0.5s ease-in-out infinite;
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+        }
+
+        .btn-effect-float {
+            animation: float 3s ease-in-out infinite;
+        }
+
+        @keyframes float {
+            0%, 100% { transform: translateY(0); }
+            50% { transform: translateY(-10px); }
         }
 
         /* Theme Toggle */
@@ -483,7 +513,7 @@
             letter-spacing: 2px;
             box-shadow: var(--button-shadow);
             cursor: pointer;
-            border: var(--button-border-width) solid var(--button-border-color);
+            border: var(--button-border-width) var(--button-border-style) var(--button-border-color);
         }
 
         .cta-button:hover,
@@ -1099,7 +1129,7 @@
             padding: var(--button-padding);
             background: var(--button-bg);
             color: var(--button-color);
-            border: var(--button-border-width) solid var(--button-border-color);
+            border: var(--button-border-width) var(--button-border-style) var(--button-border-color);
             border-radius: var(--button-border-radius);
             font-size: var(--button-font-size);
             cursor: pointer;
@@ -1632,7 +1662,7 @@
             transition: all var(--button-animation-duration) var(--button-animation);
             background: var(--button-bg);
             color: var(--button-color);
-            border: var(--button-border-width) solid var(--button-border-color);
+            border: var(--button-border-width) var(--button-border-style) var(--button-border-color);
             border-radius: var(--button-border-radius);
             box-shadow: var(--button-shadow);
         }
@@ -1723,13 +1753,57 @@
             position: relative;
         }
 
-        .portfolio-item-edit img {
+        .portfolio-item-edit .image-upload-area {
             width: 100%;
             height: 200px;
+            position: relative;
+            overflow: hidden;
+            margin-bottom: 15px;
+        }
+
+        .portfolio-item-edit .image-upload-area img {
+            width: 100%;
+            height: 100%;
             object-fit: cover;
             border-radius: 10px;
-            margin-bottom: 15px;
-            cursor: pointer;
+        }
+
+        .portfolio-item-edit .image-upload-area:hover .upload-icon,
+        .portfolio-item-edit .image-upload-area:hover .upload-text {
+            opacity: 1;
+        }
+
+        .portfolio-item-edit .upload-icon,
+        .portfolio-item-edit .upload-text {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            color: var(--white);
+            opacity: 0;
+            transition: opacity 0.3s ease;
+            pointer-events: none;
+        }
+
+        .portfolio-item-edit .upload-icon {
+            font-size: 3rem;
+            margin-top: -20px;
+        }
+
+        .portfolio-item-edit .upload-text {
+            margin-top: 20px;
+            font-size: 0.9rem;
+        }
+
+        .portfolio-item-edit .image-upload-area:hover::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.6);
+            border-radius: 10px;
         }
 
         .portfolio-remove-btn {
@@ -1744,6 +1818,7 @@
             border-radius: 50%;
             cursor: pointer;
             font-size: 1.2rem;
+            z-index: 10;
         }
 
         .add-portfolio-btn {
@@ -3095,7 +3170,34 @@
                             <option value="btn-effect-slide">Slide</option>
                             <option value="btn-effect-pulse">Pulse</option>
                             <option value="btn-effect-ripple">Ripple</option>
+                            <option value="btn-effect-glow">Glow</option>
+                            <option value="btn-effect-shake">Shake</option>
+                            <option value="btn-effect-float">Float</option>
                         </select>
+                    </div>
+                    <div class="master-control">
+                        <label>Button Outline Style</label>
+                        <select id="buttonOutline">
+                            <option value="none">None</option>
+                            <option value="solid">Solid</option>
+                            <option value="dashed">Dashed</option>
+                            <option value="dotted">Dotted</option>
+                            <option value="double">Double</option>
+                        </select>
+                    </div>
+                    <div class="master-control">
+                        <label>Button Shape</label>
+                        <select id="buttonShape">
+                            <option value="rounded">Rounded</option>
+                            <option value="sharp">Sharp Edges</option>
+                            <option value="pill">Pill Shape</option>
+                            <option value="square">Square</option>
+                        </select>
+                    </div>
+                    <div class="master-control">
+                        <label for="buttonBorderWidth">Border Width</label>
+                        <input type="range" id="buttonBorderWidth" min="0" max="5" value="0">
+                        <span class="range-value">0px</span>
                     </div>
                     <div class="master-control">
                         <label for="buttonRadius">Button Border Radius</label>
@@ -3259,7 +3361,8 @@
                             <button class="portfolio-remove-btn" onclick="removePortfolioItem(this)">&times;</button>
                             <div class="image-upload-area portfolio-image-upload" onclick="uploadPortfolioImage(this)">
                                 <img src="/api/placeholder/300/200" alt="Portfolio placeholder">
-                                <div class="upload-icon" style="display: none;">📷</div>
+                                <div class="upload-icon">📷</div>
+                                <p class="upload-text">Click to upload image</p>
                                 <input type="file" accept="image/*" hidden>
                             </div>
                             <input type="text" placeholder="Project Title" value="Cath Kidston" class="portfolio-title">
@@ -3274,7 +3377,8 @@
                             <button class="portfolio-remove-btn" onclick="removePortfolioItem(this)">&times;</button>
                             <div class="image-upload-area portfolio-image-upload" onclick="uploadPortfolioImage(this)">
                                 <img src="/api/placeholder/300/200" alt="Portfolio placeholder">
-                                <div class="upload-icon" style="display: none;">📷</div>
+                                <div class="upload-icon">📷</div>
+                                <p class="upload-text">Click to upload image</p>
                                 <input type="file" accept="image/*" hidden>
                             </div>
                             <input type="text" placeholder="Project Title" value="Tusan Ice Cream" class="portfolio-title">
@@ -3476,9 +3580,8 @@ Selangor, Malaysia</textarea>
     <!-- Navigation -->
     <nav>
         <div class="nav-container">
-            <div class="logo" id="navLogo">refit</div>
+            <div class="logo">refit</div>
             <ul class="nav-links">
-                <li><a href="#home" class="active">Home</a></li>
                 <li><a href="#services">Services</a></li>
                 <li><a href="#about">About</a></li>
                 <li><a href="#portfolio">Portfolio</a></li>
@@ -3494,69 +3597,72 @@ Selangor, Malaysia</textarea>
     </nav>
 
     <!-- Hero Section -->
-    <section id="home" class="hero">
+    <section class="hero">
         <div class="hero-content">
-            <h1 id="heroTitleElement"><span>From</span> <span>Concept</span> <span>to</span> <span>Completion</span></h1>
-            <p id="heroSubtitleElement">Transforming Spaces, Creating Excellence</p>
-            <a href="#portfolio" class="cta-button custom-button"><span id="ctaTextElement">Explore Our Work</span></a>
+            <h1><span>From Concept</span> to Completion</h1>
+            <p>Transforming Spaces, Creating Excellence</p>
+            <a href="#portfolio" class="cta-button">
+                <span>Explore Our Work</span>
+            </a>
             <button class="ai-design-button" onclick="openAIDesigner()">
-                <span class="ai-icon">🤖</span>
-                <span id="aiButtonTextElement">Try Our AI Home Designer</span>
+                <span class="ai-icon">✨</span>
+                Try Our AI Home Designer
             </button>
         </div>
     </section>
 
     <!-- Services Section -->
     <section id="services" class="services">
-        <h2 class="section-title" id="servicesTitleElement">What We Do</h2>
+        <h2 class="section-title">What We Do</h2>
         <div class="services-grid">
             <div class="service-card">
-                <div class="service-icon" id="service1IconElement">🔧</div>
-                <h3 id="service1TitleElement">Maintenance Services</h3>
-                <p id="service1DescElement">Professional maintenance solutions to keep your spaces functioning perfectly and looking their best year-round.</p>
+                <div class="service-icon" id="service1Icon">🔧</div>
+                <h3 id="service1TitleDisplay">Maintenance Services</h3>
+                <p id="service1DescDisplay">Professional maintenance solutions to keep your spaces functioning perfectly and looking their best year-round.</p>
             </div>
             <div class="service-card">
-                <div class="service-icon" id="service2IconElement">🏗️</div>
-                <h3 id="service2TitleElement">Interior Construction</h3>
-                <p id="service2DescElement">Expert architectural construction and renovation services that transform your vision into stunning reality.</p>
+                <div class="service-icon" id="service2Icon">🏗️</div>
+                <h3 id="service2TitleDisplay">Interior Construction</h3>
+                <p id="service2DescDisplay">Expert architectural construction and renovation services that transform your vision into stunning reality.</p>
             </div>
             <div class="service-card">
-                <div class="service-icon" id="service3IconElement">🎨</div>
-                <h3 id="service3TitleElement">Design & Illustration</h3>
-                <p id="service3DescElement">Creative interior design and 3D illustration services to visualize and plan your perfect space with precision.</p>
+                <div class="service-icon" id="service3Icon">🎨</div>
+                <h3 id="service3TitleDisplay">Design & Illustration</h3>
+                <p id="service3DescDisplay">Creative interior design and 3D illustration services to visualize and plan your perfect space with precision.</p>
             </div>
         </div>
     </section>
 
     <!-- About Section -->
     <section id="about" class="about">
+        <h2 class="section-title">About Refit</h2>
         <div class="about-content">
             <div class="about-text">
-                <h2 id="aboutHeadingElement">About <span>Refit</span></h2>
-                <p><strong>Our Mission:</strong> <span id="missionTextElement">To provide responsible and professional quality services as well as components and materials sale, lease, exchange and building management by constantly improving and ensuring business growth.</span></p>
-                <p><strong>Our Vision:</strong> <span id="visionTextElement">To gain customer trust and become a leading and competitive business aviation service provider in East and West Malaysia by offering innovative micro solutions team work management.</span></p>
+                <h2>Transforming Spaces with <span>Passion</span></h2>
+                <p id="missionDisplay">To provide responsible and professional quality services as well as components and materials sale, lease, exchange and building management by constantly improving and ensuring business growth.</p>
+                <p id="visionDisplay">To gain customer trust and become a leading and competitive business aviation service provider in East and West Malaysia by offering innovative micro solutions team work management.</p>
                 <div class="values-grid">
                     <div class="value-item">
-                        <h4 id="value1TitleElement">Passion</h4>
-                        <p id="value1DescElement">Continuous learning and innovation</p>
+                        <h4 id="value1TitleDisplay">Passion</h4>
+                        <p id="value1DescDisplay">Continuous learning and innovation</p>
                     </div>
                     <div class="value-item">
-                        <h4 id="value2TitleElement">Responsibility</h4>
-                        <p id="value2DescElement">Honest and respectful service</p>
+                        <h4 id="value2TitleDisplay">Responsibility</h4>
+                        <p id="value2DescDisplay">Honest and respectful service</p>
                     </div>
                     <div class="value-item">
-                        <h4 id="value3TitleElement">Innovative</h4>
-                        <p id="value3DescElement">Constant improvement</p>
+                        <h4 id="value3TitleDisplay">Innovative</h4>
+                        <p id="value3DescDisplay">Constant improvement</p>
                     </div>
                     <div class="value-item">
-                        <h4 id="value4TitleElement">Respect</h4>
-                        <p id="value4DescElement">Valuing relationships</p>
+                        <h4 id="value4TitleDisplay">Respect</h4>
+                        <p id="value4DescDisplay">Valuing relationships</p>
                     </div>
                 </div>
             </div>
             <div class="about-image">
-                <div class="about-image-content" id="aboutImageContent">
-                    Excellence in Every Detail
+                <div class="about-image-content">
+                    Creating Exceptional Spaces Since 2013
                 </div>
             </div>
         </div>
@@ -3566,32 +3672,32 @@ Selangor, Malaysia</textarea>
     <section class="stats">
         <div class="stats-grid">
             <div class="stat-item">
-                <div class="stat-number" id="stat1NumberElement">250+</div>
-                <div class="stat-label" id="stat1LabelElement">Projects Completed</div>
+                <div class="stat-number" id="stat1NumberDisplay">250+</div>
+                <div class="stat-label" id="stat1LabelDisplay">Projects Completed</div>
             </div>
             <div class="stat-item">
-                <div class="stat-number" id="stat2NumberElement">10+</div>
-                <div class="stat-label" id="stat2LabelElement">Years Experience</div>
+                <div class="stat-number" id="stat2NumberDisplay">10+</div>
+                <div class="stat-label" id="stat2LabelDisplay">Years Experience</div>
             </div>
             <div class="stat-item">
-                <div class="stat-number" id="stat3NumberElement">150+</div>
-                <div class="stat-label" id="stat3LabelElement">Happy Clients</div>
+                <div class="stat-number" id="stat3NumberDisplay">150+</div>
+                <div class="stat-label" id="stat3LabelDisplay">Happy Clients</div>
             </div>
             <div class="stat-item">
-                <div class="stat-number" id="stat4NumberElement">50+</div>
-                <div class="stat-label" id="stat4LabelElement">Expert Team</div>
+                <div class="stat-number" id="stat4NumberDisplay">50+</div>
+                <div class="stat-label" id="stat4LabelDisplay">Expert Team</div>
             </div>
         </div>
     </section>
 
     <!-- Portfolio Section -->
     <section id="portfolio" class="portfolio">
-        <h2 class="section-title" id="portfolioTitleElement">Our Portfolio</h2>
+        <h2 class="section-title">Our Portfolio</h2>
         <div class="filter-buttons">
-            <button class="filter-btn active" data-filter="all"><span>All Projects</span></button>
-            <button class="filter-btn" data-filter="commercial"><span>Commercial</span></button>
-            <button class="filter-btn" data-filter="residential"><span>Residential</span></button>
-            <button class="filter-btn" data-filter="maintenance"><span>Maintenance</span></button>
+            <button class="filter-btn active" data-filter="all">All</button>
+            <button class="filter-btn" data-filter="commercial">Commercial</button>
+            <button class="filter-btn" data-filter="residential">Residential</button>
+            <button class="filter-btn" data-filter="maintenance">Maintenance</button>
         </div>
         <div class="portfolio-grid" id="portfolioGrid">
             <div class="portfolio-item" data-category="commercial">
@@ -3608,32 +3714,11 @@ Selangor, Malaysia</textarea>
                     <p>Modern F&B Outlet Design</p>
                 </div>
             </div>
-            <div class="portfolio-item" data-category="commercial">
-                <img src="/api/placeholder/400/450" alt="Bungkus Kaw Kaw">
-                <div class="portfolio-overlay">
-                    <h3>Bungkus Kaw Kaw</h3>
-                    <p>Contemporary Restaurant Interior</p>
-                </div>
-            </div>
             <div class="portfolio-item" data-category="residential">
-                <img src="/api/placeholder/400/450" alt="Luxury Apartment">
+                <img src="/api/placeholder/400/450" alt="Modern Residence">
                 <div class="portfolio-overlay">
-                    <h3>Luxury Apartment</h3>
-                    <p>Modern Residential Design</p>
-                </div>
-            </div>
-            <div class="portfolio-item" data-category="commercial">
-                <img src="/api/placeholder/400/450" alt="Corporate Office">
-                <div class="portfolio-overlay">
-                    <h3>Corporate Office</h3>
-                    <p>Professional Workspace Interior</p>
-                </div>
-            </div>
-            <div class="portfolio-item" data-category="maintenance">
-                <img src="/api/placeholder/400/450" alt="Topshop & Topman">
-                <div class="portfolio-overlay">
-                    <h3>Topshop & Topman</h3>
-                    <p>Retail Maintenance Excellence</p>
+                    <h3>Modern Residence</h3>
+                    <p>Contemporary Living Space</p>
                 </div>
             </div>
         </div>
@@ -3641,42 +3726,42 @@ Selangor, Malaysia</textarea>
 
     <!-- Process Section -->
     <section id="process" class="process">
-        <h2 class="section-title" id="processTitleElement">Our Process</h2>
+        <h2 class="section-title">Our Process</h2>
         <div class="process-timeline">
             <div class="process-item">
                 <div class="process-number">1</div>
-                <h3>Planning</h3>
-                <p>Setting performance objectives & developing strategic decisions on how to achieve them</p>
+                <h3>Consultation</h3>
+                <p>We start by understanding your vision, requirements, and budget to create a tailored solution.</p>
             </div>
             <div class="process-item">
                 <div class="process-number">2</div>
-                <h3>Organizing</h3>
-                <p>Creating structure: Setting tasks, arranging resources & coordinating activities</p>
+                <h3>Design & Planning</h3>
+                <p>Our team develops comprehensive designs and detailed plans that bring your vision to life.</p>
             </div>
             <div class="process-item">
                 <div class="process-number">3</div>
-                <h3>Implementing</h3>
-                <p>Executing the plans to meet the set performance objectives with precision</p>
+                <h3>Implementation</h3>
+                <p>Expert execution with attention to detail, ensuring quality and timely delivery.</p>
             </div>
             <div class="process-item">
                 <div class="process-number">4</div>
-                <h3>Controlling</h3>
-                <p>Measuring performance & taking corrective actions to restore specifications</p>
+                <h3>Final Touch</h3>
+                <p>We perfect every detail and ensure your complete satisfaction with the finished project.</p>
             </div>
         </div>
     </section>
 
     <!-- Contact Section -->
     <section id="contact" class="contact">
-        <h2 class="section-title" id="contactTitleElement">Get In Touch</h2>
+        <h2 class="section-title">Get In Touch</h2>
         <div class="contact-content">
             <div class="contact-info">
-                <h3 id="contactHeadingElement">Let's Create Something <span>Amazing</span> Together</h3>
+                <h3>Let's Create Something <span>Amazing</span> Together</h3>
                 <div class="contact-item">
                     <i>📍</i>
                     <div>
-                        <p><strong>Address:</strong></p>
-                        <p id="contactAddress">C-08-34, Centum @ Oasis Corporate Park,<br>
+                        <h4>Visit Us</h4>
+                        <p id="addressDisplay">C-08-34, Centum @ Oasis Corporate Park,<br>
                         Oasis Damansara, No.2 Jalan PJU 1A/2,<br>
                         Ara Damansara, 47301 Petaling Jaya,<br>
                         Selangor, Malaysia</p>
@@ -3684,11 +3769,17 @@ Selangor, Malaysia</textarea>
                 </div>
                 <div class="contact-item">
                     <i>📧</i>
-                    <p id="contactEmail">info@refitservices.com</p>
+                    <div>
+                        <h4>Email Us</h4>
+                        <p id="emailDisplay">info@refitservices.com</p>
+                    </div>
                 </div>
                 <div class="contact-item">
                     <i>📞</i>
-                    <p id="contactPhone">+60 3-1234 5678</p>
+                    <div>
+                        <h4>Call Us</h4>
+                        <p id="phoneDisplay">+60 3-1234 5678</p>
+                    </div>
                 </div>
             </div>
             <form class="contact-form" id="contactForm">
@@ -3699,72 +3790,127 @@ Selangor, Malaysia</textarea>
                     <input type="email" placeholder="Your Email" required>
                 </div>
                 <div class="form-group">
-                    <input type="text" placeholder="Subject">
+                    <input type="tel" placeholder="Your Phone">
                 </div>
                 <div class="form-group">
-                    <textarea rows="5" placeholder="Your Message" required></textarea>
+                    <textarea placeholder="Tell us about your project" rows="5"></textarea>
                 </div>
-                <button type="submit" class="submit-btn custom-button">Send Message</button>
+                <button type="submit" class="submit-btn">Send Message</button>
             </form>
         </div>
     </section>
 
-    <!-- AI Home Designer Modal -->
+    <!-- Footer -->
+    <footer>
+        <div class="footer-content">
+            <div class="footer-grid">
+                <div class="footer-column">
+                    <h4>About Refit</h4>
+                    <p>Professional maintenance, interior construction & renovation services in Malaysia. Transforming spaces with passion and expertise since 2013.</p>
+                    <div class="social-links">
+                        <a href="#" aria-label="Facebook">📘</a>
+                        <a href="#" aria-label="Instagram">📷</a>
+                        <a href="#" aria-label="LinkedIn">💼</a>
+                        <a href="#" aria-label="Twitter">🐦</a>
+                    </div>
+                </div>
+                <div class="footer-column">
+                    <h4>Quick Links</h4>
+                    <ul>
+                        <li><a href="#services">Services</a></li>
+                        <li><a href="#about">About Us</a></li>
+                        <li><a href="#portfolio">Portfolio</a></li>
+                        <li><a href="#contact">Contact</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h4>Services</h4>
+                    <ul>
+                        <li><a href="#services">Maintenance</a></li>
+                        <li><a href="#services">Construction</a></li>
+                        <li><a href="#services">Design</a></li>
+                        <li><a href="#services">Consultation</a></li>
+                    </ul>
+                </div>
+                <div class="footer-column">
+                    <h4>Contact Info</h4>
+                    <ul>
+                        <li>📍 Petaling Jaya, Selangor</li>
+                        <li>📧 info@refitservices.com</li>
+                        <li>📞 +60 3-1234 5678</li>
+                        <li>⏰ Mon-Fri: 9AM-6PM</li>
+                    </ul>
+                </div>
+            </div>
+            <div class="footer-bottom">
+                <p>&copy; 2024 Refit Maintenance Services. All rights reserved.</p>
+                <p>Designed with ❤️ in Malaysia</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Master Admin Button -->
+    <button class="master-admin-btn" id="masterAdminBtn">Master Admin</button>
+
+    <!-- AI Designer Modal -->
     <div class="ai-designer-modal" id="aiDesignerModal">
         <div class="ai-designer-content">
             <button class="ai-close" onclick="closeAIDesigner()">&times;</button>
             
             <div class="ai-header">
-                <h2>AI Home Designer</h2>
-                <p>Transform your space with AI-powered design suggestions</p>
+                <h2>AI Interior Designer</h2>
+                <p>Transform your space with artificial intelligence</p>
             </div>
 
-            <!-- Progress Indicator -->
             <div class="ai-progress">
-                <div class="progress-step active" data-step="1">
+                <div class="progress-step active">
                     <div class="step-number">1</div>
                     <span>Upload Photo</span>
                 </div>
                 <div class="progress-line"></div>
-                <div class="progress-step" data-step="2">
+                <div class="progress-step">
                     <div class="step-number">2</div>
-                    <span>Select Area</span>
+                    <span>Select Room</span>
                 </div>
                 <div class="progress-line"></div>
-                <div class="progress-step" data-step="3">
+                <div class="progress-step">
                     <div class="step-number">3</div>
                     <span>Choose Style</span>
                 </div>
                 <div class="progress-line"></div>
-                <div class="progress-step" data-step="4">
+                <div class="progress-step">
                     <div class="step-number">4</div>
-                    <span>Color Theme</span>
+                    <span>Color Scheme</span>
+                </div>
+                <div class="progress-line"></div>
+                <div class="progress-step">
+                    <div class="step-number">5</div>
+                    <span>Generate</span>
                 </div>
             </div>
 
-            <!-- Step 1: Upload Image -->
+            <!-- Step 1: Upload -->
             <div class="ai-step active" id="step1">
                 <h3>Upload Your Room Photo</h3>
                 <div class="upload-container">
                     <div class="upload-box" id="uploadBox">
-                        <div class="upload-icon">📸</div>
-                        <h4>Click or drag photo here</h4>
-                        <p>Supported: JPG, PNG (Max 10MB)</p>
-                        <input type="file" id="roomPhotoInput" accept="image/*" hidden>
+                        <h4>📷 Drag & Drop Your Photo Here</h4>
+                        <p>or click to browse files</p>
+                        <input type="file" accept="image/*" hidden id="roomPhotoInput">
                     </div>
                     <div class="uploaded-preview" id="uploadedPreview" style="display: none;">
-                        <img id="previewImage" alt="Room preview">
+                        <img id="uploadedImage" alt="Uploaded room">
                         <button class="change-photo" onclick="changePhoto()">Change Photo</button>
                     </div>
                 </div>
                 <div class="ai-nav-buttons">
-                    <button class="ai-next-btn" onclick="nextStep()" disabled>Next Step</button>
+                    <button class="ai-next-btn" id="nextStep1" disabled>Next</button>
                 </div>
             </div>
 
-            <!-- Step 2: Select Room/Area -->
+            <!-- Step 2: Room Type -->
             <div class="ai-step" id="step2">
-                <h3>Select Room or Area to Design</h3>
+                <h3>Select Room Type</h3>
                 <div class="room-grid">
                     <div class="room-option" data-room="living">
                         <div class="room-icon">🛋️</div>
@@ -3784,7 +3930,7 @@ Selangor, Malaysia</textarea>
                     </div>
                     <div class="room-option" data-room="office">
                         <div class="room-icon">💼</div>
-                        <span>Home Office</span>
+                        <span>Office</span>
                     </div>
                     <div class="room-option" data-room="dining">
                         <div class="room-icon">🍽️</div>
@@ -3792,14 +3938,14 @@ Selangor, Malaysia</textarea>
                     </div>
                 </div>
                 <div class="ai-nav-buttons">
-                    <button class="ai-back-btn" onclick="previousStep()">Back</button>
-                    <button class="ai-next-btn" onclick="nextStep()" disabled>Next Step</button>
+                    <button class="ai-back-btn" onclick="previousStep(2)">Back</button>
+                    <button class="ai-next-btn" id="nextStep2" disabled>Next</button>
                 </div>
             </div>
 
-            <!-- Step 3: Choose Style -->
+            <!-- Step 3: Style -->
             <div class="ai-step" id="step3">
-                <h3>Choose Your Design Style</h3>
+                <h3>Choose Your Style</h3>
                 <div class="style-grid">
                     <div class="style-option" data-style="modern">
                         <div class="style-preview modern-style"></div>
@@ -3827,596 +3973,232 @@ Selangor, Malaysia</textarea>
                     </div>
                 </div>
                 <div class="ai-nav-buttons">
-                    <button class="ai-back-btn" onclick="previousStep()">Back</button>
-                    <button class="ai-next-btn" onclick="nextStep()" disabled>Next Step</button>
+                    <button class="ai-back-btn" onclick="previousStep(3)">Back</button>
+                    <button class="ai-next-btn" id="nextStep3" disabled>Next</button>
                 </div>
             </div>
 
-            <!-- Step 4: Color Theme -->
+            <!-- Step 4: Colors -->
             <div class="ai-step" id="step4">
-                <h3>Select Your Color Theme</h3>
+                <h3>Select Color Scheme</h3>
                 <div class="color-grid">
                     <div class="color-option" data-colors="warm">
                         <div class="color-palette">
                             <div class="color-swatch" style="background: #D4A574;"></div>
-                            <div class="color-swatch" style="background: #E7BC91;"></div>
-                            <div class="color-swatch" style="background: #FFF8E7;"></div>
+                            <div class="color-swatch" style="background: #E6B8A2;"></div>
+                            <div class="color-swatch" style="background: #F5E6D3;"></div>
                         </div>
                         <span>Warm & Cozy</span>
                     </div>
                     <div class="color-option" data-colors="cool">
                         <div class="color-palette">
-                            <div class="color-swatch" style="background: #5B8C9E;"></div>
-                            <div class="color-swatch" style="background: #8BBBD3;"></div>
-                            <div class="color-swatch" style="background: #E8F3F8;"></div>
+                            <div class="color-swatch" style="background: #7BA7BC;"></div>
+                            <div class="color-swatch" style="background: #9FC5E8;"></div>
+                            <div class="color-swatch" style="background: #CFE2F3;"></div>
                         </div>
                         <span>Cool & Calm</span>
                     </div>
                     <div class="color-option" data-colors="neutral">
                         <div class="color-palette">
-                            <div class="color-swatch" style="background: #A8A8A8;"></div>
-                            <div class="color-swatch" style="background: #D3D3D3;"></div>
-                            <div class="color-swatch" style="background: #F5F5F5;"></div>
+                            <div class="color-swatch" style="background: #8E8E8E;"></div>
+                            <div class="color-swatch" style="background: #B7B7B7;"></div>
+                            <div class="color-swatch" style="background: #E5E5E5;"></div>
                         </div>
                         <span>Neutral & Timeless</span>
+                    </div>
+                    <div class="color-option" data-colors="bold">
+                        <div class="color-palette">
+                            <div class="color-swatch" style="background: #E94B3C;"></div>
+                            <div class="color-swatch" style="background: #F39C12;"></div>
+                            <div class="color-swatch" style="background: #27AE60;"></div>
+                        </div>
+                        <span>Bold & Vibrant</span>
+                    </div>
+                    <div class="color-option" data-colors="pastel">
+                        <div class="color-palette">
+                            <div class="color-swatch" style="background: #FFB3D9;"></div>
+                            <div class="color-swatch" style="background: #B3D9FF;"></div>
+                            <div class="color-swatch" style="background: #FFFFB3;"></div>
+                        </div>
+                        <span>Soft Pastels</span>
                     </div>
                     <div class="color-option" data-colors="monochrome">
                         <div class="color-palette">
                             <div class="color-swatch" style="background: #2C2C2C;"></div>
-                            <div class="color-swatch" style="background: #6B6B6B;"></div>
-                            <div class="color-swatch" style="background: #FFFFFF;"></div>
+                            <div class="color-swatch" style="background: #666666;"></div>
+                            <div class="color-swatch" style="background: #CCCCCC;"></div>
                         </div>
                         <span>Monochrome</span>
                     </div>
-                    <div class="color-option" data-colors="earthy">
-                        <div class="color-palette">
-                            <div class="color-swatch" style="background: #8B6B47;"></div>
-                            <div class="color-swatch" style="background: #A0826D;"></div>
-                            <div class="color-swatch" style="background: #FAF0E6;"></div>
-                        </div>
-                        <span>Earthy & Natural</span>
-                    </div>
-                    <div class="color-option" data-colors="vibrant">
-                        <div class="color-palette">
-                            <div class="color-swatch" style="background: #FF6B6B;"></div>
-                            <div class="color-swatch" style="background: #4ECDC4;"></div>
-                            <div class="color-swatch" style="background: #45B7D1;"></div>
-                        </div>
-                        <span>Vibrant & Bold</span>
-                    </div>
                 </div>
                 <div class="ai-nav-buttons">
-                    <button class="ai-back-btn" onclick="previousStep()">Back</button>
-                    <button class="ai-generate-btn" onclick="generateDesign()" disabled>
+                    <button class="ai-back-btn" onclick="previousStep(4)">Back</button>
+                    <button class="ai-generate-btn" onclick="generateDesign()">
                         <span class="generate-icon">✨</span>
-                        <span>Generate Design</span>
+                        Generate Design
                     </button>
                 </div>
             </div>
 
-            <!-- AI Result -->
-            <div class="ai-result" id="aiResult" style="display: none;">
-                <h3>Your AI-Generated Design</h3>
-                <div class="result-container">
-                    <div class="before-after">
-                        <div class="result-image">
-                            <h4>Original Room</h4>
-                            <img id="originalImage" alt="Original room">
-                        </div>
-                        <div class="result-image">
-                            <h4>AI Design Suggestion</h4>
-                            <div class="ai-loading" id="aiLoading">
-                                <div class="loading-spinner"></div>
-                                <p>Creating your dream space...</p>
+            <!-- Step 5: Result -->
+            <div class="ai-step" id="step5">
+                <div class="ai-result">
+                    <h3>Your AI-Generated Design</h3>
+                    <div class="result-container">
+                        <div class="before-after">
+                            <div class="result-image">
+                                <h4>Before</h4>
+                                <img id="beforeImage" alt="Original room">
                             </div>
-                            <img id="aiGeneratedImage" style="display: none;" alt="AI generated design">
-                        </div>
-                    </div>
-
-                    <div class="result-actions">
-                        <button class="action-btn regenerate" onclick="regenerateDesign()">
-                            <span>🔄</span>
-                            <span>Try Different Design</span>
-                        </button>
-                        <button class="action-btn budget" onclick="showBudgetQuote()">
-                            <span>💰</span>
-                            <span>Get Budget Quote</span>
-                        </button>
-                        <button class="action-btn ok" onclick="confirmDesign()">
-                            <span>👍</span>
-                            <span>I Like This Design</span>
-                        </button>
-                    </div>
-
-                    <!-- Budget Quote Section -->
-                    <div class="budget-quote" id="budgetQuote" style="display: none;">
-                        <h4>Estimated Budget Quote</h4>
-                        <div class="quote-details">
-                            <div class="quote-item">
-                                <span>Design & Planning</span>
-                                <span class="price">RM 2,500</span>
-                            </div>
-                            <div class="quote-item">
-                                <span>Materials & Furnishing</span>
-                                <span class="price">RM 15,000</span>
-                            </div>
-                            <div class="quote-item">
-                                <span>Labor & Installation</span>
-                                <span class="price">RM 8,000</span>
-                            </div>
-                            <div class="quote-item">
-                                <span>Miscellaneous</span>
-                                <span class="price">RM 2,000</span>
-                            </div>
-                            <div class="quote-item total">
-                                <span>Total Estimated Cost</span>
-                                <span class="price">RM 27,500</span>
-                            </div>
-                        </div>
-                        <div class="deposit-info">
-                            <p>Required Deposit: <strong>RM 5,500</strong> (20%)</p>
-                        </div>
-                        <button class="action-btn agree" onclick="agreeToQuote()">
-                            <span>✅</span>
-                            <span>Agree & Proceed</span>
-                        </button>
-                    </div>
-
-                    <!-- Agreement Section -->
-                    <div class="agreement-section" id="agreementSection" style="display: none;">
-                        <h4>Service Agreement</h4>
-                        <div class="agreement-box">
-                            <p><strong>Terms & Conditions:</strong></p>
-                            <ul>
-                                <li>20% deposit required upon agreement</li>
-                                <li>Balance payment in 3 installments</li>
-                                <li>Project duration: 6-8 weeks</li>
-                                <li>Includes 1 year warranty on workmanship</li>
-                                <li>Material warranty as per manufacturer</li>
-                            </ul>
-                        </div>
-                        <div class="remarks-section">
-                            <label for="remarks">Any Special Remarks?</label>
-                            <textarea id="remarks" placeholder="Enter any special requirements or remarks..."></textarea>
-                        </div>
-                        <button class="action-btn pay-deposit" onclick="proceedToPayment()">
-                            <span>💳</span>
-                            <span>Pay Deposit</span>
-                        </button>
-                    </div>
-
-                    <!-- Payment Section -->
-                    <div class="payment-section" id="paymentSection" style="display: none;">
-                        <div class="payment-info">
-                            <p><strong>Deposit Amount:</strong> RM 5,500</p>
-                            <p><strong>Payment Reference:</strong> REF-2025-08-0001</p>
-                        </div>
-                        <div class="payment-methods">
-                            <h5>Select Payment Method:</h5>
-                            <div class="payment-options">
-                                <div class="payment-option" data-method="bank">
-                                    <span>🏦</span>
-                                    <span>Bank Transfer</span>
+                            <div class="result-image">
+                                <h4>After</h4>
+                                <div class="ai-loading" id="aiLoading">
+                                    <div class="loading-spinner"></div>
+                                    <p>AI is creating your design...</p>
                                 </div>
-                                <div class="payment-option" data-method="card">
-                                    <span>💳</span>
-                                    <span>Credit/Debit Card</span>
+                                <img id="afterImage" style="display: none;" alt="AI designed room">
+                            </div>
+                        </div>
+                        <div class="result-actions">
+                            <button class="action-btn regenerate" onclick="regenerateDesign()">
+                                🔄 Try Different Style
+                            </button>
+                            <button class="action-btn budget" onclick="getBudgetQuote()">
+                                💰 Get Budget Quote
+                            </button>
+                            <button class="action-btn ok" onclick="proceedWithDesign()">
+                                ✅ I Love It!
+                            </button>
+                        </div>
+                        
+                        <div class="budget-quote" id="budgetQuote" style="display: none;">
+                            <h4>Estimated Project Budget</h4>
+                            <div class="quote-details">
+                                <div class="quote-item">
+                                    <span>Design & Planning</span>
+                                    <span class="price">RM 5,000</span>
+                                </div>
+                                <div class="quote-item">
+                                    <span>Materials</span>
+                                    <span class="price">RM 25,000</span>
+                                </div>
+                                <div class="quote-item">
+                                    <span>Construction & Labor</span>
+                                    <span class="price">RM 15,000</span>
+                                </div>
+                                <div class="quote-item">
+                                    <span>Furnishing</span>
+                                    <span class="price">RM 20,000</span>
+                                </div>
+                                <div class="quote-item total">
+                                    <span>Total Estimate</span>
+                                    <span class="price">RM 65,000</span>
                                 </div>
                             </div>
                         </div>
-                        <button class="action-btn send-confirmation" onclick="uploadPaymentSlip()">
-                            <span>📤</span>
-                            <span>Upload Payment Slip</span>
-                        </button>
-                    </div>
 
-                    <!-- Payment Upload -->
-                    <div class="payment-upload" id="paymentUpload" style="display: none;">
-                        <h4>Upload Payment Confirmation</h4>
-                        <div class="slip-upload-box" onclick="document.getElementById('slipInput').click()">
-                            <span>📸</span>
-                            <p>Click to upload payment slip</p>
-                            <input type="file" id="slipInput" accept="image/*" hidden>
-                        </div>
-                        <div class="slip-preview" id="slipPreview" style="display: none;">
-                            <img id="slipImage" alt="Payment slip">
-                        </div>
-                        <button class="action-btn done" onclick="completeProcess()">
-                            <span>✅</span>
-                            <span>Complete Process</span>
-                        </button>
-                    </div>
-
-                    <!-- Completion Section -->
-                    <div class="completion-section" id="completionSection" style="display: none;">
-                        <div class="success-icon">🎉</div>
-                        <h4>Thank You!</h4>
-                        <p>Your AI home design request has been successfully submitted.</p>
-                        <div class="completion-details">
-                            <h5>What Happens Next?</h5>
-                            <ul>
-                                <li data-prefix="📞">Our design team will contact you within 24 hours</li>
-                                <li data-prefix="📋">Detailed project plan will be shared</li>
-                                <li data-prefix="🏠">Site visit will be scheduled</li>
-                                <li data-prefix="🎨">Final design adjustments as needed</li>
-                            </ul>
-                        </div>
-                        <div class="ai-message">
-                            <div class="message-bubble">
-                                <p>We're excited to transform your space! Our team will be in touch soon to discuss your project in detail.</p>
+                        <div class="agreement-section" id="agreementSection" style="display: none;">
+                            <h4>Project Agreement</h4>
+                            <div class="agreement-box">
+                                <p>By proceeding, you agree to:</p>
+                                <ul>
+                                    <li>Schedule a consultation with our design team</li>
+                                    <li>Receive a detailed project proposal within 48 hours</li>
+                                    <li>50% deposit required upon project confirmation</li>
+                                    <li>Project timeline: 6-8 weeks from start date</li>
+                                </ul>
                             </div>
                         </div>
-                        <button class="action-btn done" onclick="closeAIDesigner()">
-                            <span>🏠</span>
-                            <span>Back to Home</span>
-                        </button>
+
+                        <div class="payment-section" id="paymentSection" style="display: none;">
+                            <h4>Secure Your Design Consultation</h4>
+                            <div class="payment-info">
+                                <p><strong>Consultation Fee:</strong> RM 500 (deductible from project cost)</p>
+                                <p><strong>Payment Methods:</strong> Online Banking, Credit Card, E-Wallet</p>
+                                <p><strong>Next Step:</strong> Our team will contact you within 24 hours</p>
+                            </div>
+                            <button class="submit-btn" onclick="proceedToPayment()">
+                                Proceed to Payment
+                            </button>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- Footer -->
-    <footer>
-        <div class="footer-content">
-            <div class="footer-grid">
-                <div class="footer-column">
-                    <h4>About Refit</h4>
-                    <p>Professional maintenance, interior construction & renovation, and design services. Transforming spaces with passion and precision since 2013.</p>
-                    <div class="social-links">
-                        <a href="#" aria-label="Facebook"><i>f</i></a>
-                        <a href="#" aria-label="Instagram"><i>📷</i></a>
-                        <a href="#" aria-label="LinkedIn"><i>in</i></a>
-                        <a href="https://wa.me/60122145922" aria-label="WhatsApp"><i>📱</i></a>
-                    </div>
-                </div>
-                <div class="footer-column">
-                    <h4>Services</h4>
-                    <ul>
-                        <li><a href="#services">Maintenance</a></li>
-                        <li><a href="#services">Interior Construction</a></li>
-                        <li><a href="#services">Renovation</a></li>
-                        <li><a href="#services">3D Design</a></li>
-                    </ul>
-                </div>
-                <div class="footer-column">
-                    <h4>Quick Links</h4>
-                    <ul>
-                        <li><a href="#about">About Us</a></li>
-                        <li><a href="#portfolio">Portfolio</a></li>
-                        <li><a href="#process">Our Process</a></li>
-                        <li><a href="#contact">Contact</a></li>
-                    </ul>
-                </div>
-                <div class="footer-column">
-                    <h4>Contact Info</h4>
-                    <p>📍 Petaling Jaya, Selangor</p>
-                    <p>📧 info@refitservices.com</p>
-                    <p>📞 +60 3-1234 5678</p>
-                    <p>📱 +60 12-214 5922</p>
-                </div>
-            </div>
-            <div class="footer-bottom">
-                <p>&copy; 2025 Refit Maintenance Services. All rights reserved.</p>
-                <p>Crafted with ❤️ in Malaysia</p>
-            </div>
-        </div>
-    </footer>
-
+    <!-- JavaScript -->
     <script>
-        // Site Configuration Storage
-        const siteConfig = {
-            colors: {
-                primary: '#E8A5B7',
-                dark: '#D47F99',
-                light: '#F5E6EA',
-                darker: '#C05478'
-            },
-            button: {
-                style: 'filled',
-                effect: '',
-                radius: '25px',
-                padding: '15px 40px',
-                fontSize: '1.1rem',
-                shadow: 'var(--shadow-md)',
-                animation: 'ease',
-                duration: '0.3s',
-                transform: 'translateY(-3px)'
-            },
-            content: {},
-            portfolio: []
-        };
+        // Store user data
+        let currentUser = null;
+        let selectedRoom = null;
+        let selectedStyle = null;
+        let selectedColors = null;
+        let uploadedFile = null;
 
-        // Load saved configuration
-        function loadSiteConfig() {
-            const saved = localStorage.getItem('siteConfig');
-            if (saved) {
-                Object.assign(siteConfig, JSON.parse(saved));
-                applySiteConfig();
-            }
-        }
-
-        // Apply site configuration
-        function applySiteConfig() {
-            // Apply colors
-            if (siteConfig.colors) {
-                document.documentElement.style.setProperty('--primary-pink', siteConfig.colors.primary);
-                document.documentElement.style.setProperty('--dark-pink', siteConfig.colors.dark);
-                document.documentElement.style.setProperty('--light-pink', siteConfig.colors.light);
-                document.documentElement.style.setProperty('--darker-pink', siteConfig.colors.darker);
-                updateGradients();
-            }
-
-            // Apply button styles
-            if (siteConfig.button) {
-                document.documentElement.style.setProperty('--button-bg', siteConfig.button.style === 'outline' ? 'transparent' : 'var(--gradient)');
-                document.documentElement.style.setProperty('--button-color', siteConfig.button.style === 'outline' ? 'var(--primary-pink)' : 'var(--white)');
-                document.documentElement.style.setProperty('--button-border-width', siteConfig.button.style === 'outline' ? '2px' : '0');
-                document.documentElement.style.setProperty('--button-border-color', siteConfig.button.style === 'outline' ? 'var(--primary-pink)' : 'transparent');
-                document.documentElement.style.setProperty('--button-border-radius', siteConfig.button.radius);
-                document.documentElement.style.setProperty('--button-padding', siteConfig.button.padding);
-                document.documentElement.style.setProperty('--button-font-size', siteConfig.button.fontSize);
-                document.documentElement.style.setProperty('--button-shadow', siteConfig.button.shadow);
-                document.documentElement.style.setProperty('--button-animation', siteConfig.button.animation);
-                document.documentElement.style.setProperty('--button-animation-duration', siteConfig.button.duration);
-                document.documentElement.style.setProperty('--button-hover-transform', siteConfig.button.transform);
-            }
-
-            // Apply content
-            applyContentConfig();
-        }
-
-        // Update gradients based on colors
-        function updateGradients() {
-            const gradient = `linear-gradient(135deg, ${siteConfig.colors.dark} 0%, ${siteConfig.colors.primary} 50%, ${siteConfig.colors.light} 100%)`;
-            const gradientHover = `linear-gradient(135deg, ${siteConfig.colors.darker} 0%, ${siteConfig.colors.dark} 50%, ${siteConfig.colors.primary} 100%)`;
-            document.documentElement.style.setProperty('--gradient', gradient);
-            document.documentElement.style.setProperty('--gradient-hover', gradientHover);
-        }
-
-        // Apply content configuration
-        function applyContentConfig() {
-            // Apply all text content from config
-            const contentMappings = {
-                'logoText': 'navLogo',
-                'heroTitle': 'heroTitleElement',
-                'heroSubtitle': 'heroSubtitleElement',
-                'ctaText': 'ctaTextElement',
-                'aiButtonText': 'aiButtonTextElement',
-                'servicesTitle': 'servicesTitleElement',
-                'service1Title': 'service1TitleElement',
-                'service1Desc': 'service1DescElement',
-                'service2Title': 'service2TitleElement',
-                'service2Desc': 'service2DescElement',
-                'service3Title': 'service3TitleElement',
-                'service3Desc': 'service3DescElement',
-                'aboutHeading': 'aboutHeadingElement',
-                'missionText': 'missionTextElement',
-                'visionText': 'visionTextElement',
-                'value1Title': 'value1TitleElement',
-                'value1Desc': 'value1DescElement',
-                'value2Title': 'value2TitleElement',
-                'value2Desc': 'value2DescElement',
-                'value3Title': 'value3TitleElement',
-                'value3Desc': 'value3DescElement',
-                'value4Title': 'value4TitleElement',
-                'value4Desc': 'value4DescElement',
-                'stat1Number': 'stat1NumberElement',
-                'stat1Label': 'stat1LabelElement',
-                'stat2Number': 'stat2NumberElement',
-                'stat2Label': 'stat2LabelElement',
-                'stat3Number': 'stat3NumberElement',
-                'stat3Label': 'stat3LabelElement',
-                'stat4Number': 'stat4NumberElement',
-                'stat4Label': 'stat4LabelElement',
-                'portfolioTitle': 'portfolioTitleElement',
-                'processTitle': 'processTitleElement',
-                'contactTitle': 'contactTitleElement',
-                'contactHeading': 'contactHeadingElement',
-                'companyAddress': 'contactAddress',
-                'companyEmail': 'contactEmail',
-                'companyPhone': 'contactPhone'
-            };
-
-            Object.entries(contentMappings).forEach(([configKey, elementId]) => {
-                if (siteConfig.content[configKey]) {
-                    const element = document.getElementById(elementId);
-                    if (element) {
-                        if (elementId === 'contactHeadingElement') {
-                            element.innerHTML = siteConfig.content[configKey].replace('Amazing', '<span>Amazing</span>');
-                        } else if (elementId === 'aboutHeadingElement') {
-                            element.innerHTML = siteConfig.content[configKey].replace('Refit', '<span>Refit</span>');
-                        } else {
-                            element.textContent = siteConfig.content[configKey];
-                        }
-                    }
-                }
-            });
-
-            // Apply service icons
-            if (siteConfig.content.service1Icon) document.getElementById('service1IconElement').textContent = siteConfig.content.service1Icon;
-            if (siteConfig.content.service2Icon) document.getElementById('service2IconElement').textContent = siteConfig.content.service2Icon;
-            if (siteConfig.content.service3Icon) document.getElementById('service3IconElement').textContent = siteConfig.content.service3Icon;
-
-            // Update WhatsApp link
-            if (siteConfig.content.whatsappNumber) {
-                document.querySelector('.whatsapp-btn').href = `https://wa.me/${siteConfig.content.whatsappNumber.replace(/\D/g, '')}`;
-            }
-        }
-
-        // Loading Screen
-        window.addEventListener('load', function() {
-            loadSiteConfig();
+        // DOM Elements
+        const loader = document.querySelector('.loader-wrapper');
+        const nav = document.querySelector('nav');
+        const menuToggle = document.querySelector('.menu-toggle');
+        const navLinks = document.querySelector('.nav-links');
+        const scrollProgress = document.getElementById('scrollProgress');
+        
+        // Loading animation
+        window.addEventListener('load', () => {
             setTimeout(() => {
-                document.querySelector('.loader-wrapper').classList.add('loaded');
+                loader.classList.add('loaded');
             }, 2000);
         });
 
-        // Scroll Progress
+        // Scroll progress bar
         window.addEventListener('scroll', () => {
             const winScroll = document.body.scrollTop || document.documentElement.scrollTop;
             const height = document.documentElement.scrollHeight - document.documentElement.clientHeight;
             const scrolled = (winScroll / height) * 100;
-            document.getElementById('scrollProgress').style.width = scrolled + '%';
+            scrollProgress.style.width = scrolled + '%';
 
             // Nav scroll effect
-            const nav = document.querySelector('nav');
-            if (window.scrollY > 50) {
+            if (window.scrollY > 100) {
                 nav.classList.add('scrolled');
             } else {
                 nav.classList.remove('scrolled');
             }
         });
 
-        // Mobile Menu Toggle
-        const menuToggle = document.querySelector('.menu-toggle');
-        const navLinks = document.querySelector('.nav-links');
-
+        // Mobile menu toggle
         menuToggle.addEventListener('click', () => {
             menuToggle.classList.toggle('active');
             navLinks.classList.toggle('active');
         });
 
-        // Active nav link
-        const navLinksItems = document.querySelectorAll('.nav-links a');
-        navLinksItems.forEach(link => {
-            link.addEventListener('click', (e) => {
-                navLinksItems.forEach(l => l.classList.remove('active'));
-                link.classList.add('active');
-                navLinks.classList.remove('active');
-                menuToggle.classList.remove('active');
-            });
-        });
-
-        // Update active nav on scroll
-        const sections = document.querySelectorAll('section');
-        window.addEventListener('scroll', () => {
-            let current = '';
-            sections.forEach(section => {
-                const sectionTop = section.offsetTop;
-                const sectionHeight = section.clientHeight;
-                if (scrollY >= (sectionTop - 200)) {
-                    current = section.getAttribute('id');
-                }
-            });
-
-            navLinksItems.forEach(link => {
-                link.classList.remove('active');
-                if (link.getAttribute('href').slice(1) === current) {
-                    link.classList.add('active');
-                }
-            });
-        });
-
-        // Theme Toggle
+        // Theme toggle
         const themeButtons = document.querySelectorAll('.theme-toggle-btn');
-        const body = document.body;
-
         themeButtons.forEach(btn => {
             btn.addEventListener('click', () => {
-                const theme = btn.dataset.theme;
-                if (theme === 'dark') {
-                    body.classList.add('dark-mode');
-                } else {
-                    body.classList.remove('dark-mode');
-                }
                 themeButtons.forEach(b => b.classList.remove('active'));
                 btn.classList.add('active');
-                localStorage.setItem('theme', theme);
+                
+                if (btn.dataset.theme === 'dark') {
+                    document.body.classList.add('dark-mode');
+                } else {
+                    document.body.classList.remove('dark-mode');
+                }
             });
         });
 
-        // Load saved theme
-        const savedTheme = localStorage.getItem('theme');
-        if (savedTheme === 'dark') {
-            body.classList.add('dark-mode');
-            document.querySelector('[data-theme="dark"]').classList.add('active');
-            document.querySelector('[data-theme="light"]').classList.remove('active');
-        }
-
-        // User Account
+        // User Account functionality
         const userAccountBtn = document.getElementById('userAccountBtn');
         const userModal = document.getElementById('userModal');
         const modalClose = document.getElementById('modalClose');
         const modalTabs = document.querySelectorAll('.modal-tab');
         const modalForms = document.querySelectorAll('.modal-form');
+        const userProfile = document.getElementById('userProfile');
         const loginForm = document.getElementById('loginForm');
         const registerForm = document.getElementById('registerForm');
-        const userProfile = document.getElementById('userProfile');
         const logoutBtn = document.getElementById('logoutBtn');
-
-        let isLoggedIn = localStorage.getItem('isLoggedIn') === 'true';
-        let currentUser = JSON.parse(localStorage.getItem('currentUser')) || null;
-
-        // Check if admin
-        function checkAdmin() {
-            if (currentUser && currentUser.email === 'admin@refit.com') {
-                const masterBtn = document.createElement('button');
-                masterBtn.className = 'master-admin-btn';
-                masterBtn.textContent = 'Master Admin';
-                masterBtn.onclick = () => document.getElementById('masterPanel').classList.add('active');
-                document.body.appendChild(masterBtn);
-            }
-        }
-
-        // Update UI based on login status
-        function updateUI() {
-            if (isLoggedIn && currentUser) {
-                document.getElementById('userButtonText').textContent = currentUser.name.split(' ')[0];
-                document.getElementById('userName').textContent = currentUser.name;
-                document.getElementById('userEmail').textContent = currentUser.email;
-                document.getElementById('userPhone').textContent = currentUser.phone;
-                const avatarText = document.getElementById('avatarText');
-                const avatarImage = document.getElementById('avatarImage');
-                
-                if (currentUser.avatar) {
-                    avatarText.style.display = 'none';
-                    avatarImage.src = currentUser.avatar;
-                    avatarImage.style.display = 'block';
-                } else {
-                    avatarText.textContent = currentUser.name.charAt(0).toUpperCase();
-                    avatarText.style.display = 'block';
-                    avatarImage.style.display = 'none';
-                }
-                checkAdmin();
-            } else {
-                document.getElementById('userButtonText').textContent = 'Login / Register';
-            }
-        }
-
-        updateUI();
-
-        // Avatar upload
-        const userAvatar = document.getElementById('userAvatar');
-        const avatarInput = document.getElementById('avatarInput');
-
-        userAvatar.addEventListener('click', () => {
-            if (isLoggedIn) {
-                avatarInput.click();
-            }
-        });
-
-        avatarInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file && file.type.startsWith('image/')) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    currentUser.avatar = e.target.result;
-                    localStorage.setItem('currentUser', JSON.stringify(currentUser));
-                    updateUI();
-                    showNotification('Avatar updated successfully!');
-                };
-                reader.readAsDataURL(file);
-            }
-        });
 
         userAccountBtn.addEventListener('click', () => {
             userModal.classList.add('active');
-            if (isLoggedIn) {
-                document.getElementById('modalTabs').style.display = 'none';
-                modalForms.forEach(f => f.style.display = 'none');
-                userProfile.style.display = 'block';
-            }
         });
 
         modalClose.addEventListener('click', () => {
@@ -4433,96 +4215,99 @@ Selangor, Malaysia</textarea>
             });
         });
 
+        // Login form
         loginForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const email = document.getElementById('loginEmail').value;
             const password = document.getElementById('loginPassword').value;
             
             // Simulate login
-            if (email && password) {
-                currentUser = {
-                    name: email === 'admin@refit.com' ? 'Admin User' : 'John Doe',
-                    email: email,
-                    phone: '+60 12-345 6789'
-                };
-                isLoggedIn = true;
-                localStorage.setItem('isLoggedIn', 'true');
-                localStorage.setItem('currentUser', JSON.stringify(currentUser));
-                updateUI();
-                showNotification('Login successful!');
-                userModal.classList.remove('active');
-            }
+            currentUser = {
+                name: 'John Doe',
+                email: email,
+                phone: '+60 12-345 6789'
+            };
+            
+            showUserProfile();
+            showNotification('Login successful!');
         });
 
+        // Register form
         registerForm.addEventListener('submit', (e) => {
             e.preventDefault();
             const name = document.getElementById('registerName').value;
             const email = document.getElementById('registerEmail').value;
             const phone = document.getElementById('registerPhone').value;
             
-            if (name && email && phone) {
-                currentUser = { name, email, phone };
-                isLoggedIn = true;
-                localStorage.setItem('isLoggedIn', 'true');
-                localStorage.setItem('currentUser', JSON.stringify(currentUser));
-                updateUI();
-                showNotification('Registration successful!');
-                userModal.classList.remove('active');
+            currentUser = {
+                name: name,
+                email: email,
+                phone: phone
+            };
+            
+            showUserProfile();
+            showNotification('Registration successful!');
+        });
+
+        // Show user profile
+        function showUserProfile() {
+            modalTabs.forEach(t => t.parentElement.style.display = 'none');
+            modalForms.forEach(f => f.style.display = 'none');
+            userProfile.style.display = 'block';
+            
+            document.getElementById('userName').textContent = currentUser.name;
+            document.getElementById('userEmail').textContent = currentUser.email;
+            document.getElementById('userPhone').textContent = currentUser.phone;
+            document.getElementById('avatarText').textContent = currentUser.name.charAt(0).toUpperCase();
+            document.getElementById('userButtonText').textContent = currentUser.name;
+        }
+
+        // Logout
+        logoutBtn.addEventListener('click', () => {
+            currentUser = null;
+            userProfile.style.display = 'none';
+            modalTabs.forEach(t => t.parentElement.style.display = 'flex');
+            modalForms[0].style.display = 'block';
+            modalForms[0].classList.add('active');
+            modalTabs[0].classList.add('active');
+            document.getElementById('userButtonText').textContent = 'Login / Register';
+            userModal.classList.remove('active');
+            showNotification('Logged out successfully!');
+        });
+
+        // Avatar upload
+        const userAvatar = document.getElementById('userAvatar');
+        const avatarInput = document.getElementById('avatarInput');
+        const avatarImage = document.getElementById('avatarImage');
+        const avatarText = document.getElementById('avatarText');
+
+        userAvatar.addEventListener('click', () => {
+            avatarInput.click();
+        });
+
+        avatarInput.addEventListener('change', (e) => {
+            const file = e.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = (e) => {
+                    avatarImage.src = e.target.result;
+                    avatarImage.style.display = 'block';
+                    avatarText.style.display = 'none';
+                };
+                reader.readAsDataURL(file);
             }
         });
 
-        logoutBtn.addEventListener('click', () => {
-            isLoggedIn = false;
-            currentUser = null;
-            localStorage.removeItem('isLoggedIn');
-            localStorage.removeItem('currentUser');
-            updateUI();
-            userModal.classList.remove('active');
-            location.reload();
-        });
-
-        // Portfolio Filter
-        const filterBtns = document.querySelectorAll('.filter-btn');
-        const portfolioItems = document.querySelectorAll('.portfolio-item');
-
-        filterBtns.forEach(btn => {
-            btn.addEventListener('click', () => {
-                const filter = btn.dataset.filter;
-                filterBtns.forEach(b => b.classList.remove('active'));
-                btn.classList.add('active');
-                
-                portfolioItems.forEach(item => {
-                    if (filter === 'all' || item.dataset.category === filter) {
-                        item.style.display = 'block';
-                    } else {
-                        item.style.display = 'none';
-                    }
-                });
-            });
-        });
-
-        // Contact Form
-        document.getElementById('contactForm').addEventListener('submit', (e) => {
-            e.preventDefault();
-            showNotification('Message sent successfully!');
-            e.target.reset();
-        });
-
-        // Notification
-        function showNotification(message) {
-            const toast = document.getElementById('notificationToast');
-            document.getElementById('notificationText').textContent = message;
-            toast.classList.add('show');
-            setTimeout(() => {
-                toast.classList.remove('show');
-            }, 3000);
-        }
-
         // Master Admin Panel
-        const masterClose = document.getElementById('masterClose');
+        const masterAdminBtn = document.getElementById('masterAdminBtn');
         const masterPanel = document.getElementById('masterPanel');
+        const masterClose = document.getElementById('masterClose');
         const masterNavTabs = document.querySelectorAll('.master-nav-tab');
         const masterTabContents = document.querySelectorAll('.master-tab-content');
+
+        masterAdminBtn.addEventListener('click', () => {
+            masterPanel.classList.add('active');
+        });
 
         masterClose.addEventListener('click', () => {
             masterPanel.classList.remove('active');
@@ -4539,176 +4324,347 @@ Selangor, Malaysia</textarea>
         });
 
         // Color presets
-        document.querySelectorAll('.color-preset').forEach(preset => {
+        const colorPresets = document.querySelectorAll('.color-preset');
+        colorPresets.forEach(preset => {
             preset.addEventListener('click', () => {
                 const primary = preset.dataset.primary;
                 const dark = preset.dataset.dark;
                 const light = preset.dataset.light;
                 const darker = preset.dataset.darker;
                 
+                document.documentElement.style.setProperty('--primary-pink', primary);
+                document.documentElement.style.setProperty('--dark-pink', dark);
+                document.documentElement.style.setProperty('--light-pink', light);
+                document.documentElement.style.setProperty('--darker-pink', darker);
+                document.documentElement.style.setProperty('--gradient', `linear-gradient(135deg, ${dark} 0%, ${primary} 50%, ${light} 100%)`);
+                
                 document.getElementById('primaryColor').value = primary;
                 document.getElementById('darkColor').value = dark;
                 document.getElementById('lightColor').value = light;
                 document.getElementById('accentColor').value = darker;
                 
-                siteConfig.colors = { primary, dark, light, darker };
-                applySiteConfig();
+                showNotification('Color theme applied!');
             });
         });
 
-        // Master panel color changes
-        document.getElementById('primaryColor').addEventListener('input', function() {
-            siteConfig.colors.primary = this.value;
-            applySiteConfig();
+        // Custom color controls
+        document.getElementById('primaryColor').addEventListener('input', (e) => {
+            document.documentElement.style.setProperty('--primary-pink', e.target.value);
+            updateGradient();
         });
 
-        document.getElementById('darkColor').addEventListener('input', function() {
-            siteConfig.colors.dark = this.value;
-            applySiteConfig();
+        document.getElementById('darkColor').addEventListener('input', (e) => {
+            document.documentElement.style.setProperty('--dark-pink', e.target.value);
+            updateGradient();
         });
 
-        document.getElementById('lightColor').addEventListener('input', function() {
-            siteConfig.colors.light = this.value;
-            applySiteConfig();
+        document.getElementById('lightColor').addEventListener('input', (e) => {
+            document.documentElement.style.setProperty('--light-pink', e.target.value);
+            updateGradient();
         });
 
-        document.getElementById('accentColor').addEventListener('input', function() {
-            siteConfig.colors.darker = this.value;
-            applySiteConfig();
+        document.getElementById('accentColor').addEventListener('input', (e) => {
+            document.documentElement.style.setProperty('--darker-pink', e.target.value);
         });
+
+        function updateGradient() {
+            const primary = document.getElementById('primaryColor').value;
+            const dark = document.getElementById('darkColor').value;
+            const light = document.getElementById('lightColor').value;
+            document.documentElement.style.setProperty('--gradient', `linear-gradient(135deg, ${dark} 0%, ${primary} 50%, ${light} 100%)`);
+        }
 
         // Button style options
-        document.querySelectorAll('.style-option[data-style]').forEach(option => {
-            option.addEventListener('click', function() {
-                document.querySelectorAll('.style-option[data-style]').forEach(opt => opt.classList.remove('selected'));
-                this.classList.add('selected');
-                siteConfig.button.style = this.dataset.style;
-                applySiteConfig();
+        const styleOptions = document.querySelectorAll('.style-option');
+        styleOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                styleOptions.forEach(o => o.classList.remove('selected'));
+                option.classList.add('selected');
+                
+                const style = option.dataset.style;
+                if (style === 'outline') {
+                    document.documentElement.style.setProperty('--button-bg', 'transparent');
+                    document.documentElement.style.setProperty('--button-border-width', '2px');
+                    document.documentElement.style.setProperty('--button-border-color', 'var(--primary-pink)');
+                    document.documentElement.style.setProperty('--button-color', 'var(--primary-pink)');
+                } else if (style === 'ghost') {
+                    document.documentElement.style.setProperty('--button-bg', 'transparent');
+                    document.documentElement.style.setProperty('--button-border-width', '0');
+                    document.documentElement.style.setProperty('--button-color', 'var(--primary-pink)');
+                } else if (style === '3d') {
+                    document.documentElement.style.setProperty('--button-bg', 'var(--gradient)');
+                    document.documentElement.style.setProperty('--button-border-width', '0');
+                    document.documentElement.style.setProperty('--button-color', 'var(--white)');
+                    document.documentElement.style.setProperty('--button-shadow', '0 10px 0 var(--dark-pink), 0 15px 20px rgba(0,0,0,0.2)');
+                } else {
+                    document.documentElement.style.setProperty('--button-bg', 'var(--gradient)');
+                    document.documentElement.style.setProperty('--button-border-width', '0');
+                    document.documentElement.style.setProperty('--button-color', 'var(--white)');
+                    document.documentElement.style.setProperty('--button-shadow', 'var(--shadow-md)');
+                }
             });
         });
 
-        // Button customization controls
-        document.getElementById('buttonEffect').addEventListener('change', function() {
-            siteConfig.button.effect = this.value;
-            document.querySelectorAll('.custom-button').forEach(btn => {
-                btn.className = btn.className.replace(/btn-effect-\S+/g, '').trim();
-                if (this.value) btn.classList.add(this.value);
+        // Button customization
+        document.getElementById('buttonRadius').addEventListener('input', (e) => {
+            document.documentElement.style.setProperty('--button-border-radius', e.target.value + 'px');
+            e.target.nextElementSibling.textContent = e.target.value + 'px';
+        });
+
+        document.getElementById('buttonPadding').addEventListener('input', (e) => {
+            document.documentElement.style.setProperty('--button-padding', e.target.value);
+        });
+
+        document.getElementById('buttonFontSize').addEventListener('input', (e) => {
+            document.documentElement.style.setProperty('--button-font-size', e.target.value + 'rem');
+            e.target.nextElementSibling.textContent = e.target.value + 'rem';
+        });
+
+        document.getElementById('buttonBorderWidth').addEventListener('input', (e) => {
+            document.documentElement.style.setProperty('--button-border-width', e.target.value + 'px');
+            e.target.nextElementSibling.textContent = e.target.value + 'px';
+        });
+
+        document.getElementById('buttonShadow').addEventListener('change', (e) => {
+            document.documentElement.style.setProperty('--button-shadow', e.target.value);
+        });
+
+        document.getElementById('buttonAnimation').addEventListener('change', (e) => {
+            document.documentElement.style.setProperty('--button-animation', e.target.value);
+        });
+
+        document.getElementById('buttonAnimationDuration').addEventListener('input', (e) => {
+            document.documentElement.style.setProperty('--button-animation-duration', e.target.value + 's');
+            e.target.nextElementSibling.textContent = e.target.value + 's';
+        });
+
+        document.getElementById('buttonHoverTransform').addEventListener('change', (e) => {
+            document.documentElement.style.setProperty('--button-hover-transform', e.target.value);
+        });
+
+        document.getElementById('buttonEffect').addEventListener('change', (e) => {
+            const buttons = document.querySelectorAll('.cta-button, .custom-button, .submit-btn');
+            buttons.forEach(btn => {
+                btn.className = btn.className.replace(/btn-effect-\w+/g, '').trim();
+                if (e.target.value) {
+                    btn.classList.add(e.target.value);
+                }
             });
         });
 
-        document.getElementById('buttonRadius').addEventListener('input', function() {
-            siteConfig.button.radius = this.value + 'px';
-            applySiteConfig();
+        // Content updates
+        document.getElementById('heroTitle').addEventListener('input', (e) => {
+            document.querySelector('.hero h1').innerHTML = `<span>${e.target.value}</span>`;
         });
 
-        document.getElementById('buttonPadding').addEventListener('input', function() {
-            siteConfig.button.padding = this.value;
-            applySiteConfig();
+        document.getElementById('heroSubtitle').addEventListener('input', (e) => {
+            document.querySelector('.hero p').textContent = e.target.value;
         });
 
-        document.getElementById('buttonFontSize').addEventListener('input', function() {
-            siteConfig.button.fontSize = this.value + 'rem';
-            applySiteConfig();
+        document.getElementById('ctaText').addEventListener('input', (e) => {
+            document.querySelector('.cta-button span').textContent = e.target.value;
         });
 
-        document.getElementById('buttonShadow').addEventListener('change', function() {
-            siteConfig.button.shadow = this.value;
-            applySiteConfig();
+        document.getElementById('aiButtonText').addEventListener('input', (e) => {
+            document.querySelector('.ai-design-button').innerHTML = `<span class="ai-icon">✨</span> ${e.target.value}`;
         });
 
-        document.getElementById('buttonAnimation').addEventListener('change', function() {
-            siteConfig.button.animation = this.value;
-            applySiteConfig();
+        // Section titles
+        document.getElementById('servicesTitle').addEventListener('input', (e) => {
+            document.querySelector('#services .section-title').textContent = e.target.value;
         });
 
-        document.getElementById('buttonAnimationDuration').addEventListener('input', function() {
-            siteConfig.button.duration = this.value + 's';
-            applySiteConfig();
+        document.getElementById('aboutTitle').addEventListener('input', (e) => {
+            document.querySelector('#about .section-title').textContent = e.target.value;
         });
 
-        document.getElementById('buttonHoverTransform').addEventListener('change', function() {
-            siteConfig.button.transform = this.value;
-            applySiteConfig();
+        document.getElementById('portfolioTitle').addEventListener('input', (e) => {
+            document.querySelector('#portfolio .section-title').textContent = e.target.value;
         });
 
-        // Content editing
-        const contentInputs = {
-            'logoText': 'navLogo',
-            'heroTitle': 'heroTitleElement',
-            'heroSubtitle': 'heroSubtitleElement',
-            'ctaText': 'ctaTextElement',
-            'aiButtonText': 'aiButtonTextElement',
-            'servicesTitle': 'servicesTitleElement',
-            'service1Title': 'service1TitleElement',
-            'service1Desc': 'service1DescElement',
-            'service2Title': 'service2TitleElement',
-            'service2Desc': 'service2DescElement',
-            'service3Title': 'service3TitleElement',
-            'service3Desc': 'service3DescElement',
-            'aboutHeading': 'aboutHeadingElement',
-            'missionText': 'missionTextElement',
-            'visionText': 'visionTextElement',
-            'value1Title': 'value1TitleElement',
-            'value1Desc': 'value1DescElement',
-            'value2Title': 'value2TitleElement',
-            'value2Desc': 'value2DescElement',
-            'value3Title': 'value3TitleElement',
-            'value3Desc': 'value3DescElement',
-            'value4Title': 'value4TitleElement',
-            'value4Desc': 'value4DescElement',
-            'stat1Number': 'stat1NumberElement',
-            'stat1Label': 'stat1LabelElement',
-            'stat2Number': 'stat2NumberElement',
-            'stat2Label': 'stat2LabelElement',
-            'stat3Number': 'stat3NumberElement',
-            'stat3Label': 'stat3LabelElement',
-            'stat4Number': 'stat4NumberElement',
-            'stat4Label': 'stat4LabelElement',
-            'portfolioTitle': 'portfolioTitleElement',
-            'processTitle': 'processTitleElement',
-            'contactTitle': 'contactTitleElement',
-            'contactHeading': 'contactHeadingElement',
-            'companyAddress': 'contactAddress',
-            'companyEmail': 'contactEmail',
-            'companyPhone': 'contactPhone',
-            'whatsappNumber': null
-        };
+        document.getElementById('processTitle').addEventListener('input', (e) => {
+            document.querySelector('#process .section-title').textContent = e.target.value;
+        });
 
-        Object.entries(contentInputs).forEach(([inputId, elementId]) => {
-            const input = document.getElementById(inputId);
-            if (input) {
-                input.addEventListener('input', function() {
-                    siteConfig.content[inputId] = this.value;
-                    if (elementId) {
-                        const element = document.getElementById(elementId);
-                        if (element) {
-                            if (inputId === 'contactHeading') {
-                                element.innerHTML = this.value.replace('Amazing', '<span>Amazing</span>');
-                            } else if (inputId === 'aboutHeading') {
-                                element.innerHTML = this.value.replace('Refit', '<span>Refit</span>');
-                            } else {
-                                element.textContent = this.value;
-                            }
-                        }
+        document.getElementById('contactTitle').addEventListener('input', (e) => {
+            document.querySelector('#contact .section-title').textContent = e.target.value;
+        });
+
+        // Services content
+        document.getElementById('service1Title').addEventListener('input', (e) => {
+            document.getElementById('service1TitleDisplay').textContent = e.target.value;
+        });
+
+        document.getElementById('service1Desc').addEventListener('input', (e) => {
+            document.getElementById('service1DescDisplay').textContent = e.target.value;
+        });
+
+        document.getElementById('service2Title').addEventListener('input', (e) => {
+            document.getElementById('service2TitleDisplay').textContent = e.target.value;
+        });
+
+        document.getElementById('service2Desc').addEventListener('input', (e) => {
+            document.getElementById('service2DescDisplay').textContent = e.target.value;
+        });
+
+        document.getElementById('service3Title').addEventListener('input', (e) => {
+            document.getElementById('service3TitleDisplay').textContent = e.target.value;
+        });
+
+        document.getElementById('service3Desc').addEventListener('input', (e) => {
+            document.getElementById('service3DescDisplay').textContent = e.target.value;
+        });
+
+        // Service icons
+        const iconOptions = document.querySelectorAll('.icon-option');
+        iconOptions.forEach(option => {
+            option.addEventListener('click', () => {
+                const selector = option.parentElement;
+                selector.querySelectorAll('.icon-option').forEach(o => o.classList.remove('selected'));
+                option.classList.add('selected');
+                
+                const serviceNumber = selector.previousElementSibling.textContent.includes('Service 1') ? 1 : 
+                                    selector.previousElementSibling.textContent.includes('Service 2') ? 2 : 3;
+                document.getElementById(`service${serviceNumber}Icon`).textContent = option.dataset.icon;
+            });
+        });
+
+        // About content
+        document.getElementById('missionText').addEventListener('input', (e) => {
+            document.getElementById('missionDisplay').textContent = e.target.value;
+        });
+
+        document.getElementById('visionText').addEventListener('input', (e) => {
+            document.getElementById('visionDisplay').textContent = e.target.value;
+        });
+
+        // Values
+        document.getElementById('value1Title').addEventListener('input', (e) => {
+            document.getElementById('value1TitleDisplay').textContent = e.target.value;
+        });
+
+        document.getElementById('value1Desc').addEventListener('input', (e) => {
+            document.getElementById('value1DescDisplay').textContent = e.target.value;
+        });
+
+        document.getElementById('value2Title').addEventListener('input', (e) => {
+            document.getElementById('value2TitleDisplay').textContent = e.target.value;
+        });
+
+        document.getElementById('value2Desc').addEventListener('input', (e) => {
+            document.getElementById('value2DescDisplay').textContent = e.target.value;
+        });
+
+        document.getElementById('value3Title').addEventListener('input', (e) => {
+            document.getElementById('value3TitleDisplay').textContent = e.target.value;
+        });
+
+        document.getElementById('value3Desc').addEventListener('input', (e) => {
+            document.getElementById('value3DescDisplay').textContent = e.target.value;
+        });
+
+        document.getElementById('value4Title').addEventListener('input', (e) => {
+            document.getElementById('value4TitleDisplay').textContent = e.target.value;
+        });
+
+        document.getElementById('value4Desc').addEventListener('input', (e) => {
+            document.getElementById('value4DescDisplay').textContent = e.target.value;
+        });
+
+        // Statistics
+        document.getElementById('stat1Number').addEventListener('input', (e) => {
+            document.getElementById('stat1NumberDisplay').textContent = e.target.value;
+        });
+
+        document.getElementById('stat1Label').addEventListener('input', (e) => {
+            document.getElementById('stat1LabelDisplay').textContent = e.target.value;
+        });
+
+        document.getElementById('stat2Number').addEventListener('input', (e) => {
+            document.getElementById('stat2NumberDisplay').textContent = e.target.value;
+        });
+
+        document.getElementById('stat2Label').addEventListener('input', (e) => {
+            document.getElementById('stat2LabelDisplay').textContent = e.target.value;
+        });
+
+        document.getElementById('stat3Number').addEventListener('input', (e) => {
+            document.getElementById('stat3NumberDisplay').textContent = e.target.value;
+        });
+
+        document.getElementById('stat3Label').addEventListener('input', (e) => {
+            document.getElementById('stat3LabelDisplay').textContent = e.target.value;
+        });
+
+        document.getElementById('stat4Number').addEventListener('input', (e) => {
+            document.getElementById('stat4NumberDisplay').textContent = e.target.value;
+        });
+
+        document.getElementById('stat4Label').addEventListener('input', (e) => {
+            document.getElementById('stat4LabelDisplay').textContent = e.target.value;
+        });
+
+        // Contact information
+        document.getElementById('companyAddress').addEventListener('input', (e) => {
+            document.getElementById('addressDisplay').innerHTML = e.target.value.replace(/\n/g, '<br>');
+        });
+
+        document.getElementById('companyEmail').addEventListener('input', (e) => {
+            document.getElementById('emailDisplay').textContent = e.target.value;
+        });
+
+        document.getElementById('companyPhone').addEventListener('input', (e) => {
+            document.getElementById('phoneDisplay').textContent = e.target.value;
+        });
+
+        // Typography
+        document.getElementById('fontFamily').addEventListener('change', (e) => {
+            document.body.style.fontFamily = e.target.value;
+        });
+
+        document.getElementById('fontSize').addEventListener('input', (e) => {
+            document.documentElement.style.fontSize = e.target.value + 'px';
+            e.target.nextElementSibling.textContent = e.target.value + 'px';
+        });
+
+        document.getElementById('lineHeight').addEventListener('input', (e) => {
+            document.body.style.lineHeight = e.target.value;
+            e.target.nextElementSibling.textContent = e.target.value;
+        });
+
+        // Layout
+        document.getElementById('borderRadius').addEventListener('input', (e) => {
+            const value = e.target.value + 'px';
+            document.querySelectorAll('.service-card, .portfolio-item, .contact-form, .process-item').forEach(el => {
+                el.style.borderRadius = value;
+            });
+            e.target.nextElementSibling.textContent = value;
+        });
+
+        document.getElementById('sectionPadding').addEventListener('input', (e) => {
+            const value = e.target.value + 'px';
+            document.querySelectorAll('section').forEach(section => {
+                section.style.padding = `${value} 40px`;
+            });
+            e.target.nextElementSibling.textContent = value;
+        });
+
+        // Portfolio filtering
+        const filterBtns = document.querySelectorAll('.filter-btn');
+        const portfolioItems = document.querySelectorAll('.portfolio-item');
+
+        filterBtns.forEach(btn => {
+            btn.addEventListener('click', () => {
+                filterBtns.forEach(b => b.classList.remove('active'));
+                btn.classList.add('active');
+                
+                const filter = btn.dataset.filter;
+                portfolioItems.forEach(item => {
+                    if (filter === 'all' || item.dataset.category === filter) {
+                        item.style.display = 'block';
+                    } else {
+                        item.style.display = 'none';
                     }
-                    if (inputId === 'whatsappNumber') {
-                        document.querySelector('.whatsapp-btn').href = `https://wa.me/${this.value.replace(/\D/g, '')}`;
-                    }
-                });
-            }
-        });
-
-        // Service icon selectors
-        document.querySelectorAll('.icon-selector').forEach(selector => {
-            const icons = selector.querySelectorAll('.icon-option');
-            const serviceNumber = selector.previousElementSibling.getAttribute('for').match(/\d/)[0];
-            
-            icons.forEach(icon => {
-                icon.addEventListener('click', () => {
-                    icons.forEach(i => i.classList.remove('selected'));
-                    icon.classList.add('selected');
-                    siteConfig.content[`service${serviceNumber}Icon`] = icon.dataset.icon;
-                    document.getElementById(`service${serviceNumber}IconElement`).textContent = icon.dataset.icon;
                 });
             });
         });
@@ -4719,14 +4675,14 @@ Selangor, Malaysia</textarea>
         }
 
         function addPortfolioItem() {
-            const portfolioManager = document.getElementById('portfolioManager');
             const newItem = document.createElement('div');
             newItem.className = 'portfolio-item-edit';
             newItem.innerHTML = `
                 <button class="portfolio-remove-btn" onclick="removePortfolioItem(this)">&times;</button>
                 <div class="image-upload-area portfolio-image-upload" onclick="uploadPortfolioImage(this)">
                     <img src="/api/placeholder/300/200" alt="Portfolio placeholder">
-                    <div class="upload-icon" style="display: none;">📷</div>
+                    <div class="upload-icon">📷</div>
+                    <p class="upload-text">Click to upload image</p>
                     <input type="file" accept="image/*" hidden>
                 </div>
                 <input type="text" placeholder="Project Title" class="portfolio-title">
@@ -4737,118 +4693,34 @@ Selangor, Malaysia</textarea>
                     <option value="maintenance">Maintenance</option>
                 </select>
             `;
-            portfolioManager.insertBefore(newItem, portfolioManager.lastElementChild);
+            document.getElementById('portfolioManager').insertBefore(newItem, document.querySelector('.add-portfolio-btn'));
         }
 
         function uploadPortfolioImage(element) {
-            const input = element.querySelector('input[type="file"]');
-            input.click();
-            
-            input.addEventListener('change', (e) => {
-                const file = e.target.files[0];
-                if (file && file.type.startsWith('image/')) {
-                    const reader = new FileReader();
-                    reader.onload = (e) => {
-                        element.querySelector('img').src = e.target.result;
-                    };
-                    reader.readAsDataURL(file);
-                }
-            });
+            element.querySelector('input[type="file"]').click();
         }
 
-        // About image upload
-        const aboutImageUpload = document.getElementById('aboutImageUpload');
-        const aboutImageInput = aboutImageUpload.querySelector('input[type="file"]');
-
-        aboutImageUpload.addEventListener('click', () => aboutImageInput.click());
-
-        aboutImageInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file && file.type.startsWith('image/')) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    const aboutImageContent = document.getElementById('aboutImageContent');
-                    aboutImageContent.innerHTML = `<img src="${e.target.result}" alt="About Refit">`;
-                    aboutImageUpload.innerHTML = `<img src="${e.target.result}" alt="About image">`;
-                };
-                reader.readAsDataURL(file);
-            }
+        // Contact form
+        document.getElementById('contactForm').addEventListener('submit', (e) => {
+            e.preventDefault();
+            showNotification('Message sent successfully! We\'ll get back to you soon.');
+            e.target.reset();
         });
 
-        // Master Save Changes
+        // Save settings
         document.getElementById('masterSave').addEventListener('click', () => {
-            // Save portfolio items
-            const portfolioItems = [];
-            document.querySelectorAll('.portfolio-item-edit').forEach(item => {
-                const imgSrc = item.querySelector('img').src;
-                const title = item.querySelector('.portfolio-title').value;
-                const desc = item.querySelector('.portfolio-desc').value;
-                const category = item.querySelector('.portfolio-category').value;
-                
-                if (title && desc) {
-                    portfolioItems.push({ imgSrc, title, desc, category });
-                }
-            });
-            
-            siteConfig.portfolio = portfolioItems;
-            localStorage.setItem('siteConfig', JSON.stringify(siteConfig));
-            
-            // Update portfolio grid
-            updatePortfolioGrid();
-            
-            showNotification('Settings saved successfully!');
+            showNotification('All settings saved successfully!');
         });
 
-        function updatePortfolioGrid() {
-            const portfolioGrid = document.getElementById('portfolioGrid');
-            portfolioGrid.innerHTML = '';
-            
-            siteConfig.portfolio.forEach(item => {
-                const portfolioItem = document.createElement('div');
-                portfolioItem.className = 'portfolio-item';
-                portfolioItem.dataset.category = item.category;
-                portfolioItem.innerHTML = `
-                    <img src="${item.imgSrc}" alt="${item.title}">
-                    <div class="portfolio-overlay">
-                        <h3>${item.title}</h3>
-                        <p>${item.desc}</p>
-                    </div>
-                `;
-                portfolioGrid.appendChild(portfolioItem);
-            });
-            
-            // Reapply hover effects
-            portfolioGrid.querySelectorAll('.portfolio-item').forEach(item => {
-                item.addEventListener('mouseenter', function() {
-                    this.querySelector('.portfolio-overlay').style.transform = 'translateY(0)';
-                });
-                
-                item.addEventListener('mouseleave', function() {
-                    this.querySelector('.portfolio-overlay').style.transform = 'translateY(100%)';
-                });
-            });
-        }
-
+        // Reset settings
         document.getElementById('masterReset').addEventListener('click', () => {
-            if (confirm('Reset all settings to default?')) {
-                localStorage.removeItem('siteConfig');
+            if (confirm('Are you sure you want to reset all settings to default?')) {
                 location.reload();
             }
         });
 
-        // AI Designer
-        let currentStep = 1;
-        let selectedRoom = null;
-        let selectedStyle = null;
-        let selectedColors = null;
-        let uploadedImage = null;
-
+        // AI Designer functionality
         function openAIDesigner() {
-            if (!isLoggedIn) {
-                showNotification('Please login to use AI Designer');
-                document.getElementById('userAccountBtn').click();
-                return;
-            }
             document.getElementById('aiDesignerModal').classList.add('active');
         }
 
@@ -4858,98 +4730,97 @@ Selangor, Malaysia</textarea>
         }
 
         function resetAIDesigner() {
-            currentStep = 1;
+            document.querySelectorAll('.ai-step').forEach(step => step.classList.remove('active'));
+            document.getElementById('step1').classList.add('active');
+            document.querySelectorAll('.progress-step').forEach(step => step.classList.remove('active'));
+            document.querySelectorAll('.progress-step')[0].classList.add('active');
             selectedRoom = null;
             selectedStyle = null;
             selectedColors = null;
-            uploadedImage = null;
-            updateProgressIndicator();
-            showStep(1);
-            document.getElementById('aiResult').style.display = 'none';
-            document.querySelectorAll('.ai-step').forEach(step => step.style.display = 'none');
-            document.getElementById('step1').style.display = 'block';
-            document.getElementById('step1').classList.add('active');
-        }
-
-        function updateProgressIndicator() {
-            document.querySelectorAll('.progress-step').forEach((step, index) => {
-                if (index < currentStep) {
-                    step.classList.add('active');
-                } else {
-                    step.classList.remove('active');
-                }
-            });
-        }
-
-        function showStep(step) {
-            document.querySelectorAll('.ai-step').forEach(s => {
-                s.classList.remove('active');
-                s.style.display = 'none';
-            });
-            const currentStepEl = document.getElementById('step' + step);
-            currentStepEl.style.display = 'block';
-            setTimeout(() => currentStepEl.classList.add('active'), 10);
-        }
-
-        function nextStep() {
-            if (currentStep < 4) {
-                currentStep++;
-                updateProgressIndicator();
-                showStep(currentStep);
-            }
-        }
-
-        function previousStep() {
-            if (currentStep > 1) {
-                currentStep--;
-                updateProgressIndicator();
-                showStep(currentStep);
-            }
+            uploadedFile = null;
         }
 
         // Upload functionality
         const uploadBox = document.getElementById('uploadBox');
         const roomPhotoInput = document.getElementById('roomPhotoInput');
         const uploadedPreview = document.getElementById('uploadedPreview');
-        const previewImage = document.getElementById('previewImage');
+        const uploadedImage = document.getElementById('uploadedImage');
 
-        uploadBox.addEventListener('click', () => roomPhotoInput.click());
+        uploadBox.addEventListener('click', () => {
+            roomPhotoInput.click();
+        });
+
         uploadBox.addEventListener('dragover', (e) => {
             e.preventDefault();
             uploadBox.classList.add('dragover');
         });
+
         uploadBox.addEventListener('dragleave', () => {
             uploadBox.classList.remove('dragover');
         });
+
         uploadBox.addEventListener('drop', (e) => {
             e.preventDefault();
             uploadBox.classList.remove('dragover');
-            handleFile(e.dataTransfer.files[0]);
+            const files = e.dataTransfer.files;
+            if (files.length > 0 && files[0].type.startsWith('image/')) {
+                handleImageUpload(files[0]);
+            }
         });
 
         roomPhotoInput.addEventListener('change', (e) => {
-            handleFile(e.target.files[0]);
+            if (e.target.files.length > 0) {
+                handleImageUpload(e.target.files[0]);
+            }
         });
 
-        function handleFile(file) {
-            if (file && file.type.startsWith('image/')) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    uploadedImage = e.target.result;
-                    previewImage.src = uploadedImage;
-                    uploadBox.parentElement.style.display = 'none';
-                    uploadedPreview.style.display = 'block';
-                    document.querySelector('#step1 .ai-next-btn').disabled = false;
-                };
-                reader.readAsDataURL(file);
-            }
+        function handleImageUpload(file) {
+            uploadedFile = file;
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                uploadedImage.src = e.target.result;
+                uploadBox.style.display = 'none';
+                uploadedPreview.style.display = 'block';
+                document.getElementById('nextStep1').disabled = false;
+            };
+            reader.readAsDataURL(file);
         }
 
         function changePhoto() {
-            uploadBox.parentElement.style.display = 'block';
+            uploadBox.style.display = 'block';
             uploadedPreview.style.display = 'none';
-            document.querySelector('#step1 .ai-next-btn').disabled = true;
-            roomPhotoInput.value = '';
+            document.getElementById('nextStep1').disabled = true;
+            uploadedFile = null;
+        }
+
+        // Step navigation
+        document.getElementById('nextStep1').addEventListener('click', () => {
+            moveToStep(2);
+        });
+
+        document.getElementById('nextStep2').addEventListener('click', () => {
+            moveToStep(3);
+        });
+
+        document.getElementById('nextStep3').addEventListener('click', () => {
+            moveToStep(4);
+        });
+
+        function moveToStep(step) {
+            document.querySelectorAll('.ai-step').forEach(s => s.classList.remove('active'));
+            document.getElementById(`step${step}`).classList.add('active');
+            
+            document.querySelectorAll('.progress-step').forEach((s, index) => {
+                if (index < step) {
+                    s.classList.add('active');
+                } else {
+                    s.classList.remove('active');
+                }
+            });
+        }
+
+        function previousStep(currentStep) {
+            moveToStep(currentStep - 1);
         }
 
         // Room selection
@@ -4958,17 +4829,17 @@ Selangor, Malaysia</textarea>
                 document.querySelectorAll('.room-option').forEach(o => o.classList.remove('selected'));
                 option.classList.add('selected');
                 selectedRoom = option.dataset.room;
-                document.querySelector('#step2 .ai-next-btn').disabled = false;
+                document.getElementById('nextStep2').disabled = false;
             });
         });
 
         // Style selection
-        document.querySelectorAll('#step3 .style-option').forEach(option => {
+        document.querySelectorAll('.style-option[data-style]').forEach(option => {
             option.addEventListener('click', () => {
-                document.querySelectorAll('#step3 .style-option').forEach(o => o.classList.remove('selected'));
+                document.querySelectorAll('.style-option[data-style]').forEach(o => o.classList.remove('selected'));
                 option.classList.add('selected');
                 selectedStyle = option.dataset.style;
-                document.querySelector('#step3 .ai-next-btn').disabled = false;
+                document.getElementById('nextStep3').disabled = false;
             });
         });
 
@@ -4978,327 +4849,136 @@ Selangor, Malaysia</textarea>
                 document.querySelectorAll('.color-option').forEach(o => o.classList.remove('selected'));
                 option.classList.add('selected');
                 selectedColors = option.dataset.colors;
-                document.querySelector('.ai-generate-btn').disabled = false;
             });
         });
 
         // Generate design
         function generateDesign() {
-            document.querySelectorAll('.ai-step').forEach(s => s.style.display = 'none');
-            document.getElementById('aiResult').style.display = 'block';
-            document.getElementById('originalImage').src = uploadedImage;
+            if (!selectedColors) {
+                showNotification('Please select a color scheme');
+                return;
+            }
+            
+            moveToStep(5);
+            document.getElementById('beforeImage').src = uploadedImage.src;
             
             // Simulate AI generation
             setTimeout(() => {
                 document.getElementById('aiLoading').style.display = 'none';
-                document.getElementById('aiGeneratedImage').style.display = 'block';
-                // In real implementation, this would be the AI-generated image
-                document.getElementById('aiGeneratedImage').src = uploadedImage;
+                document.getElementById('afterImage').src = '/api/placeholder/600/400';
+                document.getElementById('afterImage').style.display = 'block';
                 showNotification('AI design generated successfully!');
             }, 3000);
         }
 
         function regenerateDesign() {
             document.getElementById('aiLoading').style.display = 'block';
-            document.getElementById('aiGeneratedImage').style.display = 'none';
+            document.getElementById('afterImage').style.display = 'none';
+            
             setTimeout(() => {
                 document.getElementById('aiLoading').style.display = 'none';
-                document.getElementById('aiGeneratedImage').style.display = 'block';
+                document.getElementById('afterImage').style.display = 'block';
                 showNotification('New design generated!');
-            }, 3000);
+            }, 2000);
         }
 
-        function showBudgetQuote() {
+        function getBudgetQuote() {
             document.getElementById('budgetQuote').style.display = 'block';
-            document.querySelector('.result-actions').style.display = 'none';
+            document.getElementById('budgetQuote').scrollIntoView({ behavior: 'smooth' });
         }
 
-        function confirmDesign() {
-            showBudgetQuote();
-        }
-
-        function agreeToQuote() {
-            document.getElementById('budgetQuote').style.display = 'none';
+        function proceedWithDesign() {
             document.getElementById('agreementSection').style.display = 'block';
+            document.getElementById('paymentSection').style.display = 'block';
+            document.getElementById('paymentSection').scrollIntoView({ behavior: 'smooth' });
         }
 
         function proceedToPayment() {
-            document.getElementById('agreementSection').style.display = 'none';
-            document.getElementById('paymentSection').style.display = 'block';
+            showNotification('Redirecting to payment gateway...');
+            setTimeout(() => {
+                closeAIDesigner();
+                showNotification('Thank you! Our team will contact you within 24 hours.');
+            }, 2000);
         }
 
-        // Payment method selection
-        document.querySelectorAll('.payment-option').forEach(option => {
-            option.addEventListener('click', () => {
-                document.querySelectorAll('.payment-option').forEach(o => o.classList.remove('selected'));
-                option.classList.add('selected');
-            });
-        });
-
-        function uploadPaymentSlip() {
-            document.getElementById('paymentSection').style.display = 'none';
-            document.getElementById('paymentUpload').style.display = 'block';
+        // Notification function
+        function showNotification(message) {
+            const toast = document.getElementById('notificationToast');
+            document.getElementById('notificationText').textContent = message;
+            toast.classList.add('show');
+            
+            setTimeout(() => {
+                toast.classList.remove('show');
+            }, 3000);
         }
 
-        // Payment slip upload
-        document.getElementById('slipInput').addEventListener('change', (e) => {
-            const file = e.target.files[0];
-            if (file && file.type.startsWith('image/')) {
-                const reader = new FileReader();
-                reader.onload = (e) => {
-                    document.getElementById('slipImage').src = e.target.result;
-                    document.getElementById('slipPreview').style.display = 'block';
-                };
-                reader.readAsDataURL(file);
-            }
-        });
-
-        function completeProcess() {
-            document.getElementById('paymentUpload').style.display = 'none';
-            document.getElementById('completionSection').style.display = 'block';
-            showNotification('Process completed successfully!');
-        }
-
-        // Range input value display
-        document.querySelectorAll('input[type="range"]').forEach(input => {
-            const valueDisplay = input.nextElementSibling;
-            if (valueDisplay && valueDisplay.classList.contains('range-value')) {
-                input.addEventListener('input', () => {
-                    let value = input.value;
-                    if (input.id === 'fontSize' || input.id === 'buttonRadius' || input.id === 'borderRadius' || input.id === 'sectionPadding') {
-                        value += 'px';
-                    } else if (input.id === 'boxShadow') {
-                        value += '%';
-                    } else if (input.id === 'animationSpeed') {
-                        value += 'x';
-                    } else if (input.id === 'buttonFontSize') {
-                        value += 'rem';
-                    } else if (input.id === 'buttonAnimationDuration') {
-                        value += 's';
-                    }
-                    valueDisplay.textContent = value;
-                });
-            }
-        });
-
-        // Smooth scroll for anchor links
+        // Smooth scrolling for navigation links
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();
                 const target = document.querySelector(this.getAttribute('href'));
                 if (target) {
-                    target.scrollIntoView({ behavior: 'smooth' });
-                }
-            });
-        });
-
-        // Initialize AOS-like scroll animations
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -100px 0px'
-        };
-
-        const observer = new IntersectionObserver((entries) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.style.opacity = '1';
-                    entry.target.style.transform = 'translateY(0)';
-                }
-            });
-        }, observerOptions);
-
-        // Observe elements for animations
-        document.querySelectorAll('.service-card, .portfolio-item, .process-item, .value-item').forEach(el => {
-            el.style.opacity = '0';
-            el.style.transform = 'translateY(30px)';
-            el.style.transition = 'all 0.6s ease';
-            observer.observe(el);
-        });
-
-        // Handle image upload areas
-        document.querySelectorAll('.image-upload-area').forEach(area => {
-            const input = area.querySelector('input[type="file"]');
-            
-            if (!area.classList.contains('portfolio-image-upload')) {
-                area.addEventListener('click', () => input.click());
-            }
-            
-            area.addEventListener('dragover', (e) => {
-                e.preventDefault();
-                area.classList.add('dragover');
-            });
-            
-            area.addEventListener('dragleave', () => {
-                area.classList.remove('dragover');
-            });
-            
-            area.addEventListener('drop', (e) => {
-                e.preventDefault();
-                area.classList.remove('dragover');
-                const file = e.dataTransfer.files[0];
-                if (file && file.type.startsWith('image/')) {
-                    // Handle file upload
-                    console.log('File uploaded:', file.name);
-                }
-            });
-        });
-
-        // Prevent scroll when modal is open
-        function preventScroll(modal) {
-            if (modal.classList.contains('active')) {
-                document.body.style.overflow = 'hidden';
-            } else {
-                document.body.style.overflow = '';
-            }
-        }
-
-        // Apply to all modals
-        [userModal, document.getElementById('aiDesignerModal')].forEach(modal => {
-            const observer = new MutationObserver(() => preventScroll(modal));
-            observer.observe(modal, { attributes: true, attributeFilter: ['class'] });
-        });
-
-        // Portfolio item hover effects
-        portfolioItems.forEach(item => {
-            item.addEventListener('mouseenter', function() {
-                this.querySelector('.portfolio-overlay').style.transform = 'translateY(0)';
-            });
-            
-            item.addEventListener('mouseleave', function() {
-                this.querySelector('.portfolio-overlay').style.transform = 'translateY(100%)';
-            });
-        });
-
-        // Add keyboard navigation
-        document.addEventListener('keydown', (e) => {
-            if (e.key === 'Escape') {
-                if (userModal.classList.contains('active')) {
-                    userModal.classList.remove('active');
-                }
-                if (document.getElementById('aiDesignerModal').classList.contains('active')) {
-                    closeAIDesigner();
-                }
-                if (masterPanel.classList.contains('active')) {
-                    masterPanel.classList.remove('active');
-                }
-            }
-        });
-
-        // Performance optimization - lazy load images
-        const images = document.querySelectorAll('img[data-src]');
-        const imageObserver = new IntersectionObserver((entries, observer) => {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    const img = entry.target;
-                    img.src = img.dataset.src;
-                    img.removeAttribute('data-src');
-                    imageObserver.unobserve(img);
-                }
-            });
-        });
-
-        images.forEach(img => imageObserver.observe(img));
-
-        // Add error handling for forms
-        function validateEmail(email) {
-            const re = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
-            return re.test(email);
-        }
-
-        function validatePhone(phone) {
-            const re = /^[\d\s\-\+\(\)]+$/;
-            return re.test(phone) && phone.length >= 10;
-        }
-
-        // Add validation to forms
-        loginForm.addEventListener('input', (e) => {
-            if (e.target.type === 'email') {
-                if (!validateEmail(e.target.value)) {
-                    e.target.setCustomValidity('Please enter a valid email address');
-                } else {
-                    e.target.setCustomValidity('');
-                }
-            }
-        });
-
-        registerForm.addEventListener('input', (e) => {
-            if (e.target.type === 'email') {
-                if (!validateEmail(e.target.value)) {
-                    e.target.setCustomValidity('Please enter a valid email address');
-                } else {
-                    e.target.setCustomValidity('');
-                }
-            }
-            if (e.target.type === 'tel') {
-                if (!validatePhone(e.target.value)) {
-                    e.target.setCustomValidity('Please enter a valid phone number');
-                } else {
-                    e.target.setCustomValidity('');
-                }
-            }
-        });
-
-        // Initialize all interactive elements
-        document.addEventListener('DOMContentLoaded', () => {
-            // Set initial states
-            updateUI();
-            updateProgressIndicator();
-            
-            // Focus management for accessibility
-            const focusableElements = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
-            const modals = document.querySelectorAll('.user-modal, .ai-designer-modal');
-            
-            modals.forEach(modal => {
-                const focusableContent = modal.querySelectorAll(focusableElements);
-                const firstFocusableElement = focusableContent[0];
-                const lastFocusableElement = focusableContent[focusableContent.length - 1];
-                
-                modal.addEventListener('keydown', (e) => {
-                    if (e.key === 'Tab') {
-                        if (e.shiftKey) {
-                            if (document.activeElement === firstFocusableElement) {
-                                lastFocusableElement.focus();
-                                e.preventDefault();
-                            }
-                        } else {
-                            if (document.activeElement === lastFocusableElement) {
-                                firstFocusableElement.focus();
-                                e.preventDefault();
-                            }
-                        }
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                    
+                    // Close mobile menu if open
+                    if (navLinks.classList.contains('active')) {
+                        menuToggle.classList.remove('active');
+                        navLinks.classList.remove('active');
                     }
+                }
+            });
+        });
+
+        // Range input value updates
+        document.querySelectorAll('input[type="range"]').forEach(input => {
+            input.addEventListener('input', (e) => {
+                const valueSpan = e.target.nextElementSibling;
+                if (valueSpan && valueSpan.classList.contains('range-value')) {
+                    valueSpan.textContent = e.target.value + (e.target.id.includes('px') ? 'px' : 
+                                                           e.target.id.includes('rem') ? 'rem' : 
+                                                           e.target.id.includes('s') ? 's' : '');
+                }
+            });
+        });
+
+        // Initialize
+        document.addEventListener('DOMContentLoaded', () => {
+            // Check for saved user
+            const savedUser = localStorage.getItem('currentUser');
+            if (savedUser) {
+                currentUser = JSON.parse(savedUser);
+                showUserProfile();
+            }
+            
+            // Initialize tooltips
+            const tooltips = document.querySelectorAll('[title]');
+            tooltips.forEach(el => {
+                el.addEventListener('mouseenter', (e) => {
+                    const tooltip = document.createElement('div');
+                    tooltip.className = 'tooltip';
+                    tooltip.textContent = e.target.title;
+                    document.body.appendChild(tooltip);
+                    
+                    const rect = e.target.getBoundingClientRect();
+                    tooltip.style.top = rect.top - tooltip.offsetHeight - 10 + 'px';
+                    tooltip.style.left = rect.left + (rect.width - tooltip.offsetWidth) / 2 + 'px';
+                });
+                
+                el.addEventListener('mouseleave', () => {
+                    const tooltip = document.querySelector('.tooltip');
+                    if (tooltip) tooltip.remove();
                 });
             });
         });
 
-        // Debounce function for performance
-        function debounce(func, wait) {
-            let timeout;
-            return function executedFunction(...args) {
-                const later = () => {
-                    clearTimeout(timeout);
-                    func(...args);
-                };
-                clearTimeout(timeout);
-                timeout = setTimeout(later, wait);
-            };
-        }
-
-        // Optimize scroll event
-        const optimizedScroll = debounce(() => {
-            // Scroll-based animations
-        }, 10);
-
-        window.addEventListener('scroll', optimizedScroll);
-
-        // Print styles handler
-        window.addEventListener('beforeprint', () => {
-            // Add print-specific classes if needed
-            document.body.classList.add('printing');
-        });
-
-        window.addEventListener('afterprint', () => {
-            document.body.classList.remove('printing');
+        // Save user data
+        window.addEventListener('beforeunload', () => {
+            if (currentUser) {
+                localStorage.setItem('currentUser', JSON.stringify(currentUser));
+            }
         });
     </script>
 </body>
