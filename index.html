@@ -6,6 +6,8 @@
     <title>Refit - From Concept to Completion | Maintenance Services Malaysia</title>
     <meta name="description" content="Refit Maintenance Services - Professional interior design, renovation, and maintenance solutions in Malaysia">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <link rel="stylesheet" href="https://unpkg.com/swiper/swiper-bundle.min.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.css">
     <style>
         * {
             margin: 0;
@@ -14,14 +16,25 @@
         }
 
         :root {
-            --primary-pink: #db7093;
-            --light-pink: #ffb6c1;
-            --dark-pink: #c85a7a;
+            --primary-color: #db7093;
+            --secondary-color: #ffb6c1;
+            --accent-color: #c85a7a;
             --text-dark: #2c2c2c;
             --text-light: #666;
             --bg-light: #f8f8f8;
             --white: #ffffff;
             --shadow: 0 5px 30px rgba(0, 0, 0, 0.1);
+            --success: #4CAF50;
+            --button-radius: 25px;
+            --button-padding: 12px 25px;
+            --transition-speed: 0.3s;
+        }
+
+        /* Apply CSS Variables throughout */
+        .btn {
+            border-radius: var(--button-radius);
+            padding: var(--button-padding);
+            transition: all var(--transition-speed) ease;
         }
 
         html {
@@ -33,9 +46,351 @@
             line-height: 1.6;
             color: var(--text-dark);
             overflow-x: hidden;
+            background: var(--white);
+            position: relative;
         }
 
-        /* AI Designer Panel - Fixed Left */
+        /* Master Admin Panel Styles */
+        .master-admin-panel {
+            position: fixed;
+            top: 0;
+            right: -400px;
+            width: 400px;
+            height: 100vh;
+            background: #1a1a1a;
+            color: white;
+            z-index: 10000;
+            transition: right 0.3s ease;
+            overflow-y: auto;
+            box-shadow: -5px 0 20px rgba(0, 0, 0, 0.3);
+        }
+
+        .master-admin-panel.active {
+            right: 0;
+        }
+
+        .admin-header {
+            background: #000;
+            padding: 20px;
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .admin-header h2 {
+            font-size: 18px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .admin-close {
+            background: none;
+            border: none;
+            color: white;
+            font-size: 24px;
+            cursor: pointer;
+        }
+
+        .admin-section {
+            padding: 20px;
+            border-bottom: 1px solid #333;
+        }
+
+        .admin-section h3 {
+            font-size: 16px;
+            margin-bottom: 15px;
+            color: #ffd700;
+        }
+
+        .admin-control {
+            margin-bottom: 15px;
+        }
+
+        .admin-control label {
+            display: block;
+            font-size: 12px;
+            margin-bottom: 5px;
+            color: #ccc;
+        }
+
+        .admin-control input,
+        .admin-control select,
+        .admin-control textarea {
+            width: 100%;
+            padding: 8px;
+            background: #2a2a2a;
+            border: 1px solid #444;
+            color: white;
+            border-radius: 4px;
+            font-size: 14px;
+        }
+
+        .admin-control input[type="color"] {
+            height: 40px;
+            cursor: pointer;
+        }
+
+        .admin-control input[type="range"] {
+            margin-top: 5px;
+        }
+
+        .range-value {
+            text-align: right;
+            font-size: 12px;
+            color: #ffd700;
+            margin-top: 5px;
+        }
+
+        .admin-btn-group {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .admin-btn {
+            padding: 8px 15px;
+            background: #333;
+            border: 1px solid #555;
+            color: white;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
+        }
+
+        .admin-btn:hover {
+            background: #444;
+            border-color: #ffd700;
+        }
+
+        .admin-btn.primary {
+            background: #ffd700;
+            color: #000;
+            font-weight: bold;
+        }
+
+        .admin-btn.primary:hover {
+            background: #ffed4e;
+        }
+
+        /* Admin Toggle Button */
+        .admin-toggle {
+            position: fixed;
+            bottom: 30px;
+            left: 30px;
+            width: 60px;
+            height: 60px;
+            background: #000;
+            border-radius: 50%;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            color: #ffd700;
+            font-size: 24px;
+            cursor: pointer;
+            box-shadow: 0 5px 20px rgba(0, 0, 0, 0.3);
+            z-index: 9999;
+            animation: pulse 2s infinite;
+        }
+
+        .admin-toggle.show {
+            display: flex;
+        }
+
+        .admin-toggle:hover {
+            transform: scale(1.1);
+            animation: none;
+        }
+
+        /* Editable Elements Highlight */
+        .editable-highlight {
+            position: relative;
+            transition: all 0.3s ease;
+        }
+
+        .edit-mode .editable-highlight:hover {
+            outline: 2px dashed #ffd700;
+            outline-offset: 5px;
+            cursor: pointer;
+        }
+
+        .edit-indicator {
+            position: absolute;
+            top: -25px;
+            right: 0;
+            background: #ffd700;
+            color: #000;
+            padding: 2px 8px;
+            font-size: 10px;
+            border-radius: 3px;
+            display: none;
+            z-index: 1000;
+        }
+
+        .edit-mode .editable-highlight:hover .edit-indicator {
+            display: block;
+        }
+
+        /* Media Upload Modal */
+        .media-upload-modal {
+            position: fixed;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            background: white;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+            z-index: 10001;
+            display: none;
+            max-width: 500px;
+            width: 90%;
+        }
+
+        .media-upload-modal.active {
+            display: block;
+        }
+
+        .media-upload-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .media-upload-header h3 {
+            font-size: 20px;
+            color: var(--text-dark);
+        }
+
+        .upload-area {
+            border: 2px dashed var(--primary-color);
+            border-radius: 10px;
+            padding: 40px;
+            text-align: center;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .upload-area:hover {
+            background: var(--bg-light);
+            border-color: var(--accent-color);
+        }
+
+        .upload-area.drag-over {
+            background: rgba(219, 112, 147, 0.1);
+            border-color: var(--primary-color);
+            transform: scale(1.02);
+        }
+
+        .upload-icon {
+            font-size: 48px;
+            color: var(--primary-color);
+            margin-bottom: 20px;
+        }
+
+        /* Login Modal */
+        .login-modal {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.8);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 10002;
+        }
+
+        .login-modal.active {
+            display: flex;
+        }
+
+        .login-content {
+            background: white;
+            padding: 40px;
+            border-radius: 15px;
+            max-width: 400px;
+            width: 90%;
+            position: relative;
+        }
+
+        .login-close {
+            position: absolute;
+            top: 15px;
+            right: 15px;
+            background: none;
+            border: none;
+            font-size: 24px;
+            cursor: pointer;
+            color: var(--text-light);
+        }
+
+        /* Preloader */
+        .preloader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease;
+        }
+
+        .preloader.fade-out {
+            opacity: 0;
+            pointer-events: none;
+        }
+
+        .preloader-content {
+            text-align: center;
+        }
+
+        .preloader-logo {
+            width: 150px;
+            height: 60px;
+            margin-bottom: 30px;
+            animation: pulse 1.5s ease-in-out infinite;
+        }
+
+        .preloader-dots {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+
+        .dot {
+            width: 12px;
+            height: 12px;
+            background: var(--primary-color);
+            border-radius: 50%;
+            animation: bounce 1.4s ease-in-out infinite both;
+        }
+
+        .dot:nth-child(1) { animation-delay: -0.32s; }
+        .dot:nth-child(2) { animation-delay: -0.16s; }
+        .dot:nth-child(3) { animation-delay: 0; }
+
+        @keyframes bounce {
+            0%, 80%, 100% {
+                transform: scale(0);
+            }
+            40% {
+                transform: scale(1);
+            }
+        }
+
+        /* AI Designer Panel */
         .ai-designer-panel {
             position: fixed;
             left: 0;
@@ -58,11 +413,37 @@
             opacity: 1;
             background: linear-gradient(135deg, rgba(219, 112, 147, 0.15) 0%, rgba(255, 182, 193, 0.15) 100%);
             box-shadow: 5px 0 30px rgba(219, 112, 147, 0.1);
+            width: 300px;
+        }
+
+        .ai-toggle-btn {
+            position: absolute;
+            right: -20px;
+            top: 50%;
+            transform: translateY(-50%);
+            width: 40px;
+            height: 80px;
+            background: var(--primary-color);
+            border: none;
+            border-radius: 0 20px 20px 0;
+            color: white;
+            cursor: pointer;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            transition: all 0.3s ease;
+            box-shadow: 5px 0 20px rgba(219, 112, 147, 0.3);
+        }
+
+        .ai-toggle-btn:hover {
+            background: var(--accent-color);
+            transform: translateY(-50%) translateX(5px);
         }
 
         .ai-designer-content {
             text-align: center;
-            color: var(--dark-pink);
+            color: var(--accent-color);
             margin-top: 100px;
         }
 
@@ -70,7 +451,7 @@
             width: 80px;
             height: 80px;
             margin: 0 auto 25px;
-            background: linear-gradient(135deg, var(--primary-pink) 0%, var(--light-pink) 100%);
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
             border-radius: 25px;
             display: flex;
             align-items: center;
@@ -79,6 +460,12 @@
             animation: float 4s ease-in-out infinite;
             position: relative;
             overflow: hidden;
+            cursor: pointer;
+            transition: transform 0.3s ease;
+        }
+
+        .ai-icon:hover {
+            transform: scale(1.1) rotateZ(5deg);
         }
 
         .ai-icon::before {
@@ -109,24 +496,6 @@
             50% { transform: translateY(-20px); }
         }
 
-        .ai-designer-content h3 {
-            font-size: 20px;
-            margin-bottom: 15px;
-            font-weight: 700;
-            background: linear-gradient(135deg, var(--primary-pink) 0%, var(--dark-pink) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            background-clip: text;
-        }
-
-        .ai-designer-content p {
-            font-size: 13px;
-            opacity: 0.8;
-            margin-bottom: 30px;
-            line-height: 1.6;
-            padding: 0 10px;
-        }
-
         .ai-features {
             text-align: left;
             margin: 30px 0;
@@ -136,28 +505,43 @@
             display: flex;
             align-items: center;
             margin-bottom: 15px;
-            padding: 10px;
-            border-radius: 10px;
+            padding: 12px;
+            border-radius: 12px;
             transition: all 0.3s ease;
+            cursor: pointer;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .ai-feature::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            width: 0;
+            height: 100%;
+            background: rgba(219, 112, 147, 0.1);
+            transition: width 0.3s ease;
+            z-index: -1;
+        }
+
+        .ai-feature:hover::before {
+            width: 100%;
         }
 
         .ai-feature:hover {
-            background: rgba(219, 112, 147, 0.1);
+            transform: translateX(5px);
         }
 
         .ai-feature i {
             margin-right: 12px;
             font-size: 16px;
-            color: var(--primary-pink);
-        }
-
-        .ai-feature span {
-            font-size: 13px;
-            color: var(--text-dark);
+            color: var(--primary-color);
+            width: 30px;
         }
 
         .coming-soon-badge {
-            background: linear-gradient(135deg, var(--primary-pink) 0%, var(--dark-pink) 100%);
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
             color: white;
             padding: 10px 25px;
             border-radius: 25px;
@@ -168,6 +552,8 @@
             box-shadow: 0 5px 20px rgba(219, 112, 147, 0.3);
             display: inline-block;
             animation: pulse 2s infinite;
+            position: relative;
+            overflow: hidden;
         }
 
         @keyframes pulse {
@@ -175,13 +561,14 @@
             50% { transform: scale(1.05); }
         }
 
-        /* Main Content Wrapper */
+        /* Main Content */
         .main-wrapper {
             margin-left: 280px;
             min-height: 100vh;
+            position: relative;
         }
 
-        /* Navigation Header */
+        /* Navigation */
         header {
             position: fixed;
             top: 0;
@@ -198,6 +585,7 @@
         header.scrolled {
             padding: 15px 50px;
             box-shadow: 0 5px 30px rgba(0, 0, 0, 0.1);
+            background: rgba(255, 255, 255, 0.98);
         }
 
         nav {
@@ -209,6 +597,7 @@
         .logo-container {
             display: flex;
             align-items: center;
+            position: relative;
         }
 
         .logo {
@@ -216,11 +605,16 @@
             width: auto;
             object-fit: contain;
             margin-right: 15px;
+            transition: transform 0.3s ease;
         }
 
-        .logo-svg {
-            height: 50px;
-            width: auto;
+        .logo-text {
+            font-size: 28px;
+            font-weight: bold;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
         }
 
         .nav-menu {
@@ -234,12 +628,24 @@
             text-decoration: none;
             color: var(--text-dark);
             font-weight: 500;
-            transition: color 0.3s ease;
+            transition: all 0.3s ease;
             font-size: 15px;
+            position: relative;
         }
 
-        .nav-menu a:hover {
-            color: var(--primary-pink);
+        .nav-menu a::after {
+            content: '';
+            position: absolute;
+            bottom: -5px;
+            left: 0;
+            width: 0;
+            height: 2px;
+            background: var(--primary-color);
+            transition: width 0.3s ease;
+        }
+
+        .nav-menu a:hover::after {
+            width: 100%;
         }
 
         .nav-buttons {
@@ -248,31 +654,33 @@
         }
 
         .btn {
-            padding: 12px 25px;
-            border-radius: 25px;
+            padding: var(--button-padding);
+            border-radius: var(--button-radius);
             text-decoration: none;
             font-weight: 600;
-            transition: all 0.3s ease;
+            transition: all var(--transition-speed) ease;
             cursor: pointer;
             border: none;
             font-size: 14px;
+            position: relative;
+            overflow: hidden;
         }
 
         .btn-outline {
             background: transparent;
-            color: var(--primary-pink);
-            border: 2px solid var(--primary-pink);
+            color: var(--primary-color);
+            border: 2px solid var(--primary-color);
         }
 
         .btn-outline:hover {
-            background: var(--primary-pink);
+            background: var(--primary-color);
             color: white;
             transform: translateY(-2px);
             box-shadow: 0 5px 20px rgba(219, 112, 147, 0.3);
         }
 
         .btn-primary {
-            background: linear-gradient(135deg, var(--primary-pink) 0%, var(--light-pink) 100%);
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
             color: white;
             box-shadow: 0 5px 20px rgba(219, 112, 147, 0.3);
         }
@@ -289,6 +697,8 @@
             min-height: 100vh;
             display: flex;
             align-items: center;
+            position: relative;
+            overflow: hidden;
         }
 
         .hero-content {
@@ -298,6 +708,8 @@
             align-items: center;
             max-width: 1200px;
             margin: 0 auto;
+            position: relative;
+            z-index: 1;
         }
 
         .hero-text h1 {
@@ -309,17 +721,10 @@
         }
 
         .hero-text h1 span {
-            background: linear-gradient(135deg, var(--primary-pink) 0%, var(--dark-pink) 100%);
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--accent-color) 100%);
             -webkit-background-clip: text;
             -webkit-text-fill-color: transparent;
             background-clip: text;
-        }
-
-        .hero-text p {
-            font-size: 18px;
-            color: var(--text-light);
-            margin-bottom: 30px;
-            line-height: 1.8;
         }
 
         .hero-buttons {
@@ -333,58 +738,18 @@
             gap: 40px;
         }
 
-        .stat {
-            text-align: center;
-        }
-
         .stat-number {
             font-size: 36px;
             font-weight: 700;
-            color: var(--primary-pink);
+            color: var(--primary-color);
             display: block;
         }
 
-        .stat-label {
-            font-size: 14px;
-            color: var(--text-light);
-            text-transform: uppercase;
-            letter-spacing: 1px;
-        }
-
-        .hero-image {
-            position: relative;
-        }
-
-        .hero-image img {
-            width: 100%;
-            border-radius: 20px;
-            box-shadow: var(--shadow);
-        }
-
-        .floating-card {
-            position: absolute;
-            background: white;
-            padding: 20px;
-            border-radius: 15px;
-            box-shadow: 0 10px 40px rgba(0, 0, 0, 0.1);
-            animation: float 3s ease-in-out infinite;
-        }
-
-        .floating-card.top {
-            top: -30px;
-            right: 30px;
-        }
-
-        .floating-card.bottom {
-            bottom: -30px;
-            left: 30px;
-            animation-delay: 1.5s;
-        }
-
-        /* Services Section */
+        /* Services */
         .services {
             padding: 100px 50px;
             background: white;
+            position: relative;
         }
 
         .section-header {
@@ -397,11 +762,8 @@
             font-size: 36px;
             margin-bottom: 15px;
             color: var(--text-dark);
-        }
-
-        .section-header p {
-            color: var(--text-light);
-            font-size: 16px;
+            position: relative;
+            display: inline-block;
         }
 
         .services-grid {
@@ -419,71 +781,60 @@
             text-align: center;
             transition: all 0.3s ease;
             cursor: pointer;
-        }
-
-        .service-card:hover {
-            transform: translateY(-10px);
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.1);
-            background: white;
+            position: relative;
+            overflow: hidden;
         }
 
         .service-icon {
             width: 80px;
             height: 80px;
             margin: 0 auto 25px;
-            background: linear-gradient(135deg, var(--primary-pink) 0%, var(--light-pink) 100%);
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
             border-radius: 20px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 32px;
             color: white;
+            transition: all 0.3s ease;
         }
 
-        .service-card h3 {
-            font-size: 22px;
-            margin-bottom: 15px;
-            color: var(--text-dark);
-        }
-
-        .service-card p {
-            color: var(--text-light);
-            font-size: 14px;
-            line-height: 1.6;
-        }
-
-        /* Projects Showcase */
-        .projects {
+        /* Our Clients Section */
+        .our-clients {
             padding: 100px 50px;
             background: var(--bg-light);
         }
 
-        .project-filter {
+        .client-categories {
             display: flex;
             justify-content: center;
-            gap: 20px;
-            margin-bottom: 50px;
+            gap: 30px;
+            margin-bottom: 60px;
+            flex-wrap: wrap;
         }
 
-        .filter-btn {
-            padding: 10px 25px;
+        .category-btn {
+            padding: 15px 35px;
             background: white;
-            border: none;
-            border-radius: 25px;
-            color: var(--text-dark);
-            font-weight: 500;
+            border: 2px solid var(--primary-color);
+            border-radius: 30px;
+            color: var(--primary-color);
+            font-weight: 600;
             cursor: pointer;
             transition: all 0.3s ease;
+            font-size: 16px;
         }
 
-        .filter-btn.active,
-        .filter-btn:hover {
-            background: linear-gradient(135deg, var(--primary-pink) 0%, var(--light-pink) 100%);
+        .category-btn.active,
+        .category-btn:hover {
+            background: var(--primary-color);
             color: white;
-            box-shadow: 0 5px 20px rgba(219, 112, 147, 0.3);
+            transform: translateY(-3px);
+            box-shadow: 0 10px 30px rgba(219, 112, 147, 0.3);
         }
 
-        .projects-grid {
+        /* Project Gallery */
+        .project-gallery {
             display: grid;
             grid-template-columns: repeat(auto-fill, minmax(350px, 1fr));
             gap: 30px;
@@ -491,71 +842,80 @@
             margin: 0 auto;
         }
 
-        .project-card {
+        .gallery-item {
             background: white;
-            border-radius: 20px;
+            border-radius: 15px;
             overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08);
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
             transition: all 0.3s ease;
             cursor: pointer;
+            position: relative;
         }
 
-        .project-card:hover {
+        .gallery-item:hover {
             transform: translateY(-10px);
             box-shadow: 0 20px 50px rgba(0, 0, 0, 0.15);
         }
 
-        .project-image {
+        .gallery-image {
             height: 250px;
-            background: linear-gradient(135deg, var(--light-pink) 0%, var(--primary-pink) 100%);
-            position: relative;
             overflow: hidden;
+            position: relative;
         }
 
-        .project-image img {
+        .gallery-image img {
             width: 100%;
             height: 100%;
             object-fit: cover;
+            transition: transform 0.5s ease;
         }
 
-        .project-overlay {
+        .gallery-item:hover .gallery-image img {
+            transform: scale(1.1);
+        }
+
+        .gallery-overlay {
             position: absolute;
             top: 0;
             left: 0;
             right: 0;
             bottom: 0;
-            background: linear-gradient(to bottom, transparent 50%, rgba(0, 0, 0, 0.8) 100%);
+            background: linear-gradient(to bottom, transparent 0%, rgba(0, 0, 0, 0.8) 100%);
             opacity: 0;
             transition: opacity 0.3s ease;
+            display: flex;
+            align-items: flex-end;
+            padding: 20px;
         }
 
-        .project-card:hover .project-overlay {
+        .gallery-item:hover .gallery-overlay {
             opacity: 1;
         }
 
-        .project-info {
+        .gallery-info {
             padding: 25px;
         }
 
-        .project-info h3 {
+        .gallery-info h3 {
             font-size: 20px;
             margin-bottom: 10px;
             color: var(--text-dark);
         }
 
-        .project-info p {
+        .gallery-info p {
             color: var(--text-light);
             font-size: 14px;
-            margin-bottom: 15px;
+            line-height: 1.6;
         }
 
-        .project-tags {
+        .gallery-tags {
             display: flex;
             gap: 10px;
+            margin-top: 15px;
             flex-wrap: wrap;
         }
 
-        .project-tag {
+        .gallery-tag {
             background: var(--bg-light);
             color: var(--text-light);
             padding: 5px 15px;
@@ -563,84 +923,19 @@
             font-size: 12px;
         }
 
-        /* Why Choose Us */
-        .why-us {
+        /* Contact Section */
+        .contact {
             padding: 100px 50px;
             background: white;
         }
 
-        .why-us-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 40px;
-            max-width: 1000px;
+        .contact-container {
+            max-width: 1200px;
             margin: 0 auto;
-        }
-
-        .why-card {
-            text-align: center;
-        }
-
-        .why-icon {
-            width: 60px;
-            height: 60px;
-            margin: 0 auto 20px;
-            background: rgba(219, 112, 147, 0.1);
-            border-radius: 15px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            color: var(--primary-pink);
-            font-size: 24px;
-        }
-
-        .why-card h3 {
-            font-size: 18px;
-            margin-bottom: 10px;
-            color: var(--text-dark);
-        }
-
-        .why-card p {
-            color: var(--text-light);
-            font-size: 14px;
-            line-height: 1.6;
-        }
-
-        /* CTA Section */
-        .cta {
-            padding: 100px 50px;
-            background: linear-gradient(135deg, var(--primary-pink) 0%, var(--dark-pink) 100%);
-            text-align: center;
-            color: white;
-        }
-
-        .cta h2 {
-            font-size: 36px;
-            margin-bottom: 20px;
-        }
-
-        .cta p {
-            font-size: 18px;
-            margin-bottom: 30px;
-            opacity: 0.9;
-        }
-
-        .cta-buttons {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-        }
-
-        .btn-white {
-            background: white;
-            color: var(--primary-pink);
-            padding: 15px 35px;
-        }
-
-        .btn-white:hover {
-            background: var(--bg-light);
-            transform: translateY(-2px);
-            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 60px;
+            align-items: start;
         }
 
         /* Footer */
@@ -648,94 +943,150 @@
             padding: 60px 50px 30px;
             background: var(--text-dark);
             color: white;
+            position: relative;
         }
 
-        .footer-content {
-            display: grid;
-            grid-template-columns: 2fr 1fr 1fr 1fr;
-            gap: 40px;
-            max-width: 1200px;
-            margin: 0 auto 40px;
-        }
-
-        .footer-brand h3 {
-            font-size: 24px;
-            margin-bottom: 15px;
-        }
-
-        .footer-brand p {
-            opacity: 0.7;
-            font-size: 14px;
-            line-height: 1.6;
-            margin-bottom: 20px;
-        }
-
-        .footer-social {
-            display: flex;
-            gap: 15px;
-        }
-
-        .social-icon {
-            width: 40px;
-            height: 40px;
-            background: rgba(255, 255, 255, 0.1);
+        /* Back to Top */
+        .back-to-top {
+            position: fixed;
+            bottom: 30px;
+            right: 30px;
+            width: 50px;
+            height: 50px;
+            background: linear-gradient(135deg, var(--primary-color) 0%, var(--secondary-color) 100%);
             border-radius: 50%;
             display: flex;
             align-items: center;
             justify-content: center;
             color: white;
-            text-decoration: none;
+            font-size: 20px;
+            cursor: pointer;
+            opacity: 0;
+            visibility: hidden;
+            transition: all 0.3s ease;
+            box-shadow: 0 5px 20px rgba(219, 112, 147, 0.3);
+            z-index: 1000;
+        }
+
+        .back-to-top.show {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* Color Picker Styles */
+        .color-palette {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 10px;
+            margin-top: 10px;
+        }
+
+        .color-option {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            transition: transform 0.2s ease;
+            border: 3px solid transparent;
+        }
+
+        .color-option:hover {
+            transform: scale(1.1);
+        }
+
+        .color-option.active {
+            border-color: #ffd700;
+            box-shadow: 0 0 10px rgba(255, 215, 0, 0.5);
+        }
+
+        /* Image Gallery for Portfolio */
+        .portfolio-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 20px;
+            margin-top: 20px;
+        }
+
+        .portfolio-item {
+            position: relative;
+            border-radius: 10px;
+            overflow: hidden;
+            background: #f0f0f0;
+            aspect-ratio: 1;
+            cursor: move;
+        }
+
+        .portfolio-item img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .portfolio-item-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: opacity 0.3s ease;
+        }
+
+        .portfolio-item:hover .portfolio-item-overlay {
+            opacity: 1;
+        }
+
+        .portfolio-controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .portfolio-controls button {
+            background: white;
+            border: none;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 16px;
             transition: all 0.3s ease;
         }
 
-        .social-icon:hover {
-            background: var(--primary-pink);
-            transform: translateY(-3px);
+        .portfolio-controls button:hover {
+            background: var(--primary-color);
+            color: white;
+            transform: scale(1.1);
         }
 
-        .footer-column h4 {
-            font-size: 16px;
-            margin-bottom: 20px;
+        /* Button Style Presets */
+        .button-presets {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 10px;
+            margin-top: 15px;
         }
 
-        .footer-column ul {
-            list-style: none;
-        }
-
-        .footer-column ul li {
-            margin-bottom: 10px;
-        }
-
-        .footer-column ul li a {
-            color: rgba(255, 255, 255, 0.7);
-            text-decoration: none;
-            font-size: 14px;
-            transition: color 0.3s ease;
-        }
-
-        .footer-column ul li a:hover {
-            color: var(--light-pink);
-        }
-
-        .footer-bottom {
-            text-align: center;
-            padding-top: 30px;
-            border-top: 1px solid rgba(255, 255, 255, 0.1);
-            font-size: 14px;
-            opacity: 0.7;
-        }
-
-        /* Mobile Menu Toggle */
-        .mobile-menu-toggle {
-            display: none;
-            background: none;
-            border: none;
-            font-size: 24px;
-            color: var(--text-dark);
+        .preset-btn {
+            padding: 10px;
+            border: 1px solid #444;
+            background: #2a2a2a;
+            color: white;
+            border-radius: 5px;
             cursor: pointer;
+            font-size: 12px;
+            transition: all 0.3s ease;
         }
 
-        /* Responsive Design */
+        .preset-btn:hover {
+            border-color: #ffd700;
+            background: #333;
+        }
+
+        /* Responsive */
         @media (max-width: 1024px) {
             .ai-designer-panel {
                 width: 250px;
@@ -747,7 +1098,6 @@
 
             header {
                 left: 250px;
-                padding: 20px 30px;
             }
         }
 
@@ -756,10 +1106,15 @@
                 transform: translateX(-100%);
                 width: 280px;
                 z-index: 1001;
+                opacity: 1;
             }
 
             .ai-designer-panel.active {
                 transform: translateX(0);
+            }
+
+            .ai-toggle-btn {
+                display: flex;
             }
 
             .main-wrapper {
@@ -771,7 +1126,8 @@
                 padding: 15px 20px;
             }
 
-            .nav-menu {
+            .nav-menu,
+            .nav-buttons {
                 display: none;
             }
 
@@ -779,68 +1135,434 @@
                 display: block;
             }
 
-            .hero {
-                padding: 120px 30px 60px;
-            }
-
             .hero-content {
                 grid-template-columns: 1fr;
-                gap: 40px;
             }
 
-            .hero-text h1 {
-                font-size: 36px;
-            }
-
-            .hero-buttons {
-                flex-direction: column;
-                gap: 15px;
-            }
-
-            .services-grid,
-            .projects-grid {
+            .contact-container {
                 grid-template-columns: 1fr;
             }
 
-            .footer-content {
-                grid-template-columns: 1fr;
-                text-align: center;
+            .master-admin-panel {
+                width: 100%;
+                right: -100%;
             }
+        }
 
-            .footer-social {
-                justify-content: center;
-            }
+        /* Custom Button Effects */
+        .btn-effect-pulse {
+            animation: pulse 2s infinite;
+        }
+
+        .btn-effect-shake {
+            animation: shake 0.5s;
+            animation-iteration-count: infinite;
+        }
+
+        @keyframes shake {
+            0% { transform: translateX(0); }
+            25% { transform: translateX(-5px); }
+            75% { transform: translateX(5px); }
+            100% { transform: translateX(0); }
+        }
+
+        .btn-effect-glow {
+            box-shadow: 0 0 20px var(--primary-color);
+        }
+
+        .btn-effect-slide::before {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: -100%;
+            width: 100%;
+            height: 100%;
+            background: rgba(255, 255, 255, 0.3);
+            transition: left 0.5s ease;
+        }
+
+        .btn-effect-slide:hover::before {
+            left: 100%;
+        }
+
+        /* Additional admin styles */
+        .edit-popup {
+            position: absolute;
+            background: white;
+            border: 2px solid var(--primary-color);
+            border-radius: 10px;
+            padding: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            z-index: 10000;
+            min-width: 300px;
+            display: none;
+        }
+
+        .edit-popup.active {
+            display: block;
+        }
+
+        .edit-popup-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .edit-popup-close {
+            background: none;
+            border: none;
+            font-size: 20px;
+            cursor: pointer;
+            color: var(--text-light);
+        }
+
+        /* Mobile menu toggle */
+        .mobile-menu-toggle {
+            display: none;
+            background: none;
+            border: none;
+            font-size: 24px;
+            color: var(--text-dark);
+            cursor: pointer;
         }
     </style>
 </head>
 <body>
+    <!-- Master Admin Login Modal -->
+    <div class="login-modal" id="masterLoginModal">
+        <div class="login-content">
+            <button class="login-close" onclick="closeMasterLogin()">
+                <i class="fas fa-times"></i>
+            </button>
+            <h2 style="text-align: center; margin-bottom: 30px; color: var(--text-dark);">Master Admin Login</h2>
+            <form id="masterLoginForm" onsubmit="handleMasterLogin(event)">
+                <div class="form-group">
+                    <label>Email</label>
+                    <input type="email" id="masterEmail" required style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; margin-top: 8px;">
+                </div>
+                <div class="form-group" style="margin-top: 20px;">
+                    <label>Password</label>
+                    <input type="password" id="masterPassword" required style="width: 100%; padding: 12px; border: 2px solid #e0e0e0; border-radius: 8px; margin-top: 8px;">
+                </div>
+                <button type="submit" class="btn btn-primary" style="width: 100%; margin-top: 25px; padding: 15px;">
+                    <i class="fas fa-lock" style="margin-right: 10px;"></i>
+                    Login to Master Panel
+                </button>
+            </form>
+            <p style="text-align: center; margin-top: 20px; color: var(--text-light); font-size: 14px;">
+                Master access only for Refit administrators
+            </p>
+        </div>
+    </div>
+
+    <!-- Master Admin Panel -->
+    <div class="master-admin-panel" id="masterAdminPanel">
+        <div class="admin-header">
+            <h2><i class="fas fa-cog"></i> Master Control Panel</h2>
+            <button class="admin-close" onclick="closeMasterPanel()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <!-- Logo & Branding Section -->
+        <div class="admin-section">
+            <h3><i class="fas fa-image"></i> Logo & Branding</h3>
+            
+            <div class="admin-control">
+                <label>Logo Type</label>
+                <select id="logoType" onchange="updateLogoType()">
+                    <option value="image">Image Logo</option>
+                    <option value="text">Text Logo</option>
+                    <option value="both">Image + Text</option>
+                </select>
+            </div>
+
+            <div class="admin-control" id="logoImageControl">
+                <label>Upload Logo Image</label>
+                <input type="file" id="logoUpload" accept="image/*" onchange="uploadLogo(event)">
+                <small style="color: #888;">Auto-resizes to fit</small>
+            </div>
+
+            <div class="admin-control" id="logoTextControl" style="display: none;">
+                <label>Logo Text</label>
+                <input type="text" id="logoText" value="refit" onchange="updateLogoText()">
+            </div>
+
+            <div class="admin-control">
+                <label>Logo Size</label>
+                <input type="range" id="logoSize" min="30" max="80" value="50" onchange="updateLogoSize()">
+                <div class="range-value">50px</div>
+            </div>
+        </div>
+
+        <!-- Theme Colors Section -->
+        <div class="admin-section">
+            <h3><i class="fas fa-palette"></i> Theme Colors</h3>
+            
+            <div class="admin-control">
+                <label>Primary Color</label>
+                <input type="color" id="primaryColor" value="#db7093" onchange="updateThemeColor('primary')">
+            </div>
+
+            <div class="admin-control">
+                <label>Secondary Color</label>
+                <input type="color" id="secondaryColor" value="#ffb6c1" onchange="updateThemeColor('secondary')">
+            </div>
+
+            <div class="admin-control">
+                <label>Accent Color</label>
+                <input type="color" id="accentColor" value="#c85a7a" onchange="updateThemeColor('accent')">
+            </div>
+
+            <div class="admin-control">
+                <label>Quick Color Themes</label>
+                <div class="color-palette">
+                    <div class="color-option" style="background: linear-gradient(135deg, #db7093, #ffb6c1);" onclick="applyColorTheme('pink')"></div>
+                    <div class="color-option" style="background: linear-gradient(135deg, #4a90e2, #7bb8f0);" onclick="applyColorTheme('blue')"></div>
+                    <div class="color-option" style="background: linear-gradient(135deg, #50c878, #90ee90);" onclick="applyColorTheme('green')"></div>
+                    <div class="color-option" style="background: linear-gradient(135deg, #ff6b6b, #ffa07a);" onclick="applyColorTheme('orange')"></div>
+                    <div class="color-option" style="background: linear-gradient(135deg, #9b59b6, #c39bd3);" onclick="applyColorTheme('purple')"></div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Button Styles Section -->
+        <div class="admin-section">
+            <h3><i class="fas fa-square"></i> Button Styles</h3>
+            
+            <div class="admin-control">
+                <label>Button Border Radius</label>
+                <input type="range" id="buttonRadius" min="0" max="50" value="25" onchange="updateButtonStyle()">
+                <div class="range-value">25px</div>
+            </div>
+
+            <div class="admin-control">
+                <label>Button Padding</label>
+                <select id="buttonPadding" onchange="updateButtonStyle()">
+                    <option value="8px 16px">Small</option>
+                    <option value="12px 25px" selected>Medium</option>
+                    <option value="16px 35px">Large</option>
+                    <option value="20px 45px">Extra Large</option>
+                </select>
+            </div>
+
+            <div class="admin-control">
+                <label>Button Effects</label>
+                <select id="buttonEffect" onchange="updateButtonEffect()">
+                    <option value="none">None</option>
+                    <option value="pulse">Pulse</option>
+                    <option value="glow">Glow</option>
+                    <option value="slide">Slide</option>
+                    <option value="shake">Shake</option>
+                </select>
+            </div>
+
+            <div class="admin-control">
+                <label>Button Shadow</label>
+                <input type="range" id="buttonShadow" min="0" max="50" value="20" onchange="updateButtonStyle()">
+                <div class="range-value">20px</div>
+            </div>
+
+            <div class="admin-control">
+                <label>Button Style Presets</label>
+                <div class="button-presets">
+                    <button class="preset-btn" onclick="applyButtonPreset('flat')">Flat</button>
+                    <button class="preset-btn" onclick="applyButtonPreset('rounded')">Rounded</button>
+                    <button class="preset-btn" onclick="applyButtonPreset('sharp')">Sharp</button>
+                    <button class="preset-btn" onclick="applyButtonPreset('3d')">3D Effect</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- Typography Section -->
+        <div class="admin-section">
+            <h3><i class="fas fa-font"></i> Typography</h3>
+            
+            <div class="admin-control">
+                <label>Font Family</label>
+                <select id="fontFamily" onchange="updateTypography()">
+                    <option value="-apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif">System Default</option>
+                    <option value="'Arial', sans-serif">Arial</option>
+                    <option value="'Georgia', serif">Georgia</option>
+                    <option value="'Helvetica Neue', Helvetica, sans-serif">Helvetica</option>
+                    <option value="'Times New Roman', serif">Times New Roman</option>
+                    <option value="'Montserrat', sans-serif">Montserrat</option>
+                </select>
+            </div>
+
+            <div class="admin-control">
+                <label>Heading Size Scale</label>
+                <input type="range" id="headingScale" min="0.8" max="1.5" step="0.1" value="1" onchange="updateTypography()">
+                <div class="range-value">1.0x</div>
+            </div>
+
+            <div class="admin-control">
+                <label>Body Text Size</label>
+                <input type="range" id="bodyTextSize" min="14" max="20" value="16" onchange="updateTypography()">
+                <div class="range-value">16px</div>
+            </div>
+        </div>
+
+        <!-- Layout Section -->
+        <div class="admin-section">
+            <h3><i class="fas fa-th-large"></i> Layout Settings</h3>
+            
+            <div class="admin-control">
+                <label>Container Width</label>
+                <select id="containerWidth" onchange="updateLayout()">
+                    <option value="1000px">Narrow (1000px)</option>
+                    <option value="1200px" selected>Standard (1200px)</option>
+                    <option value="1400px">Wide (1400px)</option>
+                    <option value="100%">Full Width</option>
+                </select>
+            </div>
+
+            <div class="admin-control">
+                <label>Section Padding</label>
+                <input type="range" id="sectionPadding" min="50" max="150" value="100" onchange="updateLayout()">
+                <div class="range-value">100px</div>
+            </div>
+
+            <div class="admin-control">
+                <label>Enable Animations</label>
+                <select id="enableAnimations" onchange="toggleAnimations()">
+                    <option value="yes">Yes</option>
+                    <option value="no">No</option>
+                </select>
+            </div>
+        </div>
+
+        <!-- Content Management -->
+        <div class="admin-section">
+            <h3><i class="fas fa-edit"></i> Quick Edit Mode</h3>
+            
+            <div class="admin-control">
+                <button class="admin-btn primary" onclick="toggleEditMode()" style="width: 100%;">
+                    <i class="fas fa-edit"></i> Toggle Edit Mode
+                </button>
+                <small style="color: #888; display: block; margin-top: 10px;">
+                    Click any text or image on the page to edit
+                </small>
+            </div>
+        </div>
+
+        <!-- Save/Reset Section -->
+        <div class="admin-section">
+            <h3><i class="fas fa-save"></i> Save Settings</h3>
+            
+            <div class="admin-btn-group">
+                <button class="admin-btn primary" onclick="saveAllSettings()">
+                    <i class="fas fa-save"></i> Save Changes
+                </button>
+                <button class="admin-btn" onclick="resetToDefaults()">
+                    <i class="fas fa-undo"></i> Reset Defaults
+                </button>
+            </div>
+            
+            <div class="admin-btn-group" style="margin-top: 10px;">
+                <button class="admin-btn" onclick="exportSettings()">
+                    <i class="fas fa-download"></i> Export
+                </button>
+                <button class="admin-btn" onclick="importSettings()">
+                    <i class="fas fa-upload"></i> Import
+                </button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Toggle Button -->
+    <button class="admin-toggle" id="adminToggle" onclick="openMasterLogin()">
+        <i class="fas fa-cog"></i>
+    </button>
+
+    <!-- Media Upload Modal -->
+    <div class="media-upload-modal" id="mediaUploadModal">
+        <div class="media-upload-header">
+            <h3>Upload Media</h3>
+            <button class="login-close" onclick="closeMediaUpload()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="upload-area" id="uploadArea" onclick="document.getElementById('mediaFileInput').click()">
+            <i class="fas fa-cloud-upload-alt upload-icon"></i>
+            <p>Click to upload or drag and drop</p>
+            <p style="font-size: 14px; color: var(--text-light); margin-top: 10px;">
+                Images, Videos, or Animations
+            </p>
+            <input type="file" id="mediaFileInput" style="display: none;" accept="image/*,video/*" multiple onchange="handleMediaUpload(event)">
+        </div>
+        <div id="uploadPreview" style="margin-top: 20px;"></div>
+    </div>
+
+    <!-- Edit Popup for inline editing -->
+    <div class="edit-popup" id="editPopup">
+        <div class="edit-popup-header">
+            <h4>Edit Content</h4>
+            <button class="edit-popup-close" onclick="closeEditPopup()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+        <div class="edit-popup-content" id="editPopupContent">
+            <!-- Dynamic content based on what's being edited -->
+        </div>
+    </div>
+
+    <!-- Preloader -->
+    <div class="preloader" id="preloader">
+        <div class="preloader-content">
+            <svg class="preloader-logo" viewBox="0 0 200 60" xmlns="http://www.w3.org/2000/svg">
+                <defs>
+                    <linearGradient id="preloaderGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <stop offset="0%" style="stop-color:#e85d75;stop-opacity:1" />
+                        <stop offset="50%" style="stop-color:#db7093;stop-opacity:1" />
+                        <stop offset="100%" style="stop-color:#ffb6c1;stop-opacity:1" />
+                    </linearGradient>
+                </defs>
+                <text x="100" y="40" font-family="Georgia, serif" font-size="36" font-weight="bold" text-anchor="middle" fill="url(#preloaderGradient)">refit</text>
+            </svg>
+            <div class="preloader-dots">
+                <div class="dot"></div>
+                <div class="dot"></div>
+                <div class="dot"></div>
+            </div>
+        </div>
+    </div>
+
     <!-- AI Designer Panel -->
     <aside class="ai-designer-panel" id="aiPanel">
+        <button class="ai-toggle-btn" onclick="toggleAIPanel()">
+            <i class="fas fa-robot"></i>
+        </button>
         <div class="ai-designer-content">
-            <div class="ai-icon"></div>
-            <h3>AI HOME DESIGNER</h3>
-            <p>Experience the future of interior design with our AI-powered solution</p>
+            <div class="ai-icon" onclick="showAIInfo()"></div>
+            <h3 class="editable-text" data-edit-type="text">AI HOME DESIGNER</h3>
+            <p class="editable-text" data-edit-type="text">Experience the future of interior design with our AI-powered solution</p>
             
             <div class="ai-features">
                 <div class="ai-feature">
                     <i class="fas fa-magic"></i>
-                    <span>Smart Space Planning</span>
+                    <span class="editable-text" data-edit-type="text">Smart Space Planning</span>
                 </div>
                 <div class="ai-feature">
                     <i class="fas fa-palette"></i>
-                    <span>Color Harmony Analysis</span>
+                    <span class="editable-text" data-edit-type="text">Color Harmony Analysis</span>
                 </div>
                 <div class="ai-feature">
                     <i class="fas fa-cube"></i>
-                    <span>3D Visualization</span>
+                    <span class="editable-text" data-edit-type="text">3D Visualization</span>
                 </div>
                 <div class="ai-feature">
                     <i class="fas fa-chart-line"></i>
-                    <span>Budget Optimization</span>
+                    <span class="editable-text" data-edit-type="text">Budget Optimization</span>
                 </div>
                 <div class="ai-feature">
                     <i class="fas fa-lightbulb"></i>
-                    <span>Style Recommendations</span>
+                    <span class="editable-text" data-edit-type="text">Style Recommendations</span>
+                </div>
+                <div class="ai-feature">
+                    <i class="fas fa-clock"></i>
+                    <span class="editable-text" data-edit-type="text">Timeline Estimation</span>
                 </div>
             </div>
 
@@ -853,29 +1575,18 @@
         <!-- Navigation Header -->
         <header id="header">
             <nav>
-                <div class="logo-container">
-                    <!-- Logo with fallback -->
-                    <img src="2025 logo. REFIT NEW LOGO.jpg" alt="Refit Logo" class="logo" onerror="this.style.display='none'; document.getElementById('fallbackLogo').style.display='block';">
-                    
-                    <!-- Fallback SVG Logo -->
-                    <svg id="fallbackLogo" class="logo-svg" style="display:none;" viewBox="0 0 200 60" xmlns="http://www.w3.org/2000/svg">
-                        <defs>
-                            <linearGradient id="pinkGradient" x1="0%" y1="0%" x2="100%" y2="0%">
-                                <stop offset="0%" style="stop-color:#e85d75;stop-opacity:1" />
-                                <stop offset="50%" style="stop-color:#db7093;stop-opacity:1" />
-                                <stop offset="100%" style="stop-color:#ffb6c1;stop-opacity:1" />
-                            </linearGradient>
-                        </defs>
-                        <text x="10" y="40" font-family="Georgia, serif" font-size="36" font-weight="bold" fill="url(#pinkGradient)">refit</text>
-                    </svg>
+                <div class="logo-container editable-highlight" data-edit-type="logo">
+                    <span class="edit-indicator">Click to edit logo</span>
+                    <img src="2025 logo. REFIT NEW LOGO.jpg" alt="Refit Logo" class="logo" id="mainLogo" style="display: block;">
+                    <span class="logo-text" id="logoTextDisplay" style="display: none;">refit</span>
                 </div>
 
                 <ul class="nav-menu">
-                    <li><a href="#home">Home</a></li>
-                    <li><a href="#services">Services</a></li>
-                    <li><a href="#projects">Projects</a></li>
-                    <li><a href="#about">About</a></li>
-                    <li><a href="#contact">Contact</a></li>
+                    <li><a href="#home" class="editable-text" data-edit-type="text">Home</a></li>
+                    <li><a href="#services" class="editable-text" data-edit-type="text">Services</a></li>
+                    <li><a href="#our-clients" class="editable-text" data-edit-type="text">Our Clients</a></li>
+                    <li><a href="#about" class="editable-text" data-edit-type="text">About</a></li>
+                    <li><a href="#contact" class="editable-text" data-edit-type="text">Contact</a></li>
                 </ul>
 
                 <div class="nav-buttons">
@@ -893,39 +1604,34 @@
         <section class="hero" id="home">
             <div class="hero-content">
                 <div class="hero-text">
-                    <h1>Transform Your Space <br>From <span>Concept to Completion</span></h1>
-                    <p>Professional maintenance services, interior design, and renovation solutions tailored to bring your vision to life. Located in Petaling Jaya, serving all of Malaysia.</p>
+                    <h1 class="editable-text" data-edit-type="text">Transform Your Space <br>From <span>Concept to Completion</span></h1>
+                    <p class="editable-text" data-edit-type="text">Professional maintenance services, interior design, and renovation solutions tailored to bring your vision to life. Located in Petaling Jaya, serving all of Malaysia.</p>
                     
                     <div class="hero-buttons">
                         <a href="#services" class="btn btn-primary">Explore Services</a>
-                        <a href="#contact" class="btn btn-outline">Get Quote</a>
+                        <a href="#contact" class="btn btn-outline">Get Free Quote</a>
                     </div>
 
                     <div class="hero-stats">
                         <div class="stat">
-                            <span class="stat-number">500+</span>
-                            <span class="stat-label">Projects Done</span>
+                            <span class="stat-number editable-text" data-edit-type="text" data-target="500">0</span>
+                            <span class="stat-label editable-text" data-edit-type="text">Projects Done</span>
                         </div>
                         <div class="stat">
-                            <span class="stat-number">15+</span>
-                            <span class="stat-label">Years Experience</span>
+                            <span class="stat-number editable-text" data-edit-type="text" data-target="15">0</span>
+                            <span class="stat-label editable-text" data-edit-type="text">Years Experience</span>
                         </div>
                         <div class="stat">
-                            <span class="stat-number">100%</span>
-                            <span class="stat-label">Satisfaction</span>
+                            <span class="stat-number editable-text" data-edit-type="text" data-target="100">0</span>
+                            <span class="stat-label editable-text" data-edit-type="text">% Satisfaction</span>
                         </div>
                     </div>
                 </div>
 
                 <div class="hero-image">
-                    <img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=600" alt="Modern Interior Design">
-                    <div class="floating-card top">
-                        <i class="fas fa-check-circle" style="color: var(--primary-pink); margin-right: 10px;"></i>
-                        <span>Licensed & Insured</span>
-                    </div>
-                    <div class="floating-card bottom">
-                        <i class="fas fa-award" style="color: var(--primary-pink); margin-right: 10px;"></i>
-                        <span>Award Winning Team</span>
+                    <div class="hero-image-main editable-highlight" data-edit-type="image">
+                        <span class="edit-indicator">Click to change image</span>
+                        <img src="https://images.unsplash.com/photo-1600607687939-ce8a6c25118c?w=600" alt="Modern Interior Design">
                     </div>
                 </div>
             </div>
@@ -934,172 +1640,592 @@
         <!-- Services Section -->
         <section class="services" id="services">
             <div class="section-header">
-                <h2>Our Professional Services</h2>
-                <p>Comprehensive solutions for all your space transformation needs</p>
+                <h2 class="editable-text" data-edit-type="text">Our Professional Services</h2>
+                <p class="editable-text" data-edit-type="text">Comprehensive solutions for all your space transformation needs</p>
             </div>
 
             <div class="services-grid">
-                <div class="service-card">
+                <div class="service-card editable-highlight" data-edit-type="service">
+                    <span class="edit-indicator">Edit service</span>
                     <div class="service-icon">
                         <i class="fas fa-tools"></i>
                     </div>
-                    <h3>Maintenance Services</h3>
-                    <p>Regular maintenance and repairs to keep your space in perfect condition. From electrical to plumbing, we handle it all.</p>
+                    <h3 class="editable-text" data-edit-type="text">Maintenance Services</h3>
+                    <p class="editable-text" data-edit-type="text">Regular maintenance and repairs to keep your space in perfect condition. From electrical to plumbing, we handle it all.</p>
                 </div>
 
-                <div class="service-card">
+                <div class="service-card editable-highlight" data-edit-type="service">
+                    <span class="edit-indicator">Edit service</span>
                     <div class="service-icon">
                         <i class="fas fa-paint-brush"></i>
                     </div>
-                    <h3>Interior Design</h3>
-                    <p>Creative design solutions that reflect your style and maximize your space's potential with modern aesthetics.</p>
+                    <h3 class="editable-text" data-edit-type="text">Interior Design</h3>
+                    <p class="editable-text" data-edit-type="text">Creative design solutions that reflect your style and maximize your space's potential with modern aesthetics.</p>
                 </div>
 
-                <div class="service-card">
+                <div class="service-card editable-highlight" data-edit-type="service">
+                    <span class="edit-indicator">Edit service</span>
                     <div class="service-icon">
                         <i class="fas fa-hammer"></i>
                     </div>
-                    <h3>Renovation Works</h3>
-                    <p>Complete renovation services from concept to completion, transforming your vision into reality.</p>
+                    <h3 class="editable-text" data-edit-type="text">Renovation Works</h3>
+                    <p class="editable-text" data-edit-type="text">Complete renovation services from concept to completion, transforming your vision into reality.</p>
                 </div>
 
-                <div class="service-card">
+                <div class="service-card editable-highlight" data-edit-type="service">
+                    <span class="edit-indicator">Edit service</span>
                     <div class="service-icon">
                         <i class="fas fa-cube"></i>
                     </div>
-                    <h3>3D Concept Design</h3>
-                    <p>Visualize your dream space with our detailed 3D renderings before any work begins.</p>
+                    <h3 class="editable-text" data-edit-type="text">3D Concept Design</h3>
+                    <p class="editable-text" data-edit-type="text">Visualize your dream space with our detailed 3D renderings before any work begins.</p>
                 </div>
 
-                <div class="service-card">
+                <div class="service-card editable-highlight" data-edit-type="service">
+                    <span class="edit-indicator">Edit service</span>
                     <div class="service-icon">
                         <i class="fas fa-home"></i>
                     </div>
-                    <h3>Space Planning</h3>
-                    <p>Optimize your space layout for maximum functionality and aesthetic appeal.</p>
+                    <h3 class="editable-text" data-edit-type="text">Space Planning</h3>
+                    <p class="editable-text" data-edit-type="text">Optimize your space layout for maximum functionality and aesthetic appeal.</p>
                 </div>
 
-                <div class="service-card">
+                <div class="service-card editable-highlight" data-edit-type="service">
+                    <span class="edit-indicator">Edit service</span>
                     <div class="service-icon">
                         <i class="fas fa-clipboard-check"></i>
                     </div>
-                    <h3>Project Management</h3>
-                    <p>End-to-end project coordination ensuring timely delivery and quality results.</p>
+                    <h3 class="editable-text" data-edit-type="text">Project Management</h3>
+                    <p class="editable-text" data-edit-type="text">End-to-end project coordination ensuring timely delivery and quality results.</p>
                 </div>
             </div>
         </section>
 
-        <!-- Projects Showcase -->
-        <section class="projects" id="projects">
+        <!-- Our Clients Section -->
+        <section class="our-clients" id="our-clients">
             <div class="section-header">
-                <h2>Recent Projects</h2>
-                <p>Explore our portfolio of successful transformations</p>
+                <h2 class="editable-text" data-edit-type="text">Our Clients</h2>
+                <p class="editable-text" data-edit-type="text">Showcasing our diverse portfolio of successful projects</p>
             </div>
 
-            <div class="project-filter">
-                <button class="filter-btn active" onclick="filterProjects('all')">All Projects</button>
-                <button class="filter-btn" onclick="filterProjects('commercial')">Commercial</button>
-                <button class="filter-btn" onclick="filterProjects('residential')">Residential</button>
-                <button class="filter-btn" onclick="filterProjects('maintenance')">Maintenance</button>
+            <div class="client-categories">
+                <button class="category-btn active" onclick="showClientCategory('all')">All Projects</button>
+                <button class="category-btn" onclick="showClientCategory('commercial')">Commercial Projects</button>
+                <button class="category-btn" onclick="showClientCategory('residential')">Residential Projects</button>
+                <button class="category-btn" onclick="showClientCategory('maintenance')">Maintenance Projects</button>
+                <button class="category-btn" onclick="showClientCategory('3d-concept')">3D Concept Drawings</button>
+                <button class="category-btn" onclick="showClientCategory('construction')">Construction Drawings</button>
             </div>
 
-            <div class="projects-grid">
-                <div class="project-card" data-category="commercial">
-                    <div class="project-image">
+            <div class="project-gallery" id="projectGallery">
+                <!-- Commercial Projects -->
+                <div class="gallery-item editable-highlight" data-category="commercial" data-edit-type="project">
+                    <span class="edit-indicator">Edit project</span>
+                    <div class="gallery-image">
                         <img src="https://images.unsplash.com/photo-1497366216548-37526070297c?w=400" alt="Cath Kidston Store">
-                        <div class="project-overlay"></div>
+                        <div class="gallery-overlay">
+                            <div class="overlay-content">
+                                <h4>View Project Details</h4>
+                            </div>
+                        </div>
                     </div>
-                    <div class="project-info">
-                        <h3>Cath Kidston Store</h3>
-                        <p>Complete retail space design and renovation</p>
-                        <div class="project-tags">
-                            <span class="project-tag">Retail</span>
-                            <span class="project-tag">Interior Design</span>
+                    <div class="gallery-info">
+                        <h3 class="editable-text" data-edit-type="text">Cath Kidston Store</h3>
+                        <p class="editable-text" data-edit-type="text">Complete retail space transformation with British-inspired design elements and custom fixtures.</p>
+                        <div class="gallery-tags">
+                            <span class="gallery-tag">Retail</span>
+                            <span class="gallery-tag">Interior Design</span>
+                            <span class="gallery-tag">2024</span>
                         </div>
                     </div>
                 </div>
 
-                <div class="project-card" data-category="commercial">
-                    <div class="project-image">
-                        <img src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400" alt="Cafe Design">
-                        <div class="project-overlay"></div>
+                <div class="gallery-item editable-highlight" data-category="commercial" data-edit-type="project">
+                    <span class="edit-indicator">Edit project</span>
+                    <div class="gallery-image">
+                        <img src="https://images.unsplash.com/photo-1556909114-f6e7ad7d3136?w=400" alt="Pie Face">
+                        <div class="gallery-overlay">
+                            <div class="overlay-content">
+                                <h4>View Project Details</h4>
+                            </div>
+                        </div>
                     </div>
-                    <div class="project-info">
-                        <h3>Bungkus Kaw Kaw Cafe</h3>
-                        <p>Modern cafe interior with traditional touches</p>
-                        <div class="project-tags">
-                            <span class="project-tag">F&B</span>
-                            <span class="project-tag">Renovation</span>
+                    <div class="gallery-info">
+                        <h3 class="editable-text" data-edit-type="text">Pie Face Restaurant</h3>
+                        <p class="editable-text" data-edit-type="text">Modern quick-service restaurant design with efficient kitchen layout and vibrant branding.</p>
+                        <div class="gallery-tags">
+                            <span class="gallery-tag">F&B</span>
+                            <span class="gallery-tag">Commercial Kitchen</span>
+                            <span class="gallery-tag">2024</span>
                         </div>
                     </div>
                 </div>
 
-                <div class="project-card" data-category="residential">
-                    <div class="project-image">
-                        <img src="https://images.unsplash.com/photo-1565182999561-18d7dc61c393?w=400" alt="Modern Home">
-                        <div class="project-overlay"></div>
+                <div class="gallery-item editable-highlight" data-category="commercial" data-edit-type="project">
+                    <span class="edit-indicator">Edit project</span>
+                    <div class="gallery-image">
+                        <img src="https://images.unsplash.com/photo-1559925393-8be0ec4767c8?w=400" alt="Tusan Ice Cream">
+                        <div class="gallery-overlay">
+                            <div class="overlay-content">
+                                <h4>View Project Details</h4>
+                            </div>
+                        </div>
                     </div>
-                    <div class="project-info">
-                        <h3>Modern Condominium</h3>
-                        <p>Luxury residential space transformation</p>
-                        <div class="project-tags">
-                            <span class="project-tag">Residential</span>
-                            <span class="project-tag">Full Renovation</span>
+                    <div class="gallery-info">
+                        <h3 class="editable-text" data-edit-type="text">Tusan Ice Cream</h3>
+                        <p class="editable-text" data-edit-type="text">Playful ice cream parlor design with custom displays and family-friendly atmosphere.</p>
+                        <div class="gallery-tags">
+                            <span class="gallery-tag">F&B</span>
+                            <span class="gallery-tag">Retail Design</span>
+                            <span class="gallery-tag">2024</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="gallery-item editable-highlight" data-category="commercial" data-edit-type="project">
+                    <span class="edit-indicator">Edit project</span>
+                    <div class="gallery-image">
+                        <img src="https://images.unsplash.com/photo-1517248135467-4c7edcad34c4?w=400" alt="Bungkus Kaw Kaw">
+                        <div class="gallery-overlay">
+                            <div class="overlay-content">
+                                <h4>View Project Details</h4>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="gallery-info">
+                        <h3 class="editable-text" data-edit-type="text">Bungkus Kaw Kaw</h3>
+                        <p class="editable-text" data-edit-type="text">Traditional Malaysian cafe with modern touches and efficient service counter design.</p>
+                        <div class="gallery-tags">
+                            <span class="gallery-tag">Cafe</span>
+                            <span class="gallery-tag">Local Cuisine</span>
+                            <span class="gallery-tag">2023</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="gallery-item editable-highlight" data-category="commercial" data-edit-type="project">
+                    <span class="edit-indicator">Edit project</span>
+                    <div class="gallery-image">
+                        <img src="https://images.unsplash.com/photo-1555396273-367ea4eb4db5?w=400" alt="Backhaus">
+                        <div class="gallery-overlay">
+                            <div class="overlay-content">
+                                <h4>View Project Details</h4>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="gallery-info">
+                        <h3 class="editable-text" data-edit-type="text">Backhaus German Bakery</h3>
+                        <p class="editable-text" data-edit-type="text">Authentic German bakery with rustic design elements and artisanal display cases.</p>
+                        <div class="gallery-tags">
+                            <span class="gallery-tag">Bakery</span>
+                            <span class="gallery-tag">European Style</span>
+                            <span class="gallery-tag">2023</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="gallery-item editable-highlight" data-category="commercial" data-edit-type="project">
+                    <span class="edit-indicator">Edit project</span>
+                    <div class="gallery-image">
+                        <img src="https://images.unsplash.com/photo-1441986300917-64674bd600d8?w=400" alt="Furla">
+                        <div class="gallery-overlay">
+                            <div class="overlay-content">
+                                <h4>View Project Details</h4>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="gallery-info">
+                        <h3 class="editable-text" data-edit-type="text">Furla Boutique</h3>
+                        <p class="editable-text" data-edit-type="text">Luxury Italian fashion boutique with elegant displays and premium finishes.</p>
+                        <div class="gallery-tags">
+                            <span class="gallery-tag">Luxury Retail</span>
+                            <span class="gallery-tag">Fashion</span>
+                            <span class="gallery-tag">2023</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Residential Projects -->
+                <div class="gallery-item editable-highlight" data-category="residential" data-edit-type="project">
+                    <span class="edit-indicator">Edit project</span>
+                    <div class="gallery-image">
+                        <img src="https://images.unsplash.com/photo-1600210492486-724fe5c67fb0?w=400" alt="Modern Condo">
+                        <div class="gallery-overlay">
+                            <div class="overlay-content">
+                                <h4>View Project Details</h4>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="gallery-info">
+                        <h3 class="editable-text" data-edit-type="text">Luxury Condominium</h3>
+                        <p class="editable-text" data-edit-type="text">Modern minimalist design with smart home integration and premium materials throughout.</p>
+                        <div class="gallery-tags">
+                            <span class="gallery-tag">Residential</span>
+                            <span class="gallery-tag">Smart Home</span>
+                            <span class="gallery-tag">2024</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="gallery-item editable-highlight" data-category="residential" data-edit-type="project">
+                    <span class="edit-indicator">Edit project</span>
+                    <div class="gallery-image">
+                        <img src="https://images.unsplash.com/photo-1600566753086-00f18fb6b3ea?w=400" alt="Family Home">
+                        <div class="gallery-overlay">
+                            <div class="overlay-content">
+                                <h4>View Project Details</h4>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="gallery-info">
+                        <h3 class="editable-text" data-edit-type="text">Family Residence</h3>
+                        <p class="editable-text" data-edit-type="text">Warm and inviting family home with open-plan living and child-friendly features.</p>
+                        <div class="gallery-tags">
+                            <span class="gallery-tag">Residential</span>
+                            <span class="gallery-tag">Family Home</span>
+                            <span class="gallery-tag">2024</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="gallery-item editable-highlight" data-category="residential" data-edit-type="project">
+                    <span class="edit-indicator">Edit project</span>
+                    <div class="gallery-image">
+                        <img src="https://images.unsplash.com/photo-1600607687644-c7171b42498b?w=400" alt="Studio Apartment">
+                        <div class="gallery-overlay">
+                            <div class="overlay-content">
+                                <h4>View Project Details</h4>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="gallery-info">
+                        <h3 class="editable-text" data-edit-type="text">Studio Apartment</h3>
+                        <p class="editable-text" data-edit-type="text">Space-maximizing design for compact living with multifunctional furniture solutions.</p>
+                        <div class="gallery-tags">
+                            <span class="gallery-tag">Residential</span>
+                            <span class="gallery-tag">Small Space</span>
+                            <span class="gallery-tag">2023</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Maintenance Projects -->
+                <div class="gallery-item editable-highlight" data-category="maintenance" data-edit-type="project">
+                    <span class="edit-indicator">Edit project</span>
+                    <div class="gallery-image">
+                        <img src="https://images.unsplash.com/photo-1504384308090-c894fdcc538d?w=400" alt="Topshop Maintenance">
+                        <div class="gallery-overlay">
+                            <div class="overlay-content">
+                                <h4>View Project Details</h4>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="gallery-info">
+                        <h3 class="editable-text" data-edit-type="text">Topshop & Topman</h3>
+                        <p class="editable-text" data-edit-type="text">Comprehensive maintenance services for flagship retail stores including HVAC and lighting systems.</p>
+                        <div class="gallery-tags">
+                            <span class="gallery-tag">Maintenance</span>
+                            <span class="gallery-tag">Retail</span>
+                            <span class="gallery-tag">Ongoing</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="gallery-item editable-highlight" data-category="maintenance" data-edit-type="project">
+                    <span class="edit-indicator">Edit project</span>
+                    <div class="gallery-image">
+                        <img src="https://images.unsplash.com/photo-1521737604893-d14cc237f11d?w=400" alt="Office Maintenance">
+                        <div class="gallery-overlay">
+                            <div class="overlay-content">
+                                <h4>View Project Details</h4>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="gallery-info">
+                        <h3 class="editable-text" data-edit-type="text">Corporate Office Complex</h3>
+                        <p class="editable-text" data-edit-type="text">24/7 maintenance support for multi-floor office complex including emergency repairs.</p>
+                        <div class="gallery-tags">
+                            <span class="gallery-tag">Maintenance</span>
+                            <span class="gallery-tag">Commercial</span>
+                            <span class="gallery-tag">Contract</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- 3D Concept Drawings -->
+                <div class="gallery-item editable-highlight" data-category="3d-concept" data-edit-type="project">
+                    <span class="edit-indicator">Edit project</span>
+                    <div class="gallery-image">
+                        <img src="https://images.unsplash.com/photo-1618221195710-dd6b41faaea6?w=400" alt="3D Living Room">
+                        <div class="gallery-overlay">
+                            <div class="overlay-content">
+                                <h4>View 3D Concept</h4>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="gallery-info">
+                        <h3 class="editable-text" data-edit-type="text">Modern Living Space</h3>
+                        <p class="editable-text" data-edit-type="text">Photorealistic 3D visualization of contemporary living room with natural materials.</p>
+                        <div class="gallery-tags">
+                            <span class="gallery-tag">3D Design</span>
+                            <span class="gallery-tag">Residential</span>
+                            <span class="gallery-tag">Concept</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="gallery-item editable-highlight" data-category="3d-concept" data-edit-type="project">
+                    <span class="edit-indicator">Edit project</span>
+                    <div class="gallery-image">
+                        <img src="https://images.unsplash.com/photo-1600607687920-4e2a09cf159d?w=400" alt="3D Kitchen">
+                        <div class="gallery-overlay">
+                            <div class="overlay-content">
+                                <h4>View 3D Concept</h4>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="gallery-info">
+                        <h3 class="editable-text" data-edit-type="text">Gourmet Kitchen Design</h3>
+                        <p class="editable-text" data-edit-type="text">Detailed 3D rendering of modern kitchen with island and premium appliances.</p>
+                        <div class="gallery-tags">
+                            <span class="gallery-tag">3D Design</span>
+                            <span class="gallery-tag">Kitchen</span>
+                            <span class="gallery-tag">Concept</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="gallery-item editable-highlight" data-category="3d-concept" data-edit-type="project">
+                    <span class="edit-indicator">Edit project</span>
+                    <div class="gallery-image">
+                        <img src="https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?w=400" alt="3D Bedroom">
+                        <div class="gallery-overlay">
+                            <div class="overlay-content">
+                                <h4>View 3D Concept</h4>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="gallery-info">
+                        <h3 class="editable-text" data-edit-type="text">Master Bedroom Suite</h3>
+                        <p class="editable-text" data-edit-type="text">Luxurious bedroom design with walk-in wardrobe and ensuite bathroom visualization.</p>
+                        <div class="gallery-tags">
+                            <span class="gallery-tag">3D Design</span>
+                            <span class="gallery-tag">Bedroom</span>
+                            <span class="gallery-tag">Luxury</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="gallery-item editable-highlight" data-category="3d-concept" data-edit-type="project">
+                    <span class="edit-indicator">Edit project</span>
+                    <div class="gallery-image">
+                        <img src="https://images.unsplash.com/photo-1565793298595-6a879b1d9492?w=400" alt="3D Backhaus">
+                        <div class="gallery-overlay">
+                            <div class="overlay-content">
+                                <h4>View 3D Concept</h4>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="gallery-info">
+                        <h3 class="editable-text" data-edit-type="text">Backhaus Kiosk Design</h3>
+                        <p class="editable-text" data-edit-type="text">3D concept for modular bakery kiosk with efficient workflow and customer flow.</p>
+                        <div class="gallery-tags">
+                            <span class="gallery-tag">3D Design</span>
+                            <span class="gallery-tag">Commercial</span>
+                            <span class="gallery-tag">Kiosk</span>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Construction Drawings -->
+                <div class="gallery-item editable-highlight" data-category="construction" data-edit-type="project">
+                    <span class="edit-indicator">Edit project</span>
+                    <div class="gallery-image">
+                        <img src="https://images.unsplash.com/photo-1503387762-592deb58ef4e?w=400" alt="Construction Drawing">
+                        <div class="gallery-overlay">
+                            <div class="overlay-content">
+                                <h4>View Technical Drawing</h4>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="gallery-info">
+                        <h3 class="editable-text" data-edit-type="text">Office Layout Plan</h3>
+                        <p class="editable-text" data-edit-type="text">Detailed construction drawings including MEP coordination and furniture layout.</p>
+                        <div class="gallery-tags">
+                            <span class="gallery-tag">Technical</span>
+                            <span class="gallery-tag">CAD</span>
+                            <span class="gallery-tag">Construction</span>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="gallery-item editable-highlight" data-category="construction" data-edit-type="project">
+                    <span class="edit-indicator">Edit project</span>
+                    <div class="gallery-image">
+                        <img src="https://images.unsplash.com/photo-1541888946425-d81bb19240f5?w=400" alt="Construction Plan">
+                        <div class="gallery-overlay">
+                            <div class="overlay-content">
+                                <h4>View Technical Drawing</h4>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="gallery-info">
+                        <h3 class="editable-text" data-edit-type="text">Retail Space Blueprint</h3>
+                        <p class="editable-text" data-edit-type="text">Complete set of construction documents with electrical, plumbing, and HVAC details.</p>
+                        <div class="gallery-tags">
+                            <span class="gallery-tag">Blueprint</span>
+                            <span class="gallery-tag">Technical</span>
+                            <span class="gallery-tag">Full Set</span>
                         </div>
                     </div>
                 </div>
             </div>
         </section>
 
-        <!-- Why Choose Us -->
+        <!-- About Section -->
         <section class="why-us" id="about">
             <div class="section-header">
-                <h2>Why Choose Refit?</h2>
-                <p>Your trusted partner in creating exceptional spaces</p>
+                <h2 class="editable-text" data-edit-type="text">Why Choose Refit?</h2>
+                <p class="editable-text" data-edit-type="text">Your trusted partner in creating exceptional spaces</p>
             </div>
 
             <div class="why-us-grid">
-                <div class="why-card">
+                <div class="why-card editable-highlight" data-edit-type="feature">
+                    <span class="edit-indicator">Edit feature</span>
                     <div class="why-icon">
                         <i class="fas fa-certificate"></i>
                     </div>
-                    <h3>Licensed & Certified</h3>
-                    <p>Fully licensed and certified professionals ensuring quality and compliance</p>
+                    <h3 class="editable-text" data-edit-type="text">Licensed & Certified</h3>
+                    <p class="editable-text" data-edit-type="text">Fully licensed and certified professionals ensuring quality and compliance with all regulations</p>
                 </div>
 
-                <div class="why-card">
+                <div class="why-card editable-highlight" data-edit-type="feature">
+                    <span class="edit-indicator">Edit feature</span>
                     <div class="why-icon">
                         <i class="fas fa-clock"></i>
                     </div>
-                    <h3>On-Time Delivery</h3>
-                    <p>We respect your time and ensure projects are completed as scheduled</p>
+                    <h3 class="editable-text" data-edit-type="text">On-Time Delivery</h3>
+                    <p class="editable-text" data-edit-type="text">We respect your time and ensure projects are completed as scheduled without compromising quality</p>
                 </div>
 
-                <div class="why-card">
+                <div class="why-card editable-highlight" data-edit-type="feature">
+                    <span class="edit-indicator">Edit feature</span>
                     <div class="why-icon">
                         <i class="fas fa-hand-holding-usd"></i>
                     </div>
-                    <h3>Transparent Pricing</h3>
-                    <p>No hidden costs, clear quotations, and value for your investment</p>
+                    <h3 class="editable-text" data-edit-type="text">Transparent Pricing</h3>
+                    <p class="editable-text" data-edit-type="text">No hidden costs, clear quotations, and value for your investment with detailed breakdowns</p>
                 </div>
 
-                <div class="why-card">
+                <div class="why-card editable-highlight" data-edit-type="feature">
+                    <span class="edit-indicator">Edit feature</span>
                     <div class="why-icon">
                         <i class="fas fa-headset"></i>
                     </div>
-                    <h3>24/7 Support</h3>
-                    <p>Round-the-clock support for emergencies and maintenance needs</p>
+                    <h3 class="editable-text" data-edit-type="text">24/7 Support</h3>
+                    <p class="editable-text" data-edit-type="text">Round-the-clock support for emergencies and maintenance needs with rapid response times</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Contact Section -->
+        <section class="contact" id="contact">
+            <div class="section-header">
+                <h2 class="editable-text" data-edit-type="text">Get In Touch</h2>
+                <p class="editable-text" data-edit-type="text">Let's discuss your next project</p>
+            </div>
+
+            <div class="contact-container">
+                <div class="contact-info">
+                    <h3 class="editable-text" data-edit-type="text">Contact Information</h3>
+                    <p class="editable-text" data-edit-type="text">Ready to transform your space? We're here to help bring your vision to life. Contact us today for a free consultation.</p>
+                    
+                    <div class="contact-item editable-highlight" data-edit-type="contact">
+                        <span class="edit-indicator">Edit address</span>
+                        <div class="contact-icon">
+                            <i class="fas fa-map-marker-alt"></i>
+                        </div>
+                        <div class="contact-item-info">
+                            <h4>Visit Us</h4>
+                            <p class="editable-text" data-edit-type="text">C-08-34, Centum @ Oasis Corporate Park,<br>
+                            Oasis Damansara, No.2 Jalan PJU 1A/2,<br>
+                            47301 Petaling Jaya, Selangor, Malaysia</p>
+                        </div>
+                    </div>
+
+                    <div class="contact-item editable-highlight" data-edit-type="contact">
+                        <span class="edit-indicator">Edit phone</span>
+                        <div class="contact-icon">
+                            <i class="fas fa-phone"></i>
+                        </div>
+                        <div class="contact-item-info">
+                            <h4>Call Us</h4>
+                            <p class="editable-text" data-edit-type="text">+60 3-XXXX XXXX<br>
+                            +60 12-XXX XXXX (WhatsApp)</p>
+                        </div>
+                    </div>
+
+                    <div class="contact-item editable-highlight" data-edit-type="contact">
+                        <span class="edit-indicator">Edit email</span>
+                        <div class="contact-icon">
+                            <i class="fas fa-envelope"></i>
+                        </div>
+                        <div class="contact-item-info">
+                            <h4>Email Us</h4>
+                            <p class="editable-text" data-edit-type="text">info@refit.com.my<br>
+                            support@refit.com.my</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="contact-form">
+                    <h3>Send Us a Message</h3>
+                    <form id="contactForm" onsubmit="handleContactSubmit(event)">
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="name">Your Name</label>
+                                <input type="text" id="name" name="name" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="email">Email Address</label>
+                                <input type="email" id="email" name="email" required>
+                            </div>
+                        </div>
+
+                        <div class="form-row">
+                            <div class="form-group">
+                                <label for="phone">Phone Number</label>
+                                <input type="tel" id="phone" name="phone" required>
+                            </div>
+                            <div class="form-group">
+                                <label for="service">Service Needed</label>
+                                <input type="text" id="service" name="service" placeholder="e.g., Interior Design, Renovation">
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label for="message">Your Message</label>
+                            <textarea id="message" name="message" rows="5" required placeholder="Tell us about your project..."></textarea>
+                        </div>
+
+                        <button type="submit" class="submit-btn btn btn-primary" style="width: 100%;">
+                            <i class="fas fa-paper-plane" style="margin-right: 10px;"></i>
+                            Send Message
+                        </button>
+                    </form>
                 </div>
             </div>
         </section>
 
         <!-- CTA Section -->
         <section class="cta">
-            <h2>Ready to Transform Your Space?</h2>
-            <p>Join hundreds of satisfied clients who trust Refit for their projects</p>
-            <div class="cta-buttons">
-                <a href="#" class="btn btn-white" onclick="showRegister()">Become a Member</a>
-                <a href="#contact" class="btn btn-outline" style="border-color: white; color: white;">Get Started</a>
+            <div class="cta-content">
+                <h2 class="editable-text" data-edit-type="text">Ready to Transform Your Space?</h2>
+                <p class="editable-text" data-edit-type="text">Join hundreds of satisfied clients who trust Refit for their projects</p>
+                <div class="cta-buttons">
+                    <a href="#" class="btn btn-white" onclick="showRegister()">Become a Member</a>
+                    <a href="#contact" class="btn btn-outline" style="border-color: white; color: white;">Get Started Today</a>
+                </div>
             </div>
         </section>
 
@@ -1107,21 +2233,15 @@
         <footer>
             <div class="footer-content">
                 <div class="footer-brand">
-                    <h3>Refit Maintenance Services</h3>
-                    <p>Your trusted partner in transforming spaces from concept to completion. Based in Petaling Jaya, serving all of Malaysia with excellence.</p>
-                    <div class="footer-social">
-                        <a href="#" class="social-icon"><i class="fab fa-facebook-f"></i></a>
-                        <a href="#" class="social-icon"><i class="fab fa-instagram"></i></a>
-                        <a href="#" class="social-icon"><i class="fab fa-linkedin-in"></i></a>
-                        <a href="#" class="social-icon"><i class="fab fa-whatsapp"></i></a>
-                    </div>
+                    <h3 class="editable-text" data-edit-type="text">Refit Maintenance Services</h3>
+                    <p class="editable-text" data-edit-type="text">Your trusted partner in transforming spaces from concept to completion. Based in Petaling Jaya, serving all of Malaysia with excellence since 2010.</p>
                 </div>
 
                 <div class="footer-column">
                     <h4>Quick Links</h4>
                     <ul>
                         <li><a href="#services">Our Services</a></li>
-                        <li><a href="#projects">Portfolio</a></li>
+                        <li><a href="#our-clients">Portfolio</a></li>
                         <li><a href="#about">About Us</a></li>
                         <li><a href="#contact">Contact</a></li>
                     </ul>
@@ -1130,109 +2250,734 @@
                 <div class="footer-column">
                     <h4>Services</h4>
                     <ul>
-                        <li><a href="#">Maintenance</a></li>
+                        <li><a href="#">Maintenance Services</a></li>
                         <li><a href="#">Interior Design</a></li>
-                        <li><a href="#">Renovation</a></li>
+                        <li><a href="#">Renovation Works</a></li>
                         <li><a href="#">3D Visualization</a></li>
-                    </ul>
-                </div>
-
-                <div class="footer-column">
-                    <h4>Contact Info</h4>
-                    <ul>
-                        <li><i class="fas fa-map-marker-alt"></i> Centum @ Oasis Corporate Park, Petaling Jaya</li>
-                        <li><i class="fas fa-phone"></i> +60 3-XXXX XXXX</li>
-                        <li><i class="fas fa-envelope"></i> info@refit.com.my</li>
                     </ul>
                 </div>
             </div>
 
             <div class="footer-bottom">
-                <p>&copy; 2025 Refit Maintenance Services. All rights reserved. | Privacy Policy | Terms of Service</p>
+                <p>&copy; 2025 Refit Maintenance Services. All rights reserved.</p>
             </div>
         </footer>
     </div>
 
+    <!-- Back to Top Button -->
+    <div class="back-to-top" id="backToTop" onclick="scrollToTop()">
+        <i class="fas fa-arrow-up"></i>
+    </div>
+
+    <!-- Scripts -->
+    <script src="https://unpkg.com/swiper/swiper-bundle.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.15.0/Sortable.min.js"></script>
     <script>
-        // Header scroll effect
+        // Master Admin System
+        let isAdminLoggedIn = false;
+        let editMode = false;
+        let currentEditElement = null;
+
+        // Initialize
+        window.addEventListener('load', function() {
+            // Load saved settings
+            loadSavedSettings();
+            
+            // Preloader
+            setTimeout(() => {
+                document.getElementById('preloader').classList.add('fade-out');
+                setTimeout(() => {
+                    document.getElementById('preloader').style.display = 'none';
+                }, 500);
+            }, 1000);
+
+            // Check if admin is logged in
+            checkAdminStatus();
+        });
+
+        // Check admin login status
+        function checkAdminStatus() {
+            const adminToken = localStorage.getItem('refitAdminToken');
+            if (adminToken === 'refit2024master') {
+                isAdminLoggedIn = true;
+                document.getElementById('adminToggle').classList.add('show');
+            }
+        }
+
+        // Master Login
+        function openMasterLogin() {
+            document.getElementById('masterLoginModal').classList.add('active');
+        }
+
+        function closeMasterLogin() {
+            document.getElementById('masterLoginModal').classList.remove('active');
+        }
+
+        function handleMasterLogin(event) {
+            event.preventDefault();
+            const email = document.getElementById('masterEmail').value;
+            const password = document.getElementById('masterPassword').value;
+
+            if (email === 'admin@refitservices.com' && password === 'refit2024master') {
+                isAdminLoggedIn = true;
+                localStorage.setItem('refitAdminToken', 'refit2024master');
+                document.getElementById('adminToggle').classList.add('show');
+                closeMasterLogin();
+                openMasterPanel();
+                alert('Welcome to Master Control Panel!');
+            } else {
+                alert('Invalid credentials. Please try again.');
+            }
+        }
+
+        // Master Panel Controls
+        function openMasterPanel() {
+            if (isAdminLoggedIn) {
+                document.getElementById('masterAdminPanel').classList.add('active');
+            }
+        }
+
+        function closeMasterPanel() {
+            document.getElementById('masterAdminPanel').classList.remove('active');
+        }
+
+        // Logo Management
+        function updateLogoType() {
+            const logoType = document.getElementById('logoType').value;
+            const logoImage = document.getElementById('mainLogo');
+            const logoText = document.getElementById('logoTextDisplay');
+            const imageControl = document.getElementById('logoImageControl');
+            const textControl = document.getElementById('logoTextControl');
+
+            switch(logoType) {
+                case 'image':
+                    logoImage.style.display = 'block';
+                    logoText.style.display = 'none';
+                    imageControl.style.display = 'block';
+                    textControl.style.display = 'none';
+                    break;
+                case 'text':
+                    logoImage.style.display = 'none';
+                    logoText.style.display = 'block';
+                    imageControl.style.display = 'none';
+                    textControl.style.display = 'block';
+                    break;
+                case 'both':
+                    logoImage.style.display = 'block';
+                    logoText.style.display = 'block';
+                    imageControl.style.display = 'block';
+                    textControl.style.display = 'block';
+                    break;
+            }
+            saveSettings();
+        }
+
+        function uploadLogo(event) {
+            const file = event.target.files[0];
+            if (file) {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    document.getElementById('mainLogo').src = e.target.result;
+                    saveSettings();
+                };
+                reader.readAsDataURL(file);
+            }
+        }
+
+        function updateLogoText() {
+            const text = document.getElementById('logoText').value;
+            document.getElementById('logoTextDisplay').textContent = text;
+            saveSettings();
+        }
+
+        function updateLogoSize() {
+            const size = document.getElementById('logoSize').value;
+            document.querySelector('.logo').style.height = size + 'px';
+            document.querySelector('.range-value').textContent = size + 'px';
+            saveSettings();
+        }
+
+        // Theme Color Management
+        function updateThemeColor(type) {
+            let color;
+            switch(type) {
+                case 'primary':
+                    color = document.getElementById('primaryColor').value;
+                    document.documentElement.style.setProperty('--primary-color', color);
+                    break;
+                case 'secondary':
+                    color = document.getElementById('secondaryColor').value;
+                    document.documentElement.style.setProperty('--secondary-color', color);
+                    break;
+                case 'accent':
+                    color = document.getElementById('accentColor').value;
+                    document.documentElement.style.setProperty('--accent-color', color);
+                    break;
+            }
+            saveSettings();
+        }
+
+        function applyColorTheme(theme) {
+            const themes = {
+                pink: { primary: '#db7093', secondary: '#ffb6c1', accent: '#c85a7a' },
+                blue: { primary: '#4a90e2', secondary: '#7bb8f0', accent: '#2c5aa0' },
+                green: { primary: '#50c878', secondary: '#90ee90', accent: '#228b22' },
+                orange: { primary: '#ff6b6b', secondary: '#ffa07a', accent: '#ff4500' },
+                purple: { primary: '#9b59b6', secondary: '#c39bd3', accent: '#6b3aa0' }
+            };
+
+            const selectedTheme = themes[theme];
+            document.getElementById('primaryColor').value = selectedTheme.primary;
+            document.getElementById('secondaryColor').value = selectedTheme.secondary;
+            document.getElementById('accentColor').value = selectedTheme.accent;
+
+            updateThemeColor('primary');
+            updateThemeColor('secondary');
+            updateThemeColor('accent');
+
+            // Update active color indicator
+            document.querySelectorAll('.color-option').forEach(opt => opt.classList.remove('active'));
+            event.target.classList.add('active');
+        }
+
+        // Button Style Management
+        function updateButtonStyle() {
+            const radius = document.getElementById('buttonRadius').value;
+            const padding = document.getElementById('buttonPadding').value;
+            const shadow = document.getElementById('buttonShadow').value;
+
+            document.documentElement.style.setProperty('--button-radius', radius + 'px');
+            document.documentElement.style.setProperty('--button-padding', padding);
+            
+            document.querySelectorAll('.range-value')[0].textContent = radius + 'px';
+            document.querySelectorAll('.range-value')[2].textContent = shadow + 'px';
+
+            // Update button shadows
+            const buttons = document.querySelectorAll('.btn-primary');
+            buttons.forEach(btn => {
+                btn.style.boxShadow = `0 5px ${shadow}px rgba(219, 112, 147, 0.3)`;
+            });
+
+            saveSettings();
+        }
+
+        function updateButtonEffect() {
+            const effect = document.getElementById('buttonEffect').value;
+            const buttons = document.querySelectorAll('.btn');
+            
+            // Remove all effect classes
+            buttons.forEach(btn => {
+                btn.classList.remove('btn-effect-pulse', 'btn-effect-glow', 'btn-effect-slide', 'btn-effect-shake');
+            });
+
+            // Add selected effect
+            if (effect !== 'none') {
+                buttons.forEach(btn => {
+                    btn.classList.add(`btn-effect-${effect}`);
+                });
+            }
+
+            saveSettings();
+        }
+
+        function applyButtonPreset(preset) {
+            switch(preset) {
+                case 'flat':
+                    document.getElementById('buttonRadius').value = 0;
+                    document.getElementById('buttonShadow').value = 0;
+                    break;
+                case 'rounded':
+                    document.getElementById('buttonRadius').value = 50;
+                    document.getElementById('buttonShadow').value = 20;
+                    break;
+                case 'sharp':
+                    document.getElementById('buttonRadius').value = 5;
+                    document.getElementById('buttonShadow').value = 10;
+                    break;
+                case '3d':
+                    document.getElementById('buttonRadius').value = 10;
+                    document.getElementById('buttonShadow').value = 50;
+                    break;
+            }
+            updateButtonStyle();
+        }
+
+        // Typography Management
+        function updateTypography() {
+            const fontFamily = document.getElementById('fontFamily').value;
+            const headingScale = document.getElementById('headingScale').value;
+            const bodySize = document.getElementById('bodyTextSize').value;
+
+            document.body.style.fontFamily = fontFamily;
+            
+            // Update heading sizes
+            document.querySelectorAll('h1').forEach(h => {
+                const baseSize = 48;
+                h.style.fontSize = (baseSize * headingScale) + 'px';
+            });
+            document.querySelectorAll('h2').forEach(h => {
+                const baseSize = 36;
+                h.style.fontSize = (baseSize * headingScale) + 'px';
+            });
+            document.querySelectorAll('h3').forEach(h => {
+                const baseSize = 24;
+                h.style.fontSize = (baseSize * headingScale) + 'px';
+            });
+
+            // Update body text
+            document.body.style.fontSize = bodySize + 'px';
+            
+            document.querySelectorAll('.range-value')[1].textContent = headingScale + 'x';
+            document.querySelectorAll('.range-value')[3].textContent = bodySize + 'px';
+
+            saveSettings();
+        }
+
+        // Layout Management
+        function updateLayout() {
+            const containerWidth = document.getElementById('containerWidth').value;
+            const sectionPadding = document.getElementById('sectionPadding').value;
+
+            // Update all containers
+            document.querySelectorAll('.section-header, .services-grid, .project-gallery, .contact-container').forEach(container => {
+                container.style.maxWidth = containerWidth;
+            });
+
+            // Update section padding
+            document.querySelectorAll('section').forEach(section => {
+                section.style.padding = `${sectionPadding}px 50px`;
+            });
+
+            document.querySelectorAll('.range-value')[4].textContent = sectionPadding + 'px';
+
+            saveSettings();
+        }
+
+        function toggleAnimations() {
+            const enableAnimations = document.getElementById('enableAnimations').value;
+            
+            if (enableAnimations === 'no') {
+                // Disable all animations
+                const style = document.createElement('style');
+                style.id = 'no-animations';
+                style.textContent = '* { animation: none !important; transition: none !important; }';
+                document.head.appendChild(style);
+            } else {
+                // Re-enable animations
+                const noAnimStyle = document.getElementById('no-animations');
+                if (noAnimStyle) {
+                    noAnimStyle.remove();
+                }
+            }
+
+            saveSettings();
+        }
+
+        // Edit Mode
+        function toggleEditMode() {
+            editMode = !editMode;
+            document.body.classList.toggle('edit-mode');
+            
+            if (editMode) {
+                // Add click handlers to editable elements
+                document.querySelectorAll('.editable-text').forEach(element => {
+                    element.addEventListener('click', handleTextEdit);
+                });
+                
+                document.querySelectorAll('.editable-highlight').forEach(element => {
+                    element.addEventListener('click', handleElementEdit);
+                });
+                
+                alert('Edit Mode ON - Click any text or element to edit');
+            } else {
+                // Remove click handlers
+                document.querySelectorAll('.editable-text').forEach(element => {
+                    element.removeEventListener('click', handleTextEdit);
+                });
+                
+                document.querySelectorAll('.editable-highlight').forEach(element => {
+                    element.removeEventListener('click', handleElementEdit);
+                });
+                
+                alert('Edit Mode OFF');
+            }
+        }
+
+        function handleTextEdit(event) {
+            if (!editMode) return;
+            
+            event.stopPropagation();
+            currentEditElement = event.target;
+            
+            const popup = document.getElementById('editPopup');
+            const content = document.getElementById('editPopupContent');
+            
+            content.innerHTML = `
+                <div class="form-group">
+                    <label>Edit Text</label>
+                    <textarea id="editTextArea" rows="4" style="width: 100%; padding: 10px; border: 1px solid #ddd; border-radius: 5px;">${currentEditElement.textContent}</textarea>
+                </div>
+                <button class="btn btn-primary" onclick="saveTextEdit()" style="margin-top: 10px;">Save</button>
+            `;
+            
+            popup.style.display = 'block';
+            popup.style.top = event.pageY + 'px';
+            popup.style.left = event.pageX + 'px';
+        }
+
+        function handleElementEdit(event) {
+            if (!editMode) return;
+            
+            event.stopPropagation();
+            const editType = event.currentTarget.dataset.editType;
+            
+            switch(editType) {
+                case 'logo':
+                    document.getElementById('mediaUploadModal').classList.add('active');
+                    break;
+                case 'image':
+                    currentEditElement = event.currentTarget.querySelector('img');
+                    document.getElementById('mediaUploadModal').classList.add('active');
+                    break;
+                case 'service':
+                    editServiceCard(event.currentTarget);
+                    break;
+                case 'project':
+                    editProjectCard(event.currentTarget);
+                    break;
+                default:
+                    handleTextEdit(event);
+            }
+        }
+
+        function saveTextEdit() {
+            const newText = document.getElementById('editTextArea').value;
+            currentEditElement.textContent = newText;
+            closeEditPopup();
+            saveSettings();
+        }
+
+        function closeEditPopup() {
+            document.getElementById('editPopup').style.display = 'none';
+        }
+
+        // Media Upload
+        function handleMediaUpload(event) {
+            const files = event.target.files;
+            const preview = document.getElementById('uploadPreview');
+            preview.innerHTML = '';
+
+            Array.from(files).forEach(file => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    if (file.type.startsWith('image/')) {
+                        const img = document.createElement('img');
+                        img.src = e.target.result;
+                        img.style.width = '100%';
+                        img.style.marginTop = '10px';
+                        img.style.borderRadius = '10px';
+                        preview.appendChild(img);
+
+                        // Add use button
+                        const useBtn = document.createElement('button');
+                        useBtn.className = 'btn btn-primary';
+                        useBtn.textContent = 'Use This Image';
+                        useBtn.style.marginTop = '10px';
+                        useBtn.style.width = '100%';
+                        useBtn.onclick = function() {
+                            if (currentEditElement && currentEditElement.tagName === 'IMG') {
+                                currentEditElement.src = e.target.result;
+                                closeMediaUpload();
+                                saveSettings();
+                            }
+                        };
+                        preview.appendChild(useBtn);
+                    }
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        function closeMediaUpload() {
+            document.getElementById('mediaUploadModal').classList.remove('active');
+        }
+
+        // Drag and Drop
+        const uploadArea = document.getElementById('uploadArea');
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('drag-over');
+        });
+
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('drag-over');
+        });
+
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('drag-over');
+            const files = e.dataTransfer.files;
+            document.getElementById('mediaFileInput').files = files;
+            handleMediaUpload({ target: { files } });
+        });
+
+        // Save and Load Settings
+        function saveSettings() {
+            const settings = {
+                logoType: document.getElementById('logoType').value,
+                logoSrc: document.getElementById('mainLogo').src,
+                logoText: document.getElementById('logoText').value,
+                logoSize: document.getElementById('logoSize').value,
+                primaryColor: document.getElementById('primaryColor').value,
+                secondaryColor: document.getElementById('secondaryColor').value,
+                accentColor: document.getElementById('accentColor').value,
+                buttonRadius: document.getElementById('buttonRadius').value,
+                buttonPadding: document.getElementById('buttonPadding').value,
+                buttonEffect: document.getElementById('buttonEffect').value,
+                buttonShadow: document.getElementById('buttonShadow').value,
+                fontFamily: document.getElementById('fontFamily').value,
+                headingScale: document.getElementById('headingScale').value,
+                bodyTextSize: document.getElementById('bodyTextSize').value,
+                containerWidth: document.getElementById('containerWidth').value,
+                sectionPadding: document.getElementById('sectionPadding').value,
+                enableAnimations: document.getElementById('enableAnimations').value,
+                editedContent: {}
+            };
+
+            // Save all edited text content
+            document.querySelectorAll('.editable-text').forEach((element, index) => {
+                settings.editedContent[`text_${index}`] = element.textContent;
+            });
+
+            localStorage.setItem('refitSettings', JSON.stringify(settings));
+        }
+
+        function loadSavedSettings() {
+            const savedSettings = localStorage.getItem('refitSettings');
+            if (savedSettings) {
+                const settings = JSON.parse(savedSettings);
+
+                // Apply all saved settings
+                if (settings.logoType) {
+                    document.getElementById('logoType').value = settings.logoType;
+                    updateLogoType();
+                }
+                if (settings.logoSrc && settings.logoSrc !== '') {
+                    document.getElementById('mainLogo').src = settings.logoSrc;
+                }
+                if (settings.logoText) {
+                    document.getElementById('logoText').value = settings.logoText;
+                    document.getElementById('logoTextDisplay').textContent = settings.logoText;
+                }
+                if (settings.logoSize) {
+                    document.getElementById('logoSize').value = settings.logoSize;
+                    updateLogoSize();
+                }
+                
+                // Colors
+                if (settings.primaryColor) {
+                    document.getElementById('primaryColor').value = settings.primaryColor;
+                    updateThemeColor('primary');
+                }
+                if (settings.secondaryColor) {
+                    document.getElementById('secondaryColor').value = settings.secondaryColor;
+                    updateThemeColor('secondary');
+                }
+                if (settings.accentColor) {
+                    document.getElementById('accentColor').value = settings.accentColor;
+                    updateThemeColor('accent');
+                }
+
+                // Button styles
+                if (settings.buttonRadius) {
+                    document.getElementById('buttonRadius').value = settings.buttonRadius;
+                }
+                if (settings.buttonPadding) {
+                    document.getElementById('buttonPadding').value = settings.buttonPadding;
+                }
+                if (settings.buttonEffect) {
+                    document.getElementById('buttonEffect').value = settings.buttonEffect;
+                    updateButtonEffect();
+                }
+                if (settings.buttonShadow) {
+                    document.getElementById('buttonShadow').value = settings.buttonShadow;
+                }
+                updateButtonStyle();
+
+                // Typography
+                if (settings.fontFamily) {
+                    document.getElementById('fontFamily').value = settings.fontFamily;
+                }
+                if (settings.headingScale) {
+                    document.getElementById('headingScale').value = settings.headingScale;
+                }
+                if (settings.bodyTextSize) {
+                    document.getElementById('bodyTextSize').value = settings.bodyTextSize;
+                }
+                updateTypography();
+
+                // Layout
+                if (settings.containerWidth) {
+                    document.getElementById('containerWidth').value = settings.containerWidth;
+                }
+                if (settings.sectionPadding) {
+                    document.getElementById('sectionPadding').value = settings.sectionPadding;
+                }
+                updateLayout();
+
+                if (settings.enableAnimations) {
+                    document.getElementById('enableAnimations').value = settings.enableAnimations;
+                    toggleAnimations();
+                }
+
+                // Restore edited content
+                if (settings.editedContent) {
+                    document.querySelectorAll('.editable-text').forEach((element, index) => {
+                        if (settings.editedContent[`text_${index}`]) {
+                            element.textContent = settings.editedContent[`text_${index}`];
+                        }
+                    });
+                }
+            }
+        }
+
+        function saveAllSettings() {
+            saveSettings();
+            alert('All settings saved successfully!');
+        }
+
+        function resetToDefaults() {
+            if (confirm('Are you sure you want to reset all settings to defaults? This cannot be undone.')) {
+                localStorage.removeItem('refitSettings');
+                location.reload();
+            }
+        }
+
+        function exportSettings() {
+            const settings = localStorage.getItem('refitSettings');
+            const blob = new Blob([settings], { type: 'application/json' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'refit-settings.json';
+            a.click();
+        }
+
+        function importSettings() {
+            const input = document.createElement('input');
+            input.type = 'file';
+            input.accept = '.json';
+            input.onchange = function(e) {
+                const file = e.target.files[0];
+                const reader = new FileReader();
+                reader.onload = function(event) {
+                    try {
+                        const settings = JSON.parse(event.target.result);
+                        localStorage.setItem('refitSettings', JSON.stringify(settings));
+                        location.reload();
+                    } catch (error) {
+                        alert('Invalid settings file');
+                    }
+                };
+                reader.readAsText(file);
+            };
+            input.click();
+        }
+
+        // Client Category Filter
+        function showClientCategory(category) {
+            const buttons = document.querySelectorAll('.category-btn');
+            const items = document.querySelectorAll('.gallery-item');
+            
+            // Update active button
+            buttons.forEach(btn => btn.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Show/hide items
+            items.forEach(item => {
+                if (category === 'all' || item.dataset.category === category) {
+                    item.style.display = 'block';
+                    item.style.animation = 'fadeInUp 0.6s ease';
+                } else {
+                    item.style.display = 'none';
+                }
+            });
+        }
+
+        // Regular Website Functions
         window.addEventListener('scroll', function() {
             const header = document.getElementById('header');
+            const backToTop = document.getElementById('backToTop');
+            
             if (window.scrollY > 50) {
                 header.classList.add('scrolled');
             } else {
                 header.classList.remove('scrolled');
             }
+            
+            if (window.scrollY > 300) {
+                backToTop.classList.add('show');
+            } else {
+                backToTop.classList.remove('show');
+            }
         });
 
-        // Mobile menu toggle
-        function toggleMobileMenu() {
-            const aiPanel = document.getElementById('aiPanel');
-            aiPanel.classList.toggle('active');
-        }
-
-        // Project filter
-        function filterProjects(category) {
-            const buttons = document.querySelectorAll('.filter-btn');
-            const projects = document.querySelectorAll('.project-card');
-            
-            buttons.forEach(btn => btn.classList.remove('active'));
-            event.target.classList.add('active');
-            
-            projects.forEach(project => {
-                if (category === 'all' || project.dataset.category === category) {
-                    project.style.display = 'block';
-                } else {
-                    project.style.display = 'none';
-                }
+        function scrollToTop() {
+            window.scrollTo({
+                top: 0,
+                behavior: 'smooth'
             });
         }
 
-        // Redirect to login/register (you can replace with modal or separate page)
+        function toggleAIPanel() {
+            const panel = document.getElementById('aiPanel');
+            panel.classList.toggle('active');
+        }
+
+        function showAIInfo() {
+            alert('AI HOME DESIGNER - Coming Soon!\n\nThis revolutionary feature will use artificial intelligence to:\n• Generate personalized design suggestions\n• Create optimal space layouts\n• Recommend color schemes\n• Estimate project costs\n• Provide 3D visualizations\n\nStay tuned for the launch!');
+        }
+
         function showLogin() {
-            alert('Login functionality - redirect to login page or show modal');
-            // window.location.href = '/login';
+            alert('Login functionality - This would open a login modal or redirect to login page');
         }
 
         function showRegister() {
-            alert('Register functionality - redirect to registration page or show modal');
-            // window.location.href = '/register';
+            alert('Register functionality - This would open a registration modal or redirect to registration page');
         }
 
-        // Smooth scrolling for navigation links
+        function handleContactSubmit(event) {
+            event.preventDefault();
+            alert('Thank you for your message! We will get back to you soon.');
+            event.target.reset();
+        }
+
+        // Smooth scrolling
         document.querySelectorAll('a[href^="#"]').forEach(anchor => {
             anchor.addEventListener('click', function (e) {
                 e.preventDefault();
                 const target = document.querySelector(this.getAttribute('href'));
                 if (target) {
-                    target.scrollIntoView({
-                        behavior: 'smooth',
-                        block: 'start'
+                    const headerOffset = 80;
+                    const elementPosition = target.getBoundingClientRect().top;
+                    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
+
+                    window.scrollTo({
+                        top: offsetPosition,
+                        behavior: 'smooth'
                     });
                 }
             });
         });
 
-        // Animation on scroll
-        const observerOptions = {
-            threshold: 0.1,
-            rootMargin: '0px 0px -100px 0px'
-        };
-
-        const observer = new IntersectionObserver(function(entries) {
-            entries.forEach(entry => {
-                if (entry.isIntersecting) {
-                    entry.target.style.opacity = '1';
-                    entry.target.style.transform = 'translateY(0)';
-                }
-            });
-        }, observerOptions);
-
-        // Observe all cards
-        document.querySelectorAll('.service-card, .project-card, .why-card').forEach(card => {
-            card.style.opacity = '0';
-            card.style.transform = 'translateY(30px)';
-            card.style.transition = 'all 0.6s ease';
-            observer.observe(card);
+        // Admin logout on Escape key
+        document.addEventListener('keydown', function(e) {
+            if (e.key === 'Escape') {
+                closeMasterPanel();
+                closeEditPopup();
+                closeMediaUpload();
+                closeMasterLogin();
+            }
         });
     </script>
 </body>
