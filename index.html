@@ -815,6 +815,282 @@
             border-color: var(--text-dark);
         }
 
+        /* Media Upload Styles */
+        .media-upload-container {
+            position: relative;
+            margin: 1rem 0;
+        }
+
+        .media-preview-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
+            gap: 1rem;
+            margin-top: 1rem;
+        }
+
+        .media-preview-item {
+            position: relative;
+            border-radius: 10px;
+            overflow: hidden;
+            box-shadow: var(--shadow);
+            background: var(--white);
+            animation: fadeIn 0.3s ease;
+        }
+
+        .media-preview-item img,
+        .media-preview-item video {
+            width: 100%;
+            height: 150px;
+            object-fit: cover;
+        }
+
+        .media-remove-btn {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: rgba(255, 255, 255, 0.9);
+            color: #ff4444;
+            border: none;
+            border-radius: 50%;
+            width: 30px;
+            height: 30px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: var(--transition);
+        }
+
+        .media-remove-btn:hover {
+            background: #ff4444;
+            color: white;
+        }
+
+        /* Image Slider */
+        .image-slider {
+            position: relative;
+            width: 100%;
+            height: 500px;
+            overflow: hidden;
+            border-radius: 20px;
+            box-shadow: var(--shadow-lg);
+        }
+
+        .slider-container {
+            display: flex;
+            transition: transform 0.5s ease;
+            height: 100%;
+        }
+
+        .slide {
+            min-width: 100%;
+            height: 100%;
+            position: relative;
+        }
+
+        .slide img,
+        .slide video {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+        }
+
+        .slider-controls {
+            position: absolute;
+            bottom: 20px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            gap: 10px;
+            z-index: 10;
+        }
+
+        .slider-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.5);
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .slider-dot.active {
+            background: white;
+            transform: scale(1.2);
+        }
+
+        .slider-nav {
+            position: absolute;
+            top: 50%;
+            transform: translateY(-50%);
+            background: rgba(255, 255, 255, 0.9);
+            border: none;
+            width: 50px;
+            height: 50px;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 1.5rem;
+            transition: var(--transition);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .slider-nav:hover {
+            background: white;
+            box-shadow: var(--shadow);
+        }
+
+        .slider-nav.prev {
+            left: 20px;
+        }
+
+        .slider-nav.next {
+            right: 20px;
+        }
+
+        /* Drag and Drop */
+        .upload-area.dragging {
+            background: rgba(232, 160, 191, 0.3);
+            border-color: var(--primary-dark-pink);
+        }
+
+        .upload-progress {
+            margin-top: 1rem;
+            display: none;
+        }
+
+        .progress-bar-fill {
+            height: 6px;
+            background: var(--gradient-pink);
+            border-radius: 3px;
+            transition: width 0.3s ease;
+        }
+
+        .upload-status {
+            margin-top: 0.5rem;
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        /* Video Player Custom Styles */
+        .video-container {
+            position: relative;
+            padding-bottom: 56.25%;
+            height: 0;
+            overflow: hidden;
+            border-radius: 15px;
+            box-shadow: var(--shadow);
+        }
+
+        .video-container video,
+        .video-container iframe {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+        }
+
+        /* Gallery Lightbox */
+        .lightbox {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0, 0, 0, 0.95);
+            z-index: 3000;
+            cursor: pointer;
+        }
+
+        .lightbox.active {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .lightbox-content {
+            max-width: 90%;
+            max-height: 90%;
+            position: relative;
+        }
+
+        .lightbox-content img,
+        .lightbox-content video {
+            max-width: 100%;
+            max-height: 90vh;
+            object-fit: contain;
+        }
+
+        .lightbox-close {
+            position: absolute;
+            top: 20px;
+            right: 40px;
+            color: white;
+            font-size: 3rem;
+            cursor: pointer;
+            z-index: 3001;
+        }
+
+        /* Media Gallery Grid */
+        .media-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .gallery-item {
+            position: relative;
+            overflow: hidden;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: var(--transition);
+            box-shadow: var(--shadow);
+        }
+
+        .gallery-item:hover {
+            transform: scale(1.05);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .gallery-item img,
+        .gallery-item video {
+            width: 100%;
+            height: 200px;
+            object-fit: cover;
+        }
+
+        .gallery-item-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0, 0, 0, 0.7);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            opacity: 0;
+            transition: var(--transition);
+        }
+
+        .gallery-item:hover .gallery-item-overlay {
+            opacity: 1;
+        }
+
+        .gallery-play-btn {
+            width: 60px;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            color: var(--text-dark);
+        }
+
         /* Animations */
         @keyframes fadeIn {
             from {
@@ -971,7 +1247,16 @@
                 </div>
             </div>
             <div class="hero-image">
-                <img src="https://via.placeholder.com/600x400/E8A0BF/ffffff?text=REFIT+Services" alt="REFIT Services">
+                <div class="image-slider" id="heroSlider">
+                    <div class="slider-container" id="heroSliderContainer">
+                        <div class="slide">
+                            <img src="https://via.placeholder.com/600x400/E8A0BF/ffffff?text=REFIT+Services" alt="REFIT Services">
+                        </div>
+                    </div>
+                    <button class="slider-nav prev" onclick="changeSlide('hero', -1)" style="display: none;">‹</button>
+                    <button class="slider-nav next" onclick="changeSlide('hero', 1)" style="display: none;">›</button>
+                    <div class="slider-controls" id="heroSliderDots"></div>
+                </div>
             </div>
         </div>
     </section>
@@ -1088,6 +1373,12 @@
         </div>
     </section>
 
+    <!-- Lightbox -->
+    <div class="lightbox" id="lightbox" onclick="closeLightbox()">
+        <span class="lightbox-close">&times;</span>
+        <div class="lightbox-content" id="lightboxContent"></div>
+    </div>
+
     <!-- Get Quote Section -->
     <section id="quote" class="quote-section">
         <h2 class="section-title">Get Your Quote</h2>
@@ -1104,11 +1395,19 @@
                 <!-- Step 1: Upload Images -->
                 <div class="form-step active">
                     <h3>Upload Your Space Images</h3>
-                    <div class="upload-area" onclick="document.getElementById('fileInput').click()">
+                    <div class="upload-area" onclick="document.getElementById('fileInput').click()" id="quoteUploadArea">
                         <div class="upload-icon">📷</div>
                         <p>Click or drag files here to upload</p>
-                        <input type="file" id="fileInput" multiple accept="image/*,video/*" style="display: none;">
+                        <p style="font-size: 0.9rem; color: var(--text-light);">Supports: JPG, PNG, MP4, MOV (Max 50MB each)</p>
+                        <input type="file" id="fileInput" multiple accept="image/*,video/*" style="display: none;" onchange="handleFileUpload(event, 'quote')">
                     </div>
+                    <div class="upload-progress" id="uploadProgress">
+                        <div style="background: #e0e0e0; border-radius: 3px;">
+                            <div class="progress-bar-fill" style="width: 0%"></div>
+                        </div>
+                        <div class="upload-status">Uploading...</div>
+                    </div>
+                    <div class="media-preview-grid" id="quoteMediaPreview"></div>
                     <div class="form-navigation">
                         <button type="button" class="btn btn-secondary" disabled>Previous</button>
                         <button type="button" class="btn btn-primary" onclick="nextStep()">Next</button>
@@ -1420,8 +1719,27 @@
         </div>
 
         <div class="admin-section">
+            <h4>Hero Slider Management</h4>
+            <div class="form-group">
+                <label>Upload Hero Images/Videos</label>
+                <input type="file" id="heroMediaUpload" multiple accept="image/*,video/*" onchange="handleFileUpload(event, 'hero')">
+            </div>
+            <div class="media-preview-grid" id="heroMediaPreview"></div>
+        </div>
+
+        <div class="admin-section">
             <h4>Portfolio Management</h4>
             <button class="btn btn-primary" style="width: 100%;" onclick="openPortfolioManager()">Manage Portfolio</button>
+            <div class="form-group" style="margin-top: 1rem;">
+                <label>Quick Upload to Portfolio</label>
+                <select id="portfolioCategory" style="margin-bottom: 0.5rem;">
+                    <option value="commercial">Commercial</option>
+                    <option value="residential">Residential</option>
+                    <option value="maintenance">Maintenance</option>
+                    <option value="3d">3D Concepts</option>
+                </select>
+                <input type="file" multiple accept="image/*,video/*" onchange="handlePortfolioUpload(event)">
+            </div>
         </div>
 
         <div class="admin-section">
@@ -1437,6 +1755,14 @@
         let isAdmin = false;
         let currentLang = 'EN';
         let currentTheme = 'light';
+        let uploadedFiles = {
+            hero: [],
+            portfolio: {},
+            quote: []
+        };
+        let currentSlide = {
+            hero: 0
+        };
 
         // Navigation
         function toggleMenu() {
@@ -1512,6 +1838,9 @@
                 el.style.outline = '2px dashed var(--primary-pink)';
                 el.style.outlineOffset = '5px';
             });
+
+            // Load existing media into admin previews
+            updateAdminMediaPreviews();
         }
 
         function closeAdminPanel() {
@@ -1556,6 +1885,269 @@
                     btn.classList.add(animation);
                 }
             });
+        }
+
+        // File Upload Handler
+        function handleFileUpload(event, section) {
+            const files = Array.from(event.target.files);
+            const validTypes = ['image/jpeg', 'image/png', 'image/gif', 'video/mp4', 'video/quicktime'];
+            const maxSize = 50 * 1024 * 1024; // 50MB
+
+            files.forEach(file => {
+                if (!validTypes.includes(file.type)) {
+                    alert(`Invalid file type: ${file.name}`);
+                    return;
+                }
+
+                if (file.size > maxSize) {
+                    alert(`File too large: ${file.name}`);
+                    return;
+                }
+
+                // Simulate upload progress
+                showUploadProgress();
+
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const mediaItem = {
+                        id: Date.now() + Math.random(),
+                        name: file.name,
+                        type: file.type,
+                        url: e.target.result,
+                        size: file.size
+                    };
+
+                    if (section === 'hero') {
+                        uploadedFiles.hero.push(mediaItem);
+                        updateHeroSlider();
+                        updateAdminMediaPreviews();
+                    } else if (section === 'quote') {
+                        uploadedFiles.quote.push(mediaItem);
+                        displayQuoteMediaPreview();
+                    }
+
+                    hideUploadProgress();
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // Portfolio Upload Handler
+        function handlePortfolioUpload(event) {
+            const files = Array.from(event.target.files);
+            const category = document.getElementById('portfolioCategory').value;
+            
+            if (!uploadedFiles.portfolio[category]) {
+                uploadedFiles.portfolio[category] = [];
+            }
+
+            files.forEach(file => {
+                const reader = new FileReader();
+                reader.onload = function(e) {
+                    const mediaItem = {
+                        id: Date.now() + Math.random(),
+                        name: file.name,
+                        type: file.type,
+                        url: e.target.result,
+                        category: category,
+                        title: file.name.split('.')[0].replace(/-|_/g, ' ')
+                    };
+
+                    uploadedFiles.portfolio[category].push(mediaItem);
+                    loadPortfolioItems('all');
+                };
+                reader.readAsDataURL(file);
+            });
+        }
+
+        // Upload Progress
+        function showUploadProgress() {
+            const progress = document.getElementById('uploadProgress');
+            if (progress) {
+                progress.style.display = 'block';
+                let width = 0;
+                const interval = setInterval(() => {
+                    if (width >= 90) {
+                        clearInterval(interval);
+                    } else {
+                        width += 10;
+                        progress.querySelector('.progress-bar-fill').style.width = width + '%';
+                    }
+                }, 100);
+            }
+        }
+
+        function hideUploadProgress() {
+            const progress = document.getElementById('uploadProgress');
+            if (progress) {
+                progress.querySelector('.progress-bar-fill').style.width = '100%';
+                setTimeout(() => {
+                    progress.style.display = 'none';
+                    progress.querySelector('.progress-bar-fill').style.width = '0%';
+                }, 500);
+            }
+        }
+
+        // Hero Slider Functions
+        function updateHeroSlider() {
+            const container = document.getElementById('heroSliderContainer');
+            const dotsContainer = document.getElementById('heroSliderDots');
+            
+            container.innerHTML = '';
+            dotsContainer.innerHTML = '';
+
+            if (uploadedFiles.hero.length === 0) {
+                container.innerHTML = `
+                    <div class="slide">
+                        <img src="https://via.placeholder.com/600x400/E8A0BF/ffffff?text=REFIT+Services" alt="REFIT Services">
+                    </div>
+                `;
+                return;
+            }
+
+            uploadedFiles.hero.forEach((media, index) => {
+                const slide = document.createElement('div');
+                slide.className = 'slide';
+                
+                if (media.type.startsWith('image/')) {
+                    slide.innerHTML = `<img src="${media.url}" alt="${media.name}">`;
+                } else if (media.type.startsWith('video/')) {
+                    slide.innerHTML = `<video src="${media.url}" autoplay muted loop></video>`;
+                }
+                
+                container.appendChild(slide);
+
+                // Create dot
+                const dot = document.createElement('div');
+                dot.className = 'slider-dot' + (index === 0 ? ' active' : '');
+                dot.onclick = () => goToSlide('hero', index);
+                dotsContainer.appendChild(dot);
+            });
+
+            // Show/hide navigation
+            const prevBtn = document.querySelector('.slider-nav.prev');
+            const nextBtn = document.querySelector('.slider-nav.next');
+            if (uploadedFiles.hero.length > 1) {
+                prevBtn.style.display = 'flex';
+                nextBtn.style.display = 'flex';
+            } else {
+                prevBtn.style.display = 'none';
+                nextBtn.style.display = 'none';
+            }
+
+            currentSlide.hero = 0;
+            updateSliderPosition('hero');
+        }
+
+        function changeSlide(slider, direction) {
+            const total = uploadedFiles[slider].length;
+            currentSlide[slider] = (currentSlide[slider] + direction + total) % total;
+            updateSliderPosition(slider);
+        }
+
+        function goToSlide(slider, index) {
+            currentSlide[slider] = index;
+            updateSliderPosition(slider);
+        }
+
+        function updateSliderPosition(slider) {
+            const container = document.getElementById(slider + 'SliderContainer');
+            const dots = document.querySelectorAll(`#${slider}SliderDots .slider-dot`);
+            
+            container.style.transform = `translateX(-${currentSlide[slider] * 100}%)`;
+            
+            dots.forEach((dot, index) => {
+                dot.classList.toggle('active', index === currentSlide[slider]);
+            });
+        }
+
+        // Media Preview Functions
+        function displayQuoteMediaPreview() {
+            const preview = document.getElementById('quoteMediaPreview');
+            preview.innerHTML = '';
+
+            uploadedFiles.quote.forEach((media, index) => {
+                const item = document.createElement('div');
+                item.className = 'media-preview-item';
+                
+                if (media.type.startsWith('image/')) {
+                    item.innerHTML = `
+                        <img src="${media.url}" alt="${media.name}" onclick="openLightbox('${media.url}', 'image')">
+                        <button class="media-remove-btn" onclick="removeMedia('quote', ${index})">×</button>
+                    `;
+                } else if (media.type.startsWith('video/')) {
+                    item.innerHTML = `
+                        <video src="${media.url}" onclick="openLightbox('${media.url}', 'video')"></video>
+                        <button class="media-remove-btn" onclick="removeMedia('quote', ${index})">×</button>
+                    `;
+                }
+                
+                preview.appendChild(item);
+            });
+
+            // Update upload area text
+            const uploadArea = document.getElementById('quoteUploadArea');
+            if (uploadedFiles.quote.length > 0) {
+                uploadArea.querySelector('p').textContent = `${uploadedFiles.quote.length} file(s) uploaded. Click to add more.`;
+            }
+        }
+
+        function updateAdminMediaPreviews() {
+            if (!isAdmin) return;
+
+            const heroPreview = document.getElementById('heroMediaPreview');
+            if (heroPreview) {
+                heroPreview.innerHTML = '';
+                uploadedFiles.hero.forEach((media, index) => {
+                    const item = document.createElement('div');
+                    item.className = 'media-preview-item';
+                    
+                    if (media.type.startsWith('image/')) {
+                        item.innerHTML = `
+                            <img src="${media.url}" alt="${media.name}">
+                            <button class="media-remove-btn" onclick="removeMedia('hero', ${index})">×</button>
+                        `;
+                    } else if (media.type.startsWith('video/')) {
+                        item.innerHTML = `
+                            <video src="${media.url}"></video>
+                            <button class="media-remove-btn" onclick="removeMedia('hero', ${index})">×</button>
+                        `;
+                    }
+                    
+                    heroPreview.appendChild(item);
+                });
+            }
+        }
+
+        function removeMedia(section, index) {
+            if (section === 'hero') {
+                uploadedFiles.hero.splice(index, 1);
+                updateHeroSlider();
+                updateAdminMediaPreviews();
+            } else if (section === 'quote') {
+                uploadedFiles.quote.splice(index, 1);
+                displayQuoteMediaPreview();
+            }
+        }
+
+        // Lightbox Functions
+        function openLightbox(url, type) {
+            const lightbox = document.getElementById('lightbox');
+            const content = document.getElementById('lightboxContent');
+            
+            if (type === 'image') {
+                content.innerHTML = `<img src="${url}" alt="Full size image">`;
+            } else if (type === 'video') {
+                content.innerHTML = `<video src="${url}" controls autoplay></video>`;
+            }
+            
+            lightbox.classList.add('active');
+        }
+
+        function closeLightbox() {
+            const lightbox = document.getElementById('lightbox');
+            lightbox.classList.remove('active');
+            document.getElementById('lightboxContent').innerHTML = '';
         }
 
         // Quote Form Functions
@@ -1616,8 +2208,8 @@
             const portfolioGrid = document.getElementById('portfolioGrid');
             portfolioGrid.innerHTML = '';
             
-            // Sample portfolio items
-            const portfolioItems = [
+            // Default portfolio items
+            const defaultItems = [
                 { category: 'commercial', title: 'Cath Kidston Store', image: '🛍️' },
                 { category: 'commercial', title: 'Pie Face Restaurant', image: '🍕' },
                 { category: 'commercial', title: 'Tusan Ice Cream', image: '🍦' },
@@ -1627,30 +2219,112 @@
                 { category: 'maintenance', title: 'Topshop Maintenance', image: '🔧' },
                 { category: '3d', title: '3D Kitchen Design', image: '🎨' }
             ];
+
+            // Add uploaded items
+            let allItems = [...defaultItems];
+            Object.keys(uploadedFiles.portfolio).forEach(cat => {
+                uploadedFiles.portfolio[cat].forEach(item => {
+                    allItems.push({
+                        category: cat,
+                        title: item.title,
+                        media: item
+                    });
+                });
+            });
             
-            portfolioItems
+            allItems
                 .filter(item => category === 'all' || item.category === category)
                 .forEach(item => {
                     const portfolioItem = document.createElement('div');
                     portfolioItem.className = 'portfolio-item';
-                    portfolioItem.innerHTML = `
-                        <div style="height: 250px; background: var(--gradient-pink); display: flex; align-items: center; justify-content: center; font-size: 5rem;">
-                            ${item.image}
-                        </div>
-                        <div class="portfolio-overlay">
-                            <div class="portfolio-info">
-                                <h4>${item.title}</h4>
-                                <p>${item.category.charAt(0).toUpperCase() + item.category.slice(1)} Project</p>
+                    
+                    if (item.media) {
+                        // Uploaded media
+                        if (item.media.type.startsWith('image/')) {
+                            portfolioItem.innerHTML = `
+                                <img src="${item.media.url}" alt="${item.title}">
+                                <div class="portfolio-overlay">
+                                    <div class="portfolio-info">
+                                        <h4>${item.title}</h4>
+                                        <p>${item.category.charAt(0).toUpperCase() + item.category.slice(1)} Project</p>
+                                    </div>
+                                </div>
+                            `;
+                            portfolioItem.onclick = () => openLightbox(item.media.url, 'image');
+                        } else if (item.media.type.startsWith('video/')) {
+                            portfolioItem.innerHTML = `
+                                <video src="${item.media.url}"></video>
+                                <div class="portfolio-overlay">
+                                    <div class="portfolio-info">
+                                        <h4>${item.title}</h4>
+                                        <p>${item.category.charAt(0).toUpperCase() + item.category.slice(1)} Project</p>
+                                    </div>
+                                    <div class="gallery-play-btn">▶</div>
+                                </div>
+                            `;
+                            portfolioItem.onclick = () => openLightbox(item.media.url, 'video');
+                        }
+                    } else {
+                        // Default placeholder
+                        portfolioItem.innerHTML = `
+                            <div style="height: 250px; background: var(--gradient-pink); display: flex; align-items: center; justify-content: center; font-size: 5rem;">
+                                ${item.image}
                             </div>
-                        </div>
-                    `;
+                            <div class="portfolio-overlay">
+                                <div class="portfolio-info">
+                                    <h4>${item.title}</h4>
+                                    <p>${item.category.charAt(0).toUpperCase() + item.category.slice(1)} Project</p>
+                                </div>
+                            </div>
+                        `;
+                    }
+                    
                     portfolioGrid.appendChild(portfolioItem);
                 });
         }
 
-        // Initialize portfolio on load
+        // Drag and Drop
+        function setupDragAndDrop() {
+            const uploadAreas = document.querySelectorAll('.upload-area');
+            
+            uploadAreas.forEach(area => {
+                area.addEventListener('dragover', (e) => {
+                    e.preventDefault();
+                    area.classList.add('dragging');
+                });
+                
+                area.addEventListener('dragleave', () => {
+                    area.classList.remove('dragging');
+                });
+                
+                area.addEventListener('drop', (e) => {
+                    e.preventDefault();
+                    area.classList.remove('dragging');
+                    
+                    const files = e.dataTransfer.files;
+                    const input = area.querySelector('input[type="file"]');
+                    input.files = files;
+                    
+                    const event = new Event('change', { bubbles: true });
+                    input.dispatchEvent(event);
+                });
+            });
+        }
+
+        // Auto-play slider
+        function autoPlaySliders() {
+            setInterval(() => {
+                if (uploadedFiles.hero.length > 1) {
+                    changeSlide('hero', 1);
+                }
+            }, 5000);
+        }
+
+        // Initialize on load
         document.addEventListener('DOMContentLoaded', function() {
             loadPortfolioItems();
+            setupDragAndDrop();
+            autoPlaySliders();
             
             // Smooth scrolling for navigation links
             document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -1672,18 +2346,16 @@
                     e.target.classList.remove('active');
                 }
             });
+
+            // Prevent lightbox content click from closing
+            document.getElementById('lightboxContent').addEventListener('click', (e) => {
+                e.stopPropagation();
+            });
         });
 
         // File upload handler
         document.getElementById('fileInput').addEventListener('change', function(e) {
-            const files = e.target.files;
-            if (files.length > 0) {
-                const uploadArea = document.querySelector('.upload-area');
-                uploadArea.innerHTML = `
-                    <div class="upload-icon">✓</div>
-                    <p>${files.length} file(s) uploaded successfully!</p>
-                `;
-            }
+            handleFileUpload(e, 'quote');
         });
 
         // Intersection Observer for animations
