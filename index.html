@@ -1817,7 +1817,492 @@
             cursor: pointer;
         }
 
-        /* Responsive Design */
+        /* Customer Dashboard Styles */
+        .dashboard-container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 2rem 5%;
+        }
+
+        .dashboard-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+            padding-bottom: 1rem;
+            border-bottom: 2px solid var(--primary-pink);
+        }
+
+        .dashboard-tabs {
+            display: flex;
+            gap: 1rem;
+            margin-bottom: 2rem;
+            flex-wrap: wrap;
+        }
+
+        .dashboard-tab {
+            padding: 0.8rem 1.5rem;
+            background: none;
+            border: 2px solid var(--primary-pink);
+            border-radius: 25px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-weight: 500;
+        }
+
+        .dashboard-tab.active {
+            background: var(--gradient-pink);
+            color: white;
+            border-color: transparent;
+        }
+
+        .dashboard-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 2rem;
+            margin-bottom: 3rem;
+        }
+
+        .dashboard-card {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            transition: var(--transition);
+        }
+
+        .dashboard-card:hover {
+            transform: translateY(-5px);
+            box-shadow: var(--shadow-lg);
+        }
+
+        .stat-number {
+            font-size: 2.5rem;
+            font-weight: 700;
+            color: var(--primary-dark-pink);
+            margin: 0.5rem 0;
+        }
+
+        .stat-label {
+            color: var(--text-light);
+            font-size: 0.9rem;
+        }
+
+        /* Project Tracking */
+        .project-timeline {
+            position: relative;
+            padding-left: 2rem;
+        }
+
+        .project-timeline::before {
+            content: '';
+            position: absolute;
+            left: 0;
+            top: 0;
+            bottom: 0;
+            width: 2px;
+            background: var(--gradient-pink);
+        }
+
+        .timeline-item {
+            position: relative;
+            padding-bottom: 2rem;
+        }
+
+        .timeline-dot {
+            position: absolute;
+            left: -2.4rem;
+            top: 0;
+            width: 20px;
+            height: 20px;
+            background: var(--white);
+            border: 3px solid var(--primary-pink);
+            border-radius: 50%;
+        }
+
+        .timeline-dot.completed {
+            background: var(--primary-pink);
+        }
+
+        .timeline-content {
+            background: var(--bg-light);
+            padding: 1.5rem;
+            border-radius: 10px;
+        }
+
+        .timeline-date {
+            font-size: 0.9rem;
+            color: var(--text-light);
+            margin-bottom: 0.5rem;
+        }
+
+        /* Appointment Scheduler */
+        .calendar-container {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+        }
+
+        .calendar-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .calendar-nav {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .calendar-grid {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 0.5rem;
+        }
+
+        .calendar-day {
+            aspect-ratio: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            cursor: pointer;
+            transition: var(--transition);
+            position: relative;
+        }
+
+        .calendar-day:hover {
+            background: rgba(232, 160, 191, 0.1);
+        }
+
+        .calendar-day.selected {
+            background: var(--gradient-pink);
+            color: white;
+            border-color: transparent;
+        }
+
+        .calendar-day.unavailable {
+            background: #f5f5f5;
+            color: #ccc;
+            cursor: not-allowed;
+        }
+
+        .calendar-day.has-appointment::after {
+            content: '';
+            position: absolute;
+            bottom: 5px;
+            width: 6px;
+            height: 6px;
+            background: var(--primary-pink);
+            border-radius: 50%;
+        }
+
+        .time-slots {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(100px, 1fr));
+            gap: 1rem;
+            margin-top: 2rem;
+        }
+
+        .time-slot {
+            padding: 0.8rem;
+            border: 2px solid #e0e0e0;
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .time-slot:hover {
+            border-color: var(--primary-pink);
+        }
+
+        .time-slot.selected {
+            background: var(--gradient-pink);
+            color: white;
+            border-color: transparent;
+        }
+
+        .time-slot.unavailable {
+            background: #f5f5f5;
+            color: #ccc;
+            cursor: not-allowed;
+        }
+
+        /* Review System */
+        .review-form {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+        }
+
+        .star-rating {
+            display: flex;
+            gap: 0.5rem;
+            font-size: 2rem;
+            margin: 1rem 0;
+        }
+
+        .star {
+            cursor: pointer;
+            color: #ddd;
+            transition: var(--transition);
+        }
+
+        .star:hover,
+        .star.active {
+            color: #ffd700;
+        }
+
+        .review-card {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 1.5rem;
+            margin-bottom: 1rem;
+            box-shadow: var(--shadow);
+        }
+
+        .review-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 1rem;
+        }
+
+        .reviewer-info {
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .reviewer-avatar {
+            width: 50px;
+            height: 50px;
+            background: var(--gradient-pink);
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-weight: 700;
+        }
+
+        /* Analytics Dashboard */
+        .chart-container {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            margin-bottom: 2rem;
+        }
+
+        .chart-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 2rem;
+        }
+
+        .chart-filters {
+            display: flex;
+            gap: 1rem;
+        }
+
+        .chart-filter {
+            padding: 0.5rem 1rem;
+            background: none;
+            border: 1px solid #e0e0e0;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: var(--transition);
+            font-size: 0.9rem;
+        }
+
+        .chart-filter.active {
+            background: var(--gradient-pink);
+            color: white;
+            border-color: transparent;
+        }
+
+        /* 3D Visualization */
+        .visualization-container {
+            background: var(--white);
+            border-radius: 15px;
+            padding: 2rem;
+            box-shadow: var(--shadow);
+            height: 500px;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .visualization-tools {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background: rgba(255, 255, 255, 0.9);
+            border-radius: 10px;
+            padding: 1rem;
+            display: flex;
+            flex-direction: column;
+            gap: 0.5rem;
+            box-shadow: var(--shadow);
+            z-index: 10;
+        }
+
+        .viz-tool-btn {
+            width: 40px;
+            height: 40px;
+            background: var(--white);
+            border: 1px solid #e0e0e0;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .viz-tool-btn:hover {
+            background: var(--gradient-pink);
+            color: white;
+            border-color: transparent;
+        }
+
+        /* Email Template Preview */
+        .email-preview {
+            background: var(--white);
+            border: 1px solid #e0e0e0;
+            border-radius: 10px;
+            padding: 2rem;
+            margin: 2rem 0;
+        }
+
+        .email-header {
+            border-bottom: 1px solid #e0e0e0;
+            padding-bottom: 1rem;
+            margin-bottom: 1rem;
+        }
+
+        .email-subject {
+            font-weight: 700;
+            margin-bottom: 0.5rem;
+        }
+
+        .email-meta {
+            font-size: 0.9rem;
+            color: var(--text-light);
+        }
+
+        /* Language Selector */
+        .language-menu {
+            position: absolute;
+            top: 100%;
+            right: 0;
+            background: var(--white);
+            border-radius: 10px;
+            box-shadow: var(--shadow-lg);
+            padding: 0.5rem;
+            min-width: 150px;
+            display: none;
+        }
+
+        .language-menu.active {
+            display: block;
+        }
+
+        .language-option {
+            padding: 0.5rem 1rem;
+            cursor: pointer;
+            transition: var(--transition);
+            border-radius: 5px;
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+        }
+
+        .language-option:hover {
+            background: var(--bg-light);
+        }
+
+        .language-flag {
+            width: 20px;
+            height: 15px;
+            border-radius: 2px;
+        }
+
+        /* Advanced Admin Controls */
+        .admin-analytics {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 1rem;
+            margin-bottom: 2rem;
+        }
+
+        .admin-stat-card {
+            background: var(--gradient-pink);
+            color: white;
+            padding: 1.5rem;
+            border-radius: 10px;
+            text-align: center;
+        }
+
+        .admin-stat-card h3 {
+            font-size: 2rem;
+            margin: 0.5rem 0;
+        }
+
+        .admin-tools {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 1rem;
+        }
+
+        .admin-tool-btn {
+            padding: 1rem;
+            background: var(--white);
+            border: 2px solid var(--primary-pink);
+            border-radius: 10px;
+            text-align: center;
+            cursor: pointer;
+            transition: var(--transition);
+        }
+
+        .admin-tool-btn:hover {
+            background: var(--gradient-pink);
+            color: white;
+            border-color: transparent;
+        }
+
+        /* SMS Preview */
+        .sms-preview {
+            background: #f0f0f0;
+            border-radius: 20px;
+            padding: 1.5rem;
+            max-width: 300px;
+            margin: 1rem auto;
+            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
+        }
+
+        .sms-bubble {
+            background: #007AFF;
+            color: white;
+            padding: 0.8rem 1rem;
+            border-radius: 18px;
+            margin-bottom: 0.5rem;
+            position: relative;
+        }
+
+        .sms-time {
+            font-size: 0.8rem;
+            color: #666;
+            text-align: center;
+            margin-top: 0.5rem;
+        }
         @media (max-width: 768px) {
             .nav-menu {
                 position: fixed;
@@ -2522,6 +3007,341 @@
         </div>
     </div>
 
+    <!-- Customer Dashboard -->
+    <div class="modal" id="dashboardModal" style="overflow-y: auto;">
+        <div class="modal-content" style="max-width: 1200px; height: 90vh; overflow-y: auto;">
+            <span class="modal-close" onclick="closeModal('dashboardModal')">&times;</span>
+            <div class="dashboard-container">
+                <div class="dashboard-header">
+                    <h2>My Dashboard</h2>
+                    <div style="display: flex; gap: 1rem; align-items: center;">
+                        <span id="userWelcome">Welcome back!</span>
+                        <button class="btn btn-secondary" onclick="logout()">Logout</button>
+                    </div>
+                </div>
+
+                <div class="dashboard-tabs">
+                    <button class="dashboard-tab active" onclick="switchDashboardTab('overview')">Overview</button>
+                    <button class="dashboard-tab" onclick="switchDashboardTab('projects')">My Projects</button>
+                    <button class="dashboard-tab" onclick="switchDashboardTab('appointments')">Appointments</button>
+                    <button class="dashboard-tab" onclick="switchDashboardTab('invoices')">Invoices</button>
+                    <button class="dashboard-tab" onclick="switchDashboardTab('reviews')">Reviews</button>
+                </div>
+
+                <!-- Overview Tab -->
+                <div class="dashboard-content" id="overview-content">
+                    <div class="dashboard-grid">
+                        <div class="dashboard-card">
+                            <div class="stat-label">Active Projects</div>
+                            <div class="stat-number">3</div>
+                            <p style="color: var(--text-light); font-size: 0.9rem;">2 in progress, 1 pending</p>
+                        </div>
+                        <div class="dashboard-card">
+                            <div class="stat-label">Total Spent</div>
+                            <div class="stat-number">RM 45,800</div>
+                            <p style="color: var(--text-light); font-size: 0.9rem;">Across 5 projects</p>
+                        </div>
+                        <div class="dashboard-card">
+                            <div class="stat-label">Next Appointment</div>
+                            <div class="stat-number">Tomorrow</div>
+                            <p style="color: var(--text-light); font-size: 0.9rem;">2:00 PM - Site Visit</p>
+                        </div>
+                    </div>
+
+                    <div class="chart-container">
+                        <div class="chart-header">
+                            <h3>Project Timeline</h3>
+                        </div>
+                        <div class="project-timeline">
+                            <div class="timeline-item">
+                                <div class="timeline-dot completed"></div>
+                                <div class="timeline-content">
+                                    <div class="timeline-date">January 15, 2024</div>
+                                    <h4>Initial Consultation</h4>
+                                    <p>Discussed project requirements and budget</p>
+                                </div>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="timeline-dot completed"></div>
+                                <div class="timeline-content">
+                                    <div class="timeline-date">January 20, 2024</div>
+                                    <h4>Design Approval</h4>
+                                    <p>3D designs approved, deposit received</p>
+                                </div>
+                            </div>
+                            <div class="timeline-item">
+                                <div class="timeline-dot"></div>
+                                <div class="timeline-content">
+                                    <div class="timeline-date">Ongoing</div>
+                                    <h4>Construction Phase</h4>
+                                    <p>Interior construction in progress</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Projects Tab -->
+                <div class="dashboard-content" id="projects-content" style="display: none;">
+                    <div class="portfolio-grid">
+                        <!-- Dynamic project cards will be loaded here -->
+                    </div>
+                </div>
+
+                <!-- Appointments Tab -->
+                <div class="dashboard-content" id="appointments-content" style="display: none;">
+                    <div class="calendar-container">
+                        <div class="calendar-header">
+                            <h3 id="calendarMonth">January 2024</h3>
+                            <div class="calendar-nav">
+                                <button class="btn btn-secondary" onclick="changeMonth(-1)">‹</button>
+                                <button class="btn btn-secondary" onclick="changeMonth(1)">›</button>
+                            </div>
+                        </div>
+                        <div class="calendar-grid" id="calendarGrid">
+                            <!-- Calendar days will be generated here -->
+                        </div>
+                        <div id="timeSlotContainer" style="display: none;">
+                            <h4 style="margin-top: 2rem;">Available Time Slots</h4>
+                            <div class="time-slots" id="timeSlots">
+                                <!-- Time slots will be generated here -->
+                            </div>
+                            <button class="btn btn-primary" style="margin-top: 2rem;" onclick="bookAppointment()">Book Appointment</button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Invoices Tab -->
+                <div class="dashboard-content" id="invoices-content" style="display: none;">
+                    <table class="document-table">
+                        <thead>
+                            <tr>
+                                <th>Invoice #</th>
+                                <th>Date</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody id="invoiceTableBody">
+                            <!-- Invoice rows will be loaded here -->
+                        </tbody>
+                    </table>
+                </div>
+
+                <!-- Reviews Tab -->
+                <div class="dashboard-content" id="reviews-content" style="display: none;">
+                    <div class="review-form" id="newReviewForm">
+                        <h3>Write a Review</h3>
+                        <div class="form-group">
+                            <label>Project</label>
+                            <select id="reviewProject">
+                                <option>Kitchen Renovation - Completed</option>
+                                <option>Living Room Design - Completed</option>
+                            </select>
+                        </div>
+                        <div class="form-group">
+                            <label>Rating</label>
+                            <div class="star-rating" id="starRating">
+                                <span class="star" onclick="setRating(1)">★</span>
+                                <span class="star" onclick="setRating(2)">★</span>
+                                <span class="star" onclick="setRating(3)">★</span>
+                                <span class="star" onclick="setRating(4)">★</span>
+                                <span class="star" onclick="setRating(5)">★</span>
+                            </div>
+                        </div>
+                        <div class="form-group">
+                            <label>Your Review</label>
+                            <textarea id="reviewText" rows="4" placeholder="Share your experience..."></textarea>
+                        </div>
+                        <button class="btn btn-primary" onclick="submitReview()">Submit Review</button>
+                    </div>
+                    
+                    <div id="userReviews" style="margin-top: 2rem;">
+                        <!-- User's reviews will be displayed here -->
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Admin Analytics Dashboard -->
+    <div class="modal" id="analyticsModal">
+        <div class="modal-content" style="max-width: 1200px;">
+            <span class="modal-close" onclick="closeModal('analyticsModal')">&times;</span>
+            <h2 style="margin-bottom: 2rem;">Analytics Dashboard</h2>
+            
+            <div class="admin-analytics">
+                <div class="admin-stat-card">
+                    <p>Total Revenue</p>
+                    <h3>RM 285,000</h3>
+                    <p style="font-size: 0.9rem;">+15% this month</p>
+                </div>
+                <div class="admin-stat-card">
+                    <p>Active Projects</p>
+                    <h3>12</h3>
+                    <p style="font-size: 0.9rem;">3 new this week</p>
+                </div>
+                <div class="admin-stat-card">
+                    <p>Customers</p>
+                    <h3>156</h3>
+                    <p style="font-size: 0.9rem;">8 new signups</p>
+                </div>
+                <div class="admin-stat-card">
+                    <p>Conversion Rate</p>
+                    <h3>23%</h3>
+                    <p style="font-size: 0.9rem;">Quote to project</p>
+                </div>
+            </div>
+
+            <div class="chart-container">
+                <div class="chart-header">
+                    <h3>Revenue Trend</h3>
+                    <div class="chart-filters">
+                        <button class="chart-filter active">Daily</button>
+                        <button class="chart-filter">Weekly</button>
+                        <button class="chart-filter">Monthly</button>
+                        <button class="chart-filter">Yearly</button>
+                    </div>
+                </div>
+                <canvas id="revenueChart" height="100"></canvas>
+            </div>
+
+            <div class="dashboard-grid" style="margin-top: 2rem;">
+                <div class="dashboard-card">
+                    <h4>Popular Services</h4>
+                    <div style="margin-top: 1rem;">
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span>Interior Renovation</span>
+                            <span style="color: var(--primary-pink);">45%</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between; margin-bottom: 0.5rem;">
+                            <span>3D Design</span>
+                            <span style="color: var(--primary-pink);">30%</span>
+                        </div>
+                        <div style="display: flex; justify-content: space-between;">
+                            <span>Maintenance</span>
+                            <span style="color: var(--primary-pink);">25%</span>
+                        </div>
+                    </div>
+                </div>
+                <div class="dashboard-card">
+                    <h4>Customer Satisfaction</h4>
+                    <div style="text-align: center; margin-top: 1rem;">
+                        <div class="stat-number">4.8/5.0</div>
+                        <div class="star-rating" style="justify-content: center;">
+                            <span class="star active">★</span>
+                            <span class="star active">★</span>
+                            <span class="star active">★</span>
+                            <span class="star active">★</span>
+                            <span class="star">★</span>
+                        </div>
+                        <p style="color: var(--text-light); font-size: 0.9rem; margin-top: 0.5rem;">Based on 89 reviews</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3D Visualization Modal -->
+    <div class="modal" id="visualizationModal">
+        <div class="modal-content" style="max-width: 1200px;">
+            <span class="modal-close" onclick="closeModal('visualizationModal')">&times;</span>
+            <h2 style="margin-bottom: 2rem;">3D Room Visualization</h2>
+            
+            <div class="visualization-container">
+                <div id="threejsContainer" style="width: 100%; height: 100%; background: #f0f0f0; display: flex; align-items: center; justify-content: center;">
+                    <p style="color: var(--text-light);">3D visualization will be rendered here</p>
+                </div>
+                <div class="visualization-tools">
+                    <div class="viz-tool-btn" onclick="rotateView()" title="Rotate">🔄</div>
+                    <div class="viz-tool-btn" onclick="zoomIn()" title="Zoom In">➕</div>
+                    <div class="viz-tool-btn" onclick="zoomOut()" title="Zoom Out">➖</div>
+                    <div class="viz-tool-btn" onclick="resetView()" title="Reset">🏠</div>
+                    <div class="viz-tool-btn" onclick="changeTexture()" title="Change Materials">🎨</div>
+                </div>
+            </div>
+            
+            <div style="margin-top: 2rem;">
+                <h4>Room Customization</h4>
+                <div class="form-group">
+                    <label>Wall Color</label>
+                    <div class="color-picker">
+                        <div class="color-option" style="background: #ffffff;" onclick="changeWallColor('#ffffff')"></div>
+                        <div class="color-option" style="background: #f5f5f5;" onclick="changeWallColor('#f5f5f5')"></div>
+                        <div class="color-option" style="background: #e8e8e8;" onclick="changeWallColor('#e8e8e8')"></div>
+                        <div class="color-option" style="background: #d4a574;" onclick="changeWallColor('#d4a574')"></div>
+                        <div class="color-option" style="background: #a8ccd7;" onclick="changeWallColor('#a8ccd7')"></div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Floor Type</label>
+                    <select onchange="changeFloorType(this.value)">
+                        <option>Wood Parquet</option>
+                        <option>Marble</option>
+                        <option>Tiles</option>
+                        <option>Carpet</option>
+                    </select>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Email/SMS Preview Modal -->
+    <div class="modal" id="communicationModal">
+        <div class="modal-content">
+            <span class="modal-close" onclick="closeModal('communicationModal')">&times;</span>
+            <h2 style="margin-bottom: 2rem;">Communication Center</h2>
+            
+            <div class="dashboard-tabs">
+                <button class="dashboard-tab active" onclick="switchCommTab('email')">Email Templates</button>
+                <button class="dashboard-tab" onclick="switchCommTab('sms')">SMS Templates</button>
+            </div>
+
+            <div id="email-templates">
+                <div class="email-preview">
+                    <div class="email-header">
+                        <div class="email-subject">Welcome to REFIT - Your Project Has Started!</div>
+                        <div class="email-meta">From: noreply@refitservices.com</div>
+                    </div>
+                    <div class="email-body">
+                        <p>Dear {{customer_name}},</p>
+                        <p>Thank you for choosing REFIT Maintenance Services! We're excited to begin your {{project_type}} project.</p>
+                        <p>Your project manager will contact you within 24 hours to schedule the initial site visit.</p>
+                        <p>Best regards,<br>The REFIT Team</p>
+                    </div>
+                </div>
+                <button class="btn btn-primary" style="margin-top: 1rem;">Send Test Email</button>
+            </div>
+
+            <div id="sms-templates" style="display: none;">
+                <div class="sms-preview">
+                    <div class="sms-bubble">
+                        Hi {{name}}! Your REFIT appointment is confirmed for {{date}} at {{time}}. Reply CONFIRM to confirm or RESCHEDULE to change.
+                    </div>
+                    <div class="sms-time">Delivered</div>
+                </div>
+                <button class="btn btn-primary" style="margin-top: 1rem;">Send Test SMS</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- Language Menu -->
+    <div class="language-menu" id="languageMenu">
+        <div class="language-option" onclick="changeLanguage('en')">
+            <span class="language-flag" style="background: linear-gradient(to bottom, #012169 0%, #012169 33%, white 33%, white 66%, #C8102E 66%);">🇬🇧</span>
+            <span>English</span>
+        </div>
+        <div class="language-option" onclick="changeLanguage('ms')">
+            <span class="language-flag" style="background: linear-gradient(to bottom, #CC0000 0%, #CC0000 50%, white 50%, white 100%);">🇲🇾</span>
+            <span>Bahasa Malaysia</span>
+        </div>
+        <div class="language-option" onclick="changeLanguage('zh')">
+            <span class="language-flag" style="background: #DE2910;">🇨🇳</span>
+            <span>中文</span>
+        </div>
+    </div>
+
     <!-- Chat Widget -->
     <div class="chat-widget">
         <div class="chat-button" onclick="toggleChat()">💬</div>
@@ -2730,9 +3550,51 @@
         </div>
 
         <div class="admin-section">
-            <h4>Advanced Settings</h4>
-            <button class="btn btn-secondary" style="width: 100%; margin-bottom: 10px;">Export Settings</button>
-            <button class="btn btn-secondary" style="width: 100%;">Import Settings</button>
+            <h4>Admin Tools</h4>
+            <div class="admin-tools">
+                <div class="admin-tool-btn" onclick="showAnalytics()">
+                    <div>📊</div>
+                    <p>Analytics</p>
+                </div>
+                <div class="admin-tool-btn" onclick="showCommunication()">
+                    <div>📧</div>
+                    <p>Email/SMS</p>
+                </div>
+                <div class="admin-tool-btn" onclick="exportData()">
+                    <div>📥</div>
+                    <p>Export Data</p>
+                </div>
+                <div class="admin-tool-btn" onclick="manageUsers()">
+                    <div>👥</div>
+                    <p>Users</p>
+                </div>
+                <div class="admin-tool-btn" onclick="systemSettings()">
+                    <div>⚙️</div>
+                    <p>Settings</p>
+                </div>
+                <div class="admin-tool-btn" onclick="viewReports()">
+                    <div>📄</div>
+                    <p>Reports</p>
+                </div>
+            </div>
+        </div>
+
+        <div class="admin-section">
+            <h4>Quick Stats</h4>
+            <div style="display: grid; gap: 0.5rem;">
+                <div style="display: flex; justify-content: space-between;">
+                    <span>Today's Quotes</span>
+                    <strong>8</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span>Pending Approvals</span>
+                    <strong style="color: #ff6b6b;">3</strong>
+                </div>
+                <div style="display: flex; justify-content: space-between;">
+                    <span>Active Users</span>
+                    <strong style="color: #4ecdc4;">24</strong>
+                </div>
+            </div>
         </div>
     </div>
 
@@ -4296,15 +5158,606 @@
             setTimeout(() => {
                 showNotification('Welcome to REFIT! Check out our portfolio and get a free quote!', 'info');
             }, 2000);
+
+            // File upload handler for quote section
+            const quoteFileInput = document.getElementById('fileInput');
+            if (quoteFileInput) {
+                quoteFileInput.addEventListener('change', function(e) {
+                    handleFileUpload(e, 'quote');
+                });
+            }
+
+            // Add dashboard link to nav
+            const navMenu = document.querySelector('.nav-menu');
+            const dashboardLink = document.createElement('li');
+            dashboardLink.innerHTML = '<a href="#" onclick="showDashboard()">Dashboard</a>';
+            dashboardLink.style.display = 'none';
+            dashboardLink.id = 'dashboardNavLink';
+            navMenu.insertBefore(dashboardLink, navMenu.lastElementChild);
+
+            // Initialize language menu click handler
+            document.querySelector('.lang-toggle').onclick = toggleLanguageMenu;
+
+            // Click outside language menu to close
+            document.addEventListener('click', function(e) {
+                const langMenu = document.getElementById('languageMenu');
+                const langToggle = document.querySelector('.lang-toggle');
+                if (!langMenu.contains(e.target) && !langToggle.contains(e.target)) {
+                    langMenu.classList.remove('active');
+                }
+            });
         });
 
-        // File upload handler for quote section
-        const quoteFileInput = document.getElementById('fileInput');
-        if (quoteFileInput) {
-            quoteFileInput.addEventListener('change', function(e) {
-                handleFileUpload(e, 'quote');
+        // Customer Dashboard Functions
+        let currentUser = null;
+        let userProjects = [];
+        let userAppointments = [];
+        let currentRating = 0;
+
+        function showDashboard() {
+            if (!currentUser) {
+                showNotification('Please login to access your dashboard', 'error');
+                showLoginModal();
+                return;
+            }
+            
+            document.getElementById('userWelcome').textContent = `Welcome back, ${currentUser.name}!`;
+            document.getElementById('dashboardModal').classList.add('active');
+            loadDashboardData();
+        }
+
+        function switchDashboardTab(tab) {
+            // Hide all content
+            document.querySelectorAll('.dashboard-content').forEach(content => {
+                content.style.display = 'none';
+            });
+            
+            // Remove active class from tabs
+            document.querySelectorAll('.dashboard-tab').forEach(tabBtn => {
+                tabBtn.classList.remove('active');
+            });
+            
+            // Show selected content
+            document.getElementById(`${tab}-content`).style.display = 'block';
+            event.target.classList.add('active');
+            
+            // Load specific tab data
+            switch(tab) {
+                case 'projects':
+                    loadUserProjects();
+                    break;
+                case 'appointments':
+                    initCalendar();
+                    break;
+                case 'invoices':
+                    loadInvoices();
+                    break;
+                case 'reviews':
+                    loadUserReviews();
+                    break;
+            }
+        }
+
+        function loadDashboardData() {
+            // Simulate loading user data
+            userProjects = [
+                {
+                    id: 1,
+                    title: 'Living Room Renovation',
+                    status: 'In Progress',
+                    progress: 65,
+                    startDate: '2024-01-15',
+                    image: '🏠'
+                },
+                {
+                    id: 2,
+                    title: 'Kitchen Design',
+                    status: 'Completed',
+                    progress: 100,
+                    startDate: '2023-11-20',
+                    image: '🍳'
+                },
+                {
+                    id: 3,
+                    title: 'Office Space Planning',
+                    status: 'Pending',
+                    progress: 0,
+                    startDate: '2024-02-01',
+                    image: '🏢'
+                }
+            ];
+        }
+
+        function loadUserProjects() {
+            const container = document.querySelector('#projects-content .portfolio-grid');
+            container.innerHTML = '';
+            
+            userProjects.forEach(project => {
+                const projectCard = document.createElement('div');
+                projectCard.className = 'portfolio-item';
+                projectCard.innerHTML = `
+                    <div style="height: 200px; background: var(--gradient-pink); display: flex; align-items: center; justify-content: center; font-size: 4rem;">
+                        ${project.image}
+                    </div>
+                    <div style="padding: 1.5rem;">
+                        <h4>${project.title}</h4>
+                        <p style="color: var(--text-light);">Status: ${project.status}</p>
+                        <div style="margin: 1rem 0;">
+                            <div style="background: #e0e0e0; height: 8px; border-radius: 4px; overflow: hidden;">
+                                <div style="background: var(--gradient-pink); height: 100%; width: ${project.progress}%; transition: width 0.5s;"></div>
+                            </div>
+                            <p style="font-size: 0.9rem; margin-top: 0.5rem;">${project.progress}% Complete</p>
+                        </div>
+                        <button class="btn btn-primary" onclick="viewProjectDetails(${project.id})">View Details</button>
+                    </div>
+                `;
+                container.appendChild(projectCard);
             });
         }
+
+        // Calendar Functions
+        let currentMonth = new Date();
+        let selectedDate = null;
+
+        function initCalendar() {
+            renderCalendar();
+        }
+
+        function renderCalendar() {
+            const year = currentMonth.getFullYear();
+            const month = currentMonth.getMonth();
+            const firstDay = new Date(year, month, 1).getDay();
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            
+            document.getElementById('calendarMonth').textContent = 
+                new Date(year, month).toLocaleDateString('en-US', { month: 'long', year: 'numeric' });
+            
+            const grid = document.getElementById('calendarGrid');
+            grid.innerHTML = '';
+            
+            // Add day headers
+            const days = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+            days.forEach(day => {
+                const dayHeader = document.createElement('div');
+                dayHeader.style.fontWeight = '700';
+                dayHeader.style.textAlign = 'center';
+                dayHeader.textContent = day;
+                grid.appendChild(dayHeader);
+            });
+            
+            // Add empty cells for days before month starts
+            for (let i = 0; i < firstDay; i++) {
+                grid.appendChild(document.createElement('div'));
+            }
+            
+            // Add days
+            for (let day = 1; day <= daysInMonth; day++) {
+                const dayElement = document.createElement('div');
+                dayElement.className = 'calendar-day';
+                dayElement.textContent = day;
+                
+                // Mark some days as unavailable (weekends for demo)
+                const dayOfWeek = new Date(year, month, day).getDay();
+                if (dayOfWeek === 0 || dayOfWeek === 6) {
+                    dayElement.classList.add('unavailable');
+                }
+                
+                // Mark days with appointments
+                if ([5, 12, 20, 25].includes(day)) {
+                    dayElement.classList.add('has-appointment');
+                }
+                
+                dayElement.onclick = () => selectDate(year, month, day);
+                grid.appendChild(dayElement);
+            }
+        }
+
+        function changeMonth(direction) {
+            currentMonth.setMonth(currentMonth.getMonth() + direction);
+            renderCalendar();
+        }
+
+        function selectDate(year, month, day) {
+            const date = new Date(year, month, day);
+            if (date.getDay() === 0 || date.getDay() === 6) {
+                showNotification('Weekends are not available for appointments', 'error');
+                return;
+            }
+            
+            selectedDate = date;
+            document.querySelectorAll('.calendar-day').forEach(el => el.classList.remove('selected'));
+            event.target.classList.add('selected');
+            
+            // Show time slots
+            showTimeSlots();
+        }
+
+        function showTimeSlots() {
+            document.getElementById('timeSlotContainer').style.display = 'block';
+            const slotsContainer = document.getElementById('timeSlots');
+            slotsContainer.innerHTML = '';
+            
+            const times = ['9:00 AM', '10:00 AM', '11:00 AM', '2:00 PM', '3:00 PM', '4:00 PM', '5:00 PM'];
+            const unavailable = ['10:00 AM', '3:00 PM']; // Some slots already booked
+            
+            times.forEach(time => {
+                const slot = document.createElement('div');
+                slot.className = 'time-slot';
+                slot.textContent = time;
+                
+                if (unavailable.includes(time)) {
+                    slot.classList.add('unavailable');
+                } else {
+                    slot.onclick = () => selectTimeSlot(time);
+                }
+                
+                slotsContainer.appendChild(slot);
+            });
+        }
+
+        function selectTimeSlot(time) {
+            document.querySelectorAll('.time-slot').forEach(el => el.classList.remove('selected'));
+            event.target.classList.add('selected');
+        }
+
+        function bookAppointment() {
+            if (!selectedDate || !document.querySelector('.time-slot.selected')) {
+                showNotification('Please select a date and time', 'error');
+                return;
+            }
+            
+            const time = document.querySelector('.time-slot.selected').textContent;
+            showNotification(`Appointment booked for ${selectedDate.toLocaleDateString()} at ${time}`, 'success');
+            
+            // Send confirmation
+            setTimeout(() => {
+                addChatMessage(`Your appointment has been confirmed! We'll send you a reminder 24 hours before.`, 'bot');
+            }, 1000);
+        }
+
+        // Invoice Functions
+        function loadInvoices() {
+            const tbody = document.getElementById('invoiceTableBody');
+            tbody.innerHTML = '';
+            
+            const invoices = [
+                { number: 'INV-2024-001', date: '2024-01-15', amount: 'RM 6,000', status: 'Paid', project: 'Kitchen Renovation' },
+                { number: 'INV-2024-002', date: '2024-01-20', amount: 'RM 12,000', status: 'Paid', project: 'Kitchen Renovation' },
+                { number: 'INV-2024-003', date: '2024-02-01', amount: 'RM 4,500', status: 'Pending', project: 'Living Room Design' }
+            ];
+            
+            invoices.forEach(invoice => {
+                const row = document.createElement('tr');
+                row.innerHTML = `
+                    <td>${invoice.number}</td>
+                    <td>${invoice.date}</td>
+                    <td>${invoice.amount}</td>
+                    <td><span style="color: ${invoice.status === 'Paid' ? '#4ecdc4' : '#ffa94d'};">${invoice.status}</span></td>
+                    <td>
+                        <button class="btn btn-secondary" style="padding: 0.5rem 1rem;" onclick="viewInvoice('${invoice.number}')">View</button>
+                        ${invoice.status === 'Pending' ? '<button class="btn btn-primary" style="padding: 0.5rem 1rem; margin-left: 0.5rem;" onclick="payInvoice(\'' + invoice.number + '\')">Pay</button>' : ''}
+                    </td>
+                `;
+                tbody.appendChild(row);
+            });
+        }
+
+        function viewInvoice(invoiceNumber) {
+            showNotification(`Opening invoice ${invoiceNumber}...`, 'info');
+        }
+
+        function payInvoice(invoiceNumber) {
+            showNotification(`Redirecting to payment for ${invoiceNumber}...`, 'info');
+        }
+
+        // Review Functions
+        function setRating(rating) {
+            currentRating = rating;
+            const stars = document.querySelectorAll('#starRating .star');
+            stars.forEach((star, index) => {
+                star.classList.toggle('active', index < rating);
+            });
+        }
+
+        function submitReview() {
+            const project = document.getElementById('reviewProject').value;
+            const reviewText = document.getElementById('reviewText').value;
+            
+            if (currentRating === 0) {
+                showNotification('Please select a rating', 'error');
+                return;
+            }
+            
+            if (!reviewText.trim()) {
+                showNotification('Please write a review', 'error');
+                return;
+            }
+            
+            showNotification('Thank you for your review!', 'success');
+            
+            // Add review to display
+            const review = {
+                project: project,
+                rating: currentRating,
+                text: reviewText,
+                date: new Date().toLocaleDateString()
+            };
+            
+            displayUserReview(review);
+            
+            // Reset form
+            currentRating = 0;
+            document.getElementById('reviewText').value = '';
+            setRating(0);
+        }
+
+        function displayUserReview(review) {
+            const container = document.getElementById('userReviews');
+            const reviewCard = document.createElement('div');
+            reviewCard.className = 'review-card';
+            
+            let stars = '';
+            for (let i = 0; i < 5; i++) {
+                stars += `<span class="star ${i < review.rating ? 'active' : ''}">★</span>`;
+            }
+            
+            reviewCard.innerHTML = `
+                <div class="review-header">
+                    <div>
+                        <h4>${review.project}</h4>
+                        <div class="star-rating">${stars}</div>
+                    </div>
+                    <span style="color: var(--text-light);">${review.date}</span>
+                </div>
+                <p>${review.text}</p>
+            `;
+            
+            container.insertBefore(reviewCard, container.firstChild);
+        }
+
+        function loadUserReviews() {
+            // Load existing reviews
+            const existingReviews = [
+                {
+                    project: 'Kitchen Renovation - Completed',
+                    rating: 5,
+                    text: 'Excellent work! The team was professional and the results exceeded our expectations.',
+                    date: '2024-01-25'
+                }
+            ];
+            
+            const container = document.getElementById('userReviews');
+            container.innerHTML = '<h3 style="margin-bottom: 1rem;">Your Reviews</h3>';
+            
+            existingReviews.forEach(review => displayUserReview(review));
+        }
+
+        // Admin Analytics Functions
+        function showAnalytics() {
+            document.getElementById('analyticsModal').classList.add('active');
+            initAnalyticsChart();
+        }
+
+        function initAnalyticsChart() {
+            // This would use Chart.js in a real implementation
+            const canvas = document.getElementById('revenueChart');
+            const ctx = canvas.getContext('2d');
+            
+            // Simple line chart simulation
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+            ctx.strokeStyle = '#E8A0BF';
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            
+            const points = [20, 35, 30, 45, 50, 40, 60, 55, 70, 65, 80, 75];
+            const width = canvas.width / points.length;
+            
+            points.forEach((point, index) => {
+                const x = index * width + width / 2;
+                const y = canvas.height - (point / 100 * canvas.height);
+                
+                if (index === 0) {
+                    ctx.moveTo(x, y);
+                } else {
+                    ctx.lineTo(x, y);
+                }
+            });
+            
+            ctx.stroke();
+        }
+
+        // Communication Functions
+        function showCommunication() {
+            document.getElementById('communicationModal').classList.add('active');
+        }
+
+        function switchCommTab(tab) {
+            document.getElementById('email-templates').style.display = tab === 'email' ? 'block' : 'none';
+            document.getElementById('sms-templates').style.display = tab === 'sms' ? 'block' : 'none';
+            
+            document.querySelectorAll('#communicationModal .dashboard-tab').forEach(btn => {
+                btn.classList.toggle('active', btn.textContent.toLowerCase().includes(tab));
+            });
+        }
+
+        // 3D Visualization Functions
+        function show3DVisualization() {
+            document.getElementById('visualizationModal').classList.add('active');
+            init3DScene();
+        }
+
+        function init3DScene() {
+            // This would initialize Three.js in a real implementation
+            const container = document.getElementById('threejsContainer');
+            container.innerHTML = `
+                <div style="text-align: center;">
+                    <div style="font-size: 5rem; margin-bottom: 1rem;">🏠</div>
+                    <p>3D visualization would be rendered here using Three.js</p>
+                    <p style="color: var(--text-light); font-size: 0.9rem;">Use the tools on the right to interact with the model</p>
+                </div>
+            `;
+        }
+
+        function rotateView() {
+            showNotification('Rotating view...', 'info');
+        }
+
+        function zoomIn() {
+            showNotification('Zooming in...', 'info');
+        }
+
+        function zoomOut() {
+            showNotification('Zooming out...', 'info');
+        }
+
+        function resetView() {
+            showNotification('View reset', 'info');
+        }
+
+        function changeTexture() {
+            showNotification('Opening texture library...', 'info');
+        }
+
+        function changeWallColor(color) {
+            showNotification(`Wall color changed to ${color}`, 'success');
+        }
+
+        function changeFloorType(type) {
+            showNotification(`Floor type changed to ${type}`, 'success');
+        }
+
+        // Language Functions
+        let translations = {
+            en: {
+                welcome: 'Welcome to REFIT',
+                services: 'Services',
+                getQuote: 'Get Quote',
+                aboutUs: 'About Us'
+            },
+            ms: {
+                welcome: 'Selamat Datang ke REFIT',
+                services: 'Perkhidmatan',
+                getQuote: 'Dapatkan Sebut Harga',
+                aboutUs: 'Tentang Kami'
+            },
+            zh: {
+                welcome: '欢迎来到 REFIT',
+                services: '服务',
+                getQuote: '获取报价',
+                aboutUs: '关于我们'
+            }
+        };
+
+        function toggleLanguageMenu() {
+            const menu = document.getElementById('languageMenu');
+            menu.classList.toggle('active');
+        }
+
+        function changeLanguage(lang) {
+            currentLang = lang.toUpperCase();
+            document.querySelector('.lang-toggle').textContent = currentLang;
+            
+            // Apply translations
+            if (translations[lang]) {
+                // Update UI with translations
+                showNotification(`Language changed to ${lang.toUpperCase()}`, 'success');
+            }
+            
+            document.getElementById('languageMenu').classList.remove('active');
+        }
+
+        // Additional Admin Functions
+        function exportData() {
+            showNotification('Exporting data...', 'info');
+            setTimeout(() => {
+                showNotification('Data exported successfully!', 'success');
+            }, 2000);
+        }
+
+        function manageUsers() {
+            showNotification('Opening user management...', 'info');
+        }
+
+        function systemSettings() {
+            showNotification('Opening system settings...', 'info');
+        }
+
+        function viewReports() {
+            showNotification('Generating reports...', 'info');
+        }
+
+        // Update login to set current user
+        const originalHandleLogin = handleLogin;
+        function handleLogin(event) {
+            event.preventDefault();
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            // Set current user
+            currentUser = {
+                name: email.split('@')[0],
+                email: email,
+                id: Math.random().toString(36).substr(2, 9)
+            };
+            
+            originalHandleLogin(event);
+            
+            // Update navigation
+            updateNavForUser();
+            
+            // Show dashboard option after login
+            if (!email.includes('admin')) {
+                setTimeout(() => {
+                    showNotification('Welcome! Check your dashboard for project updates.', 'info');
+                }, 1000);
+            }
+        }
+
+        function logout() {
+            currentUser = null;
+            closeModal('dashboardModal');
+            showNotification('Logged out successfully', 'success');
+        }
+
+        function viewProjectDetails(projectId) {
+            const project = userProjects.find(p => p.id === projectId);
+            if (project) {
+                showNotification(`Opening details for ${project.title}...`, 'info');
+                // Could open a detailed project view modal
+            }
+        }
+
+        // Update language toggle to show menu
+        document.querySelector('.lang-toggle').onclick = toggleLanguageMenu;
+
+        // Add dashboard access from nav
+        document.addEventListener('DOMContentLoaded', function() {
+            // Add dashboard link to nav for logged-in users
+            const navMenu = document.querySelector('.nav-menu');
+            const dashboardLink = document.createElement('li');
+            dashboardLink.innerHTML = '<a href="#" onclick="showDashboard()">Dashboard</a>';
+            dashboardLink.style.display = 'none';
+            dashboardLink.id = 'dashboardNavLink';
+            navMenu.insertBefore(dashboardLink, navMenu.lastElementChild);
+        });
+
+        // Show dashboard link when logged in
+        function updateNavForUser() {
+            const dashboardLink = document.getElementById('dashboardNavLink');
+            if (dashboardLink) {
+                dashboardLink.style.display = currentUser ? 'block' : 'none';
+            }
+        }
+
+        // File upload handler for quote section
+        document.addEventListener('DOMContentLoaded', function() {
+            const quoteFileInput = document.getElementById('fileInput');
+            if (quoteFileInput) {
+                quoteFileInput.addEventListener('change', function(e) {
+                    handleFileUpload(e, 'quote');
+                });
+            }
+        });
 
         // Intersection Observer for animations
         const observerOptions = {
